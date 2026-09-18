@@ -1,0 +1,200 @@
+{
+  "format": 1,
+  "restore": {
+    "/home/wsm/Desktop/Projects/logiciel quincaillerie/src/QLSystem.Licensing/QLSystem.Licensing.csproj": {}
+  },
+  "projects": {
+    "/home/wsm/Desktop/Projects/logiciel quincaillerie/src/QLSystem.Core/QLSystem.Core.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/home/wsm/Desktop/Projects/logiciel quincaillerie/src/QLSystem.Core/QLSystem.Core.csproj",
+        "projectName": "QLSystem.Core",
+        "projectPath": "/home/wsm/Desktop/Projects/logiciel quincaillerie/src/QLSystem.Core/QLSystem.Core.csproj",
+        "packagesPath": "/home/wsm/.nuget/packages/",
+        "outputPath": "/home/wsm/Desktop/Projects/logiciel quincaillerie/src/QLSystem.Core/obj/",
+        "projectStyle": "PackageReference",
+        "crossTargeting": true,
+        "configFilePaths": [
+          "/home/wsm/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0",
+          "netstandard2.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {}
+          },
+          "netstandard2.0": {
+            "targetAlias": "netstandard2.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        }
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/home/wsm/.dotnet/sdk/8.0.425/PortableRuntimeIdentifierGraph.json"
+        },
+        "netstandard2.0": {
+          "targetAlias": "netstandard2.0",
+          "dependencies": {
+            "NETStandard.Library": {
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[2.0.3, )",
+              "autoReferenced": true
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "runtimeIdentifierGraphPath": "/home/wsm/.dotnet/sdk/8.0.425/RuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "/home/wsm/Desktop/Projects/logiciel quincaillerie/src/QLSystem.Licensing/QLSystem.Licensing.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/home/wsm/Desktop/Projects/logiciel quincaillerie/src/QLSystem.Licensing/QLSystem.Licensing.csproj",
+        "projectName": "QLSystem.Licensing",
+        "projectPath": "/home/wsm/Desktop/Projects/logiciel quincaillerie/src/QLSystem.Licensing/QLSystem.Licensing.csproj",
+        "packagesPath": "/home/wsm/.nuget/packages/",
+        "outputPath": "/home/wsm/Desktop/Projects/logiciel quincaillerie/src/QLSystem.Licensing/obj/",
+        "projectStyle": "PackageReference",
+        "crossTargeting": true,
+        "configFilePaths": [
+          "/home/wsm/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0",
+          "netstandard2.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {
+              "/home/wsm/Desktop/Projects/logiciel quincaillerie/src/QLSystem.Core/QLSystem.Core.csproj": {
+                "projectPath": "/home/wsm/Desktop/Projects/logiciel quincaillerie/src/QLSystem.Core/QLSystem.Core.csproj"
+              }
+            }
+          },
+          "netstandard2.0": {
+            "targetAlias": "netstandard2.0",
+            "projectReferences": {
+              "/home/wsm/Desktop/Projects/logiciel quincaillerie/src/QLSystem.Core/QLSystem.Core.csproj": {
+                "projectPath": "/home/wsm/Desktop/Projects/logiciel quincaillerie/src/QLSystem.Core/QLSystem.Core.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        }
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "dependencies": {
+            "Microsoft.Win32.Registry": {
+              "target": "Package",
+              "version": "[5.0.0, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/home/wsm/.dotnet/sdk/8.0.425/PortableRuntimeIdentifierGraph.json"
+        },
+        "netstandard2.0": {
+          "targetAlias": "netstandard2.0",
+          "dependencies": {
+            "Microsoft.Win32.Registry": {
+              "target": "Package",
+              "version": "[5.0.0, )"
+            },
+            "NETStandard.Library": {
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[2.0.3, )",
+              "autoReferenced": true
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "runtimeIdentifierGraphPath": "/home/wsm/.dotnet/sdk/8.0.425/RuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}

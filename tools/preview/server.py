@@ -37,6 +37,8 @@ def check_license():
     is_activated = False
     status = "TrialActive"
     remaining_days = 7
+    active_key = None
+    store_name = "Quincaillerie El-Baraka"
 
     if os.path.exists(LICENSE_FILE):
         try:
@@ -48,14 +50,28 @@ def check_license():
                     is_activated = True
                     status = "Activated"
                     remaining_days = 9999
+                    active_key = lines[1].upper()
         except:
             pass
+
+    try:
+        conn = get_db()
+        cur = conn.cursor()
+        cur.execute("SELECT StoreName FROM StoreSettings LIMIT 1")
+        row = cur.fetchone()
+        if row and row["StoreName"]:
+            store_name = row["StoreName"]
+        conn.close()
+    except:
+        pass
 
     return {
         "machineId": MACHINE_ID,
         "status": status,
         "isActivated": is_activated,
         "remainingDays": remaining_days,
+        "activationKey": active_key,
+        "storeName": store_name,
         "whatsapp": "0550 12 34 56"
     }
 
@@ -320,6 +336,21 @@ class QLRequestHandler(http.server.SimpleHTTPRequestHandler):
             self.send_json(alerts)
             return
 
+        if parsed.path == "/api/settings":
+            conn = get_db()
+            cur = conn.cursor()
+            cur.execute("SELECT * FROM StoreSettings LIMIT 1")
+            row = cur.fetchone()
+            res = dict(row) if row else {
+                "StoreName": "Quincaillerie El-Baraka",
+                "Phone1": "0550 12 34 56",
+                "Address": "Alger, Algérie",
+                "Language": "ar"
+            }
+            conn.close()
+            self.send_json(res)
+            return
+
         self.send_error(404, "Not Found")
 
     def do_POST(self):
@@ -476,6 +507,29 @@ class QLRequestHandler(http.server.SimpleHTTPRequestHandler):
             try:
                 cur.execute("DELETE FROM SaleItems")
                 cur.execute("DELETE FROM Sales")
+                conn.commit()
+                self.send_json({"success": True})
+            except Exception as e:
+                conn.rollback()
+                self.send_json({"success": False, "error": str(e)})
+            finally:
+                conn.close()
+            return
+
+        if parsed.path == "/api/settings":
+            conn = get_db()
+            cur = conn.cursor()
+            try:
+                name = data.get("storeName", "").strip()
+                phone = data.get("phone", "").strip()
+                address = data.get("address", "").strip()
+                lang = data.get("language", "ar").strip()
+
+                cur.execute("""
+                    UPDATE StoreSettings 
+                    SET StoreName = ?, Phone1 = ?, Address = ?, Language = ?
+                    WHERE Id = 1
+                """, (name, phone, address, lang))
                 conn.commit()
                 self.send_json({"success": True})
             except Exception as e:

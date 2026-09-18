@@ -143,6 +143,19 @@
         .period-btn { border: none; background: transparent; padding: 5px 14px; font-size: 12.5px; font-weight: 700; border-radius: 4px; cursor: pointer; color: #475569; }
         .period-btn.active { background: var(--primary); color: #fff; }
         .kpi-card-mini { font-size: 11.5px; color: var(--text-muted); margin-top: 2px; }
+
+        /* Price Badges & Shortcuts */
+        .btn-price-badge { border: 1px solid var(--border); border-radius: 4px; padding: 2px 7px; font-size: 11px; font-weight: 700; cursor: pointer; transition: 0.15s; background: #fff; display: inline-flex; align-items: center; gap: 4px; }
+        .btn-price-badge.retail { color: var(--primary); border-color: #93c5fd; background: #eff6ff; }
+        .btn-price-badge.wholesale { color: #b45309; border-color: #fde68a; background: #fffbeb; }
+        .shortcuts-bar { display: flex; gap: 10px; font-size: 11.5px; color: #64748b; padding: 7px 12px; background: #f8fafc; border-radius: 6px; border: 1px solid var(--border); margin-top: 8px; flex-wrap: wrap; align-items: center; }
+        .kbd-key { display: inline-block; background: #e2e8f0; border-radius: 3px; padding: 1px 6px; font-family: monospace; font-size: 11px; font-weight: 800; color: #1e293b; border: 1px solid #cbd5e1; }
+
+        /* Simple License Modal */
+        .license-modal { background: #fff; width: 440px; border-radius: 10px; padding: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.25); border: 1px solid var(--border); position: relative; }
+        .license-feature-list { list-style: none; display: flex; flex-direction: column; gap: 8px; margin: 16px 0; }
+        .license-feature-list li { display: flex; align-items: center; gap: 9px; font-size: 12.5px; color: #334155; }
+        .license-feature-list li i { color: var(--success); font-size: 14px; }
     </style>
 </head>
 <body>
@@ -183,16 +196,12 @@
                     <i class="fa-solid fa-gear fa-fw"></i>
                     <span id="navSettings">الإعدادات (Paramètres)</span>
                 </button></li>
-                <li><button class="nav-btn" onclick="switchTab('lock')">
-                    <i class="fa-solid fa-lock fa-fw"></i>
-                    <span id="navLock">شاشة القفل (Verrouillage)</span>
-                </button></li>
             </ul>
         </div>
 
         <div class="sidebar-footer">
             <div id="lblMonoposte">نسخة حاسوب واحد (Monoposte)</div>
-            <div class="mid-badge" id="sidebarMid">QL-ALG-XXXX-XXXX</div>
+            <div class="mid-badge" id="sidebarMid" style="cursor: pointer;" onclick="openLicenseModal()" title="معلومات الترخيص والتفعيل">QL-ALG-XXXX-XXXX</div>
             <div style="margin-top: 4px;">v1.0.0 DZ • 2026</div>
         </div>
     </div>
@@ -210,7 +219,10 @@
                     <i class="fa-solid fa-bell"></i>
                     <span id="notifBadge" style="display: none; background: var(--danger); color: #fff; border-radius: 10px; padding: 1px 6px; font-size: 11px; font-weight: bold; margin-inline-start: 4px;">0</span>
                 </button>
-                <div class="license-badge" id="topBadge"><i class="fa-solid fa-shield-halved"></i> <span>فترة تجريبية: باقي 7 أيام</span></div>
+                <button class="btn btn-secondary" id="btnLicenseTop" style="padding: 6px 12px; font-size: 13px; display: inline-flex; align-items: center; gap: 7px; cursor: pointer;" onclick="openLicenseModal()" title="حالة الترخيص والتفعيل">
+                    <i class="fa-solid fa-shield-halved" id="topLicenseIcon" style="color: var(--warning);"></i>
+                    <span id="topLicenseText" style="font-weight: 700; font-size: 12px;">تفعيل</span>
+                </button>
             </div>
         </div>
 
@@ -223,31 +235,40 @@
                     <div>
                         <div class="card" style="padding: 10px 14px; margin-bottom: 12px; display: flex; gap: 10px; align-items: center;">
                             <div class="search-container" style="flex: 1;">
-                                <input type="text" id="caisseSearchInput" class="input-text" placeholder="ابحث بالاسم، المرجع (vis, pvc, cable...) أو امسح الباركود..." autocomplete="off">
+                                <input type="text" id="caisseSearchInput" class="input-text" placeholder="[F1] ابحث بالاسم (vis, pvc, cable...) أو امسح الباركود..." autocomplete="off">
                                 <div id="searchDropdown" class="search-dropdown"></div>
                             </div>
                             <div style="display: flex; gap: 4px; border: 1px solid var(--border); border-radius: 6px; padding: 2px;">
                                 <button class="btn btn-secondary active" id="btnPriceRetail" style="padding: 5px 10px; font-size: 12px;" onclick="setPriceMode('retail')">تجزئة (Détail)</button>
-                                <button class="btn btn-secondary" id="btnPriceWholesale" style="padding: 5px 10px; font-size: 12px;" onclick="setPriceMode('wholesale')">جملة (Gros)</button>
+                                <button class="btn btn-secondary" id="btnPriceWholesale" style="padding: 5px 10px; font-size: 12px;" onclick="setPriceMode('wholesale')">جملة (Gros) [F4]</button>
                             </div>
                         </div>
 
-                        <div class="card" style="padding: 0; overflow: hidden; min-height: 420px;">
+                        <div class="card" style="padding: 0; overflow: hidden; min-height: 400px;">
                             <table id="cartTable">
                                 <thead>
                                     <tr>
-                                        <th style="width: 110px;" id="thRef">المرجع</th>
-                                        <th id="thName">تسمية السلعة</th>
-                                        <th style="width: 95px;" id="thPrice">السعر</th>
-                                        <th style="width: 140px; text-align: center;" id="thQty">الكمية</th>
+                                        <th id="thName">اسم وتسمية السلعة</th>
+                                        <th style="width: 120px;" id="thPrice">السعر (تجزئة/جملة)</th>
+                                        <th style="width: 135px; text-align: center;" id="thQty">الكمية</th>
                                         <th style="width: 110px;" id="thTotal">المجموع</th>
                                         <th style="width: 45px;"></th>
                                     </tr>
                                 </thead>
                                 <tbody id="cartTbody">
-                                    <tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 45px;" id="cartEmptyMsg">السلة فارغة. ابحث عن سلعة لإضافتها</td></tr>
+                                    <tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 45px;" id="cartEmptyMsg">السلة فارغة. ابحث عن سلعة لإضافتها</td></tr>
                                 </tbody>
                             </table>
+                        </div>
+
+                        <!-- Keyboard Shortcuts Guide Bar -->
+                        <div class="shortcuts-bar">
+                            <span><span class="kbd-key">F1</span> <span id="scF1">بحث</span></span>
+                            <span><span class="kbd-key">F2</span> <span id="scF2">دفع نقداً</span></span>
+                            <span><span class="kbd-key">F3</span> <span id="scF3">كريدي</span></span>
+                            <span><span class="kbd-key">F4</span> <span id="scF4">جملة / تجزئة</span></span>
+                            <span><span class="kbd-key">F5</span> <span id="scF5">إفراغ السلة</span></span>
+                            <span><span class="kbd-key">Esc</span> <span id="scEsc">إلغاء / إغلاق</span></span>
                         </div>
                     </div>
 
@@ -323,13 +344,13 @@
                             <table id="stockTable">
                                 <thead>
                                     <tr>
-                                        <th id="stRef">المرجع</th>
-                                        <th id="stName">التسمية</th>
+                                        <th id="stName">اسم وتسمية السلعة</th>
                                         <th id="stDim">المقاس</th>
+                                        <th id="stPrice">سعر البيع</th>
+                                        <th id="stWholesale">سعر الجملة</th>
                                         <th id="stCost">الشراء</th>
-                                        <th id="stPrice">البيع</th>
-                                        <th id="stWholesale">الجملة</th>
                                         <th id="stStock">المخزون</th>
+                                        <th id="stRef">المرجع</th>
                                         <th style="width: 70px;"></th>
                                     </tr>
                                 </thead>
@@ -349,41 +370,31 @@
                         <input type="hidden" id="editProductId">
 
                         <div style="display: flex; flex-direction: column; gap: 9px;">
+                            <!-- 1. NAME FIRST -->
                             <div>
-                                <label style="font-size: 12px; font-weight: 600;" id="fLblRef">المرجع (Référence):</label>
-                                <input type="text" id="prodRef" class="input-text">
+                                <label style="font-size: 12.5px; font-weight: 700; color: #1e293b;" id="fLblName">اسم السلعة (Désignation) * :</label>
+                                <input type="text" id="prodName" class="input-text" placeholder="مثال: Vis Placo Noire, Câble 2.5, Tuyau PVC...">
                             </div>
-                            <div>
-                                <label style="font-size: 12px; font-weight: 600;" id="fLblBarcode">كود الباركود:</label>
-                                <div style="display: flex; gap: 6px;">
-                                    <input type="text" id="prodBarcode" class="input-text">
-                                    <button class="btn btn-secondary" style="font-size: 12px;" onclick="generateRandomBarcode()" id="btnGenBarcode">
-                                        <i class="fa-solid fa-barcode"></i> <span>توليد</span>
-                                    </button>
-                                </div>
-                            </div>
-                            <div>
-                                <label style="font-size: 12px; font-weight: 600;" id="fLblName">اسم السلعة (Désignation):</label>
-                                <input type="text" id="prodName" class="input-text">
-                            </div>
+                            <!-- 2. DIMENSIONS -->
                             <div>
                                 <label style="font-size: 12px; font-weight: 600;" id="fLblDim">القياسات / المقاس (Dimensions):</label>
-                                <input type="text" id="prodDim" class="input-text" placeholder="مثال: 4x40, Ø32, M8">
+                                <input type="text" id="prodDim" class="input-text" placeholder="مثال: 4x40, Ø32, M8, 100m">
+                            </div>
+                            <!-- 3. PRICES -->
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                                <div>
+                                    <label style="font-size: 12px; font-weight: 700; color: var(--primary);" id="fLblPrice">سعر البيع تجزئة دج:</label>
+                                    <input type="number" id="prodPrice" class="input-text" value="0">
+                                </div>
+                                <div>
+                                    <label style="font-size: 12px; font-weight: 700; color: #b45309;" id="fLblWholesale">سعر البيع جملة دج:</label>
+                                    <input type="number" id="prodWholesale" class="input-text" value="0">
+                                </div>
                             </div>
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
                                 <div>
                                     <label style="font-size: 12px; font-weight: 600;" id="fLblCost">سعر الشراء دج:</label>
                                     <input type="number" id="prodCost" class="input-text" value="0">
-                                </div>
-                                <div>
-                                    <label style="font-size: 12px; font-weight: 600;" id="fLblPrice">سعر البيع دج:</label>
-                                    <input type="number" id="prodPrice" class="input-text" value="0">
-                                </div>
-                            </div>
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                                <div>
-                                    <label style="font-size: 12px; font-weight: 600;" id="fLblWholesale">سعر الجملة دج:</label>
-                                    <input type="number" id="prodWholesale" class="input-text" value="0">
                                 </div>
                                 <div>
                                     <label style="font-size: 12px; font-weight: 600;" id="fLblStock">الكمية بالمخزن:</label>
@@ -393,6 +404,22 @@
                             <div>
                                 <label style="font-size: 12px; font-weight: 600;" id="fLblAlert">تنبيه الحد الأدنى للمخزون:</label>
                                 <input type="number" id="prodAlert" class="input-text" value="5">
+                            </div>
+                            <!-- 4. REFERENCE & BARCODE SECONDARY -->
+                            <div style="display: grid; grid-template-columns: 1fr 1.2fr; gap: 8px; border-top: 1px solid var(--border); padding-top: 8px;">
+                                <div>
+                                    <label style="font-size: 11.5px; font-weight: 600; color: var(--text-muted);" id="fLblRef">المرجع (Réf / اختياري):</label>
+                                    <input type="text" id="prodRef" class="input-text" placeholder="تلقائي إن ترك فارغاً">
+                                </div>
+                                <div>
+                                    <label style="font-size: 11.5px; font-weight: 600; color: var(--text-muted);" id="fLblBarcode">كود الباركود:</label>
+                                    <div style="display: flex; gap: 4px;">
+                                        <input type="text" id="prodBarcode" class="input-text">
+                                        <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="generateRandomBarcode()" id="btnGenBarcode" title="توليد باركود تلقائي">
+                                            <i class="fa-solid fa-barcode"></i>
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
 
                             <div style="display: flex; gap: 8px; margin-top: 6px;">
@@ -598,7 +625,7 @@
                                 <option value="fr">Français</option>
                             </select>
                         </div>
-                        <button class="btn btn-success" style="align-self: flex-start; margin-top: 8px;">
+                        <button class="btn btn-success" style="align-self: flex-start; margin-top: 8px;" onclick="saveStoreSettings()">
                             <i class="fa-solid fa-floppy-disk"></i>
                             <span id="setBtnSave">حفظ الإعدادات</span>
                         </button>
@@ -606,36 +633,88 @@
                 </div>
             </div>
 
-            <!-- TAB 7: TRIAL LOCK SIMULATOR -->
-            <div id="tab-lock" class="tab-content">
-                <div style="max-width: 620px; margin: 15px auto; background: #fff; border-radius: 10px; padding: 30px; border: 1px solid var(--border); box-shadow: 0 4px 20px rgba(0,0,0,0.06); text-align: center;">
-                    <div style="width: 48px; height: 48px; background: #fee2e2; color: var(--danger); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px; font-size: 20px;">
-                        <i class="fa-solid fa-lock"></i>
-                    </div>
-                    <h2 style="color: #1e293b; margin-bottom: 8px; font-size: 18px;" id="lockTitle">انتهت الفترة التجريبية المجانية (7 أيام)</h2>
-                    <p style="color: var(--text-muted); font-size: 13.5px; line-height: 1.6; margin-bottom: 20px;" id="lockDesc">
-                        هذه هي الشاشة الرسمية التي تظهر لصاحب المحل في اليوم الثامن. جميع بياناته ومبيعاته ومخزونه تبقى محفوظة بالكامل.
-                    </p>
+        </div>
+    </div>
 
-                    <div style="background: #f8fafc; border-radius: 6px; padding: 14px; margin-bottom: 18px; border: 1px solid #cbd5e1;">
-                        <div style="font-size: 12px; color: #475569; margin-bottom: 4px;" id="lockMidLbl">معرف جهاز الزبون (Machine ID):</div>
-                        <div style="font-size: 18px; font-weight: 800; color: var(--primary); letter-spacing: 1px;" id="lockMid">QL-ALG-XXXX-XXXX</div>
-                    </div>
-
-                    <div style="background: #ecfdf5; border-radius: 6px; padding: 10px; margin-bottom: 20px; border: 1px solid #a7f3d0; color: #065f46; font-weight: bold; font-size: 13px;" id="lockContact">
-                        للطلب والتفعيل: اتصل بالمطور عبر الهاتف أو واتساب: 0550 12 34 56
-                    </div>
-
-                    <div style="text-align: start; margin-bottom: 6px; font-size: 12.5px; font-weight: 700;" id="lockEnterKey">أدخل كود التفعيل المستلم:</div>
-                    <div style="display: flex; gap: 8px;">
-                        <input type="text" id="activationKeyInput" class="input-text" style="font-size: 15px; font-weight: bold; text-align: center;" placeholder="ACT-XXXX-XXXX-XXXX-XXXX">
-                        <button class="btn btn-success" style="padding: 0 20px;" onclick="activateSoftware()" id="btnActivate">
-                            <i class="fa-solid fa-key"></i> <span id="btnActText">تفعيل البرنامج</span>
-                        </button>
-                    </div>
-                </div>
+    <!-- Simple & Clean License Modal -->
+    <div id="licenseModal" class="modal-overlay" onclick="if(event.target===this) closeLicenseModal()">
+        <div class="license-modal">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 16px;">
+                <h3 style="font-size: 15px; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-shield-halved" id="licModalIcon" style="color: var(--primary);"></i>
+                    <span id="licModalTitle">الترخيص والتفعيل</span>
+                </h3>
+                <button class="btn btn-secondary" style="padding: 2px 8px; border: none; font-size: 16px; cursor: pointer;" onclick="closeLicenseModal()">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
             </div>
 
+            <!-- 1. If Activated State -->
+            <div id="licActivatedView" style="display: none; text-align: center; padding: 10px 0;">
+                <div style="width: 52px; height: 52px; background: #ecfdf5; color: var(--success); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; font-size: 24px;">
+                    <i class="fa-solid fa-circle-check"></i>
+                </div>
+                <h4 style="font-size: 16px; font-weight: 800; color: #065f46; margin-bottom: 4px;" id="licActiveHeading">البرنامج مفعل رسمياً ومدى الحياة</h4>
+                <div style="font-size: 12.5px; color: var(--text-muted); margin-bottom: 16px;" id="licActiveSub">نسخة غير محدودة مرخصة لصاحب المحل</div>
+
+                <div style="background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 14px; text-align: start; font-size: 12.5px; display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px;">
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: var(--text-muted);" id="licLblStore">المحل:</span>
+                        <strong id="licActiveStoreName">Quincaillerie El-Baraka</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: var(--text-muted);" id="licLblMid">معرف الجهاز:</span>
+                        <span style="font-family: monospace; font-weight: 700; color: var(--primary);" id="licActiveMid">QL-ALG-XXXX-XXXX</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: var(--text-muted);" id="licLblKey">كود التفعيل:</span>
+                        <span style="font-family: monospace; font-weight: 700; color: #334155;" id="licActiveKey">ACT-XXXX-XXXX-XXXX-XXXX</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: var(--text-muted);" id="licLblType">نوع الرخصة:</span>
+                        <span class="badge-pill badge-success" id="licActiveType">دائمة (Illimitée)</span>
+                    </div>
+                </div>
+
+                <button class="btn btn-secondary" style="width: 100%; height: 38px;" onclick="closeLicenseModal()">
+                    <span id="btnLicCloseActive">إغلاق النافذة</span>
+                </button>
+            </div>
+
+            <!-- 2. If Trial / Not Activated State -->
+            <div id="licTrialView">
+                <div style="display: flex; align-items: center; gap: 10px; background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 12px; margin-bottom: 14px;">
+                    <i class="fa-solid fa-clock" style="font-size: 22px; color: var(--warning);"></i>
+                    <div>
+                        <div style="font-weight: 700; font-size: 13px; color: #92400e;" id="licTrialStatusTitle">النسخة في الفترة التجريبية (باقي 7 أيام)</div>
+                        <div style="font-size: 11.5px; color: #b45309;" id="licTrialStatusSub">قم بتفعيل البرنامج للحصول على رخصة دائمة بدون انقطاع</div>
+                    </div>
+                </div>
+
+                <ul class="license-feature-list">
+                    <li><i class="fa-solid fa-check"></i> <span id="licF1">ترخيص دائم مدى الحياة بدون أي اشتراك شهري</span></li>
+                    <li><i class="fa-solid fa-check"></i> <span id="licF2">حفظ آمن وغير محدود لكافة المبيعات والسلع والديون</span></li>
+                    <li><i class="fa-solid fa-check"></i> <span id="licF3">دعم فني وتحديثات مجانية مستمرة</span></li>
+                </ul>
+
+                <div style="background: #f8fafc; border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; margin-bottom: 14px;">
+                    <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 3px;" id="licLblMidTrial">معرف جهازك (Machine ID):</div>
+                    <div style="font-family: monospace; font-size: 14px; font-weight: 800; color: var(--primary);" id="licTrialMid">QL-ALG-XXXX-XXXX</div>
+                </div>
+
+                <div style="margin-bottom: 14px;">
+                    <label style="font-size: 12px; font-weight: 700; color: #334155; display: block; margin-bottom: 5px;" id="licLblInputKey">أدخل كود التفعيل المستلم:</label>
+                    <input type="text" id="activationKeyInput" class="input-text" style="font-family: monospace; font-size: 14px; font-weight: 700; text-align: center; letter-spacing: 1px;" placeholder="ACT-XXXX-XXXX-XXXX-XXXX">
+                </div>
+
+                <button class="btn btn-success" style="width: 100%; height: 40px; font-size: 13.5px;" onclick="activateSoftware()" id="btnActivate">
+                    <i class="fa-solid fa-key"></i> <span id="btnActText">تفعيل البرنامج الآن</span>
+                </button>
+
+                <div style="text-align: center; font-size: 11.5px; color: var(--text-muted); margin-top: 12px;" id="licContactFooter">
+                    لطلب كود التفعيل اتصل بالمطور: 0550 12 34 56
+                </div>
+            </div>
         </div>
     </div>
 
@@ -758,10 +837,9 @@
                 reportsTitle: "التقارير والأرباح اليومية (Rapports)",
                 settingsTitle: "إعدادات المحل والطباعة (Paramètres)",
                 lockNavTitle: "محاكاة شاشة القفل بعد 7 أيام (Verrouillage)",
-                searchPlaceholder: "ابحث بالاسم، المرجع (vis, pvc, cable...) أو امسح الباركود...",
-                thRef: "المرجع",
-                thName: "تسمية السلعة",
-                thPrice: "السعر",
+                searchPlaceholder: "[F1] ابحث بالاسم (vis, pvc, cable...) أو امسح الباركود...",
+                thName: "اسم وتسمية السلعة",
+                thPrice: "السعر (تجزئة/جملة)",
                 thQty: "الكمية",
                 thTotal: "المجموع",
                 cartEmptyMsg: "السلة فارغة. ابحث عن سلعة لإضافتها",
@@ -776,25 +854,25 @@
                 btnClearCart: "[F5] إفراغ السلة",
                 lblLowStockFilter: "المخزون الضعيف فقط",
                 btnRefresh: "تحديث",
-                stRef: "المرجع",
-                stName: "التسمية",
+                stName: "اسم وتسمية السلعة",
                 stDim: "المقاس",
+                stPrice: "سعر البيع",
+                stWholesale: "سعر الجملة",
                 stCost: "الشراء",
-                stPrice: "البيع",
-                stWholesale: "الجملة",
                 stStock: "المخزون",
+                stRef: "المرجع",
                 formTitleAdd: "إضافة سلعة جديدة",
                 formTitleEdit: "تعديل السلعة",
                 btnNewProdText: "سلعة جديدة",
-                fLblRef: "المرجع (Référence):",
-                fLblBarcode: "كود الباركود:",
-                fLblName: "اسم السلعة (Désignation):",
+                fLblName: "اسم السلعة (Désignation) * :",
                 fLblDim: "القياسات / المقاس (Dimensions):",
+                fLblPrice: "سعر البيع تجزئة دج:",
+                fLblWholesale: "سعر البيع جملة دج:",
                 fLblCost: "سعر الشراء دج:",
-                fLblPrice: "سعر البيع دج:",
-                fLblWholesale: "سعر الجملة دج:",
                 fLblStock: "الكمية بالمخزن:",
                 fLblAlert: "تنبيه الحد الأدنى للمخزون:",
+                fLblRef: "المرجع (Réf / اختياري):",
+                fLblBarcode: "كود الباركود:",
                 btnSaveProd: "حفظ السلعة",
                 btnDelText: "حذف",
                 htInvNum: "رقم الوصل",
@@ -825,50 +903,9 @@
                 setStoreInfoTitle: "معلومات المحل والطباعة",
                 setLblName: "اسم المحل:",
                 setLblPhone: "رقم الهاتف:",
-                setLblAddress: "العنوان:",
-                setLblLang: "لغة الواجهة الافتراضية:",
-                setBtnSave: "حفظ الإعدادات",
-                lockTitle: "انتهت الفترة التجريبية المجانية (7 أيام)",
-                lockDesc: "هذه هي الشاشة الرسمية التي تظهر لصاحب المحل في اليوم الثامن. جميع بياناته ومبيعاته ومخزونه تبقى محفوظة بالكامل.",
-                lockMidLbl: "معرف جهاز الزبون (Machine ID):",
-                lockContact: "للطلب والتفعيل: اتصل بالمطور عبر الهاتف أو واتساب: 0550 12 34 56",
-                lockEnterKey: "أدخل كود التفعيل المستلم:",
-                btnActText: "تفعيل البرنامج",
-                btnTicClose: "إغلاق الوصل وعملية جديدة",
-                btnClearHistoryText: "مسح السجل",
-                repPeriodTitle: "تحليلات الأرباح والمبيعات",
-                btnRepToday: "اليوم",
-                btnRepWeek: "هذا الأسبوع",
-                btnRepMonth: "هذا الشهر",
-                btnRepAll: "كل المبيعات",
-                repTopTitle: "السلع الأكثر مبيعاً وطلباً في المحل",
-                repTopSub: "أعلى 5 سلع",
-                repHourTitle: "أوقات الذروة والمبيعات بالساعة",
-                repHourSub: "توزيع النشاط اليومي",
-                notifPanelTitle: "مركز التنبيهات الذكية",
-                btnNotifRefresh: "تحديث"
-            },
-            fr: {
-                brandSub: "Quincaillerie Algérie",
-                navCaisse: "Vente & Caisse",
-                navStock: "Stock & Articles",
-                navHistory: "Historique Ventes",
-                navCredit: "Crédits Clients",
-                navReports: "Rapports & Ventes",
-                navSettings: "Paramètres",
-                navLock: "Verrouillage Trial",
-                lblMonoposte: "Version Monoposte (1 PC)",
-                caisseTitle: "Point de Vente au Comptoir (Caisse)",
-                stockTitle: "Gestion du Stock & Produits",
-                historyTitle: "Historique des Ventes & Reçus",
-                creditTitle: "Crédits Clients & Versements",
-                reportsTitle: "Rapports Journaliers & Bénéfices",
-                settingsTitle: "Paramètres du Magasin",
-                lockNavTitle: "Simulation Écran de Verrouillage (7 jours)",
-                searchPlaceholder: "Rechercher par nom, réf (vis, pvc, câble...) ou scanner code-barres...",
-                thRef: "Réf",
-                thName: "Désignation",
-                thPrice: "Prix",
+                     searchPlaceholder: "[F1] Rechercher par nom (vis, pvc, câble...) ou scanner code-barres...",
+                thName: "Désignation Produit",
+                thPrice: "Prix (Détail/Gros)",
                 thQty: "Quantité",
                 thTotal: "Total",
                 cartEmptyMsg: "Panier vide. Recherchez un article pour l'ajouter",
@@ -883,25 +920,25 @@
                 btnClearCart: "[F5] Vider le Panier",
                 lblLowStockFilter: "Stock Faible Uniquement",
                 btnRefresh: "Actualiser",
-                stRef: "Réf",
-                stName: "Désignation",
+                stName: "Désignation Article",
                 stDim: "Dimensions",
-                stCost: "Prix Achat",
                 stPrice: "Prix Détail",
                 stWholesale: "Prix Gros",
+                stCost: "Prix Achat",
                 stStock: "Stock",
+                stRef: "Réf",
                 formTitleAdd: "Ajouter un Produit",
                 formTitleEdit: "Modifier le Produit",
                 btnNewProdText: "Nouveau Produit",
-                fLblRef: "Référence :",
-                fLblBarcode: "Code-barres :",
-                fLblName: "Désignation :",
+                fLblName: "Désignation de l'article * :",
                 fLblDim: "Dimensions :",
-                fLblCost: "Prix d'Achat DZD :",
                 fLblPrice: "Prix de Vente Détail DZD :",
                 fLblWholesale: "Prix de Vente Gros DZD :",
+                fLblCost: "Prix d'Achat DZD :",
                 fLblStock: "Quantité en Stock :",
                 fLblAlert: "Alerte Stock Min :",
+                fLblRef: "Référence (optionnel) :",
+                fLblBarcode: "Code-barres :",
                 btnSaveProd: "Enregistrer Produit",
                 btnDelText: "Supprimer",
                 htInvNum: "N° Facture/Ticket",
@@ -935,12 +972,6 @@
                 setLblAddress: "Adresse :",
                 setLblLang: "Langue par Défaut :",
                 setBtnSave: "Enregistrer",
-                lockTitle: "Période d'Essai Gratuite Terminée (7 jours)",
-                lockDesc: "Ceci est l'écran officiel qui s'affiche au commerçant le 8ème jour. Toutes ses données, ventes et stocks restent intégralement conservés.",
-                lockMidLbl: "Identifiant Machine (Machine ID) :",
-                lockContact: "Pour activation : Contactez le développeur par Téléphone ou WhatsApp : 0550 12 34 56",
-                lockEnterKey: "Entrez la Clé d'Activation Reçue :",
-                btnActText: "Activer la Licence",
                 btnTicClose: "Fermer le Ticket & Nouvelle Vente",
                 btnClearHistoryText: "Effacer l'historique",
                 repPeriodTitle: "Analyses & Ventes",
@@ -953,7 +984,31 @@
                 repHourTitle: "Heures de Pointe & Activité",
                 repHourSub: "Distribution Horaire",
                 notifPanelTitle: "Centre d'Alertes Intelligentes",
-                btnNotifRefresh: "Actualiser"
+                btnNotifRefresh: "Actualiser",
+                scF1: "Rechercher",
+                scF2: "Espèces",
+                scF3: "Crédit",
+                scF4: "Gros/Détail",
+                scF5: "Vider Panier",
+                scEsc: "Fermer",
+                licModalTitle: "Licence & Activation",
+                licActiveHeading: "Licence Officielle Activée à Vie",
+                licActiveSub: "Version illimitée pour quincaillerie",
+                licLblStore: "Magasin :",
+                licLblMid: "ID Machine :",
+                licLblKey: "Clé d'activation :",
+                licLblType: "Type de licence :",
+                licActiveType: "Perpétuelle (Illimitée)",
+                btnLicCloseActive: "Fermer",
+                licTrialStatusTitle: "Version d'évaluation en cours",
+                licTrialStatusSub: "Activez pour une licence permanente sans interruption",
+                licF1: "Licence permanente à vie sans abonnement",
+                licF2: "Stockage illimité et sécurisé des données",
+                licF3: "Support technique et mises à jour gratuites",
+                licLblMidTrial: "Identifiant Machine (Machine ID) :",
+                licLblInputKey: "Saisir la clé d'activation reçue :",
+                btnActText: "Activer la Licence",
+                licContactFooter: "Pour commander la clé : 0550 12 34 56"
             }
         };
 
@@ -990,24 +1045,29 @@
             document.getElementById('btnPriceWholesale').classList.toggle('active', mode === 'wholesale');
 
             currentCart.forEach(it => {
-                it.unitPrice = mode === 'wholesale' && it.wholesalePrice > 0 ? it.wholesalePrice : it.retailPrice;
+                it.isWholesale = (mode === 'wholesale' && it.wholesalePrice > 0);
+                it.unitPrice = it.isWholesale ? it.wholesalePrice : it.retailPrice;
                 it.totalPrice = it.quantity * it.unitPrice;
             });
             renderCart();
         }
 
-        async function init() {
-            const statusRes = await fetch('/api/status').then(r => r.json());
-            document.getElementById('sidebarMid').innerText = statusRes.machineId;
-            document.getElementById('lockMid').innerText = statusRes.machineId;
+        function togglePriceMode() {
+            setPriceMode(priceMode === 'retail' ? 'wholesale' : 'retail');
+        }
 
-            const badgeSpan = document.querySelector('#topBadge span');
-            if (statusRes.isActivated) {
-                document.getElementById('topBadge').className = 'license-badge activated';
-                if (badgeSpan) badgeSpan.innerText = currentLang === 'ar' ? 'نسخة مفعلة رسمياً' : 'Licence Activée';
-            } else {
-                if (badgeSpan) badgeSpan.innerText = currentLang === 'ar' ? `فترة تجريبية: باقي ${statusRes.remainingDays} أيام` : `Essai : ${statusRes.remainingDays} j restants`;
-            }
+        function toggleItemPriceMode(index) {
+            const it = currentCart[index];
+            if (!it || it.wholesalePrice <= 0) return;
+            it.isWholesale = !it.isWholesale;
+            it.unitPrice = it.isWholesale ? it.wholesalePrice : it.retailPrice;
+            it.totalPrice = it.quantity * it.unitPrice;
+            renderCart();
+        }
+
+        async function init() {
+            await loadStoreSettings();
+            await renderLicenseModal();
 
             // Load customers
             const custRes = await fetch('/api/customers').then(r => r.json());
@@ -1072,9 +1132,22 @@
                 const div = document.createElement('div');
                 div.className = 'search-item';
                 const pPrice = priceMode === 'wholesale' && p.WholesalePrice > 0 ? p.WholesalePrice : p.SalePrice;
+                const wholesaleBadge = p.WholesalePrice > 0 
+                    ? `<span style="font-size: 11px; color: #0284c7; background: #e0f2fe; padding: 1px 5px; border-radius: 4px; margin-inline-start: 4px;">${currentLang === 'ar' ? 'جملة:' : 'Gros:'} ${p.WholesalePrice.toFixed(0)}</span>` 
+                    : '';
+                const stockBadge = p.StockQuantity <= 0 
+                    ? `<span style="font-size: 10.5px; color: #b91c1c; background: #fee2e2; padding: 1px 4px; border-radius: 4px; margin-inline-start: 6px;">${currentLang === 'ar' ? 'نفد' : 'Épuisé'}</span>` 
+                    : `<span style="font-size: 10.5px; color: #475569; margin-inline-start: 6px;">(${p.StockQuantity} en stock)</span>`;
+
                 div.innerHTML = `
-                    <div><strong>${p.Name}</strong> <span style="color: var(--text-muted); font-size: 12px;">(${p.Reference} - ${p.Dimensions || ''})</span></div>
-                    <div style="font-weight: bold; color: var(--primary);">${pPrice.toFixed(2)} DZD</div>
+                    <div>
+                        <strong style="font-size: 13.5px;">${p.Name}</strong> ${stockBadge}
+                        <div style="color: var(--text-muted); font-size: 11.5px; margin-top: 2px;">${p.Dimensions ? p.Dimensions + ' • ' : ''}${p.Reference}</div>
+                    </div>
+                    <div style="text-align: end;">
+                        <div style="font-weight: 800; color: var(--primary); font-size: 14px;">${pPrice.toFixed(2)} DZD</div>
+                        ${wholesaleBadge}
+                    </div>
                 `;
                 div.onclick = () => {
                     addToCart(p);
@@ -1095,7 +1168,9 @@
 
         function addToCart(prod) {
             const existing = currentCart.find(x => x.productId === prod.Id);
-            const activePrice = priceMode === 'wholesale' && prod.WholesalePrice > 0 ? prod.WholesalePrice : prod.SalePrice;
+            const isWholesale = priceMode === 'wholesale' && prod.WholesalePrice > 0;
+            const activePrice = isWholesale ? prod.WholesalePrice : prod.SalePrice;
+
             if (existing) {
                 existing.quantity += 1;
                 existing.totalPrice = existing.quantity * existing.unitPrice;
@@ -1104,8 +1179,10 @@
                     productId: prod.Id,
                     reference: prod.Reference,
                     name: prod.Name,
+                    dimensions: prod.Dimensions || '',
                     retailPrice: prod.SalePrice,
                     wholesalePrice: prod.WholesalePrice,
+                    isWholesale: isWholesale,
                     unitPrice: activePrice,
                     purchasePrice: prod.PurchasePrice,
                     quantity: 1,
@@ -1147,7 +1224,7 @@
             const tbody = document.getElementById('cartTbody');
             const emptyText = i18n[currentLang].cartEmptyMsg;
             if (currentCart.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 45px;">${emptyText}</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 45px;">${emptyText}</td></tr>`;
                 document.getElementById('totalAmountDisplay').innerText = '0.00 DZD';
                 document.getElementById('paidInput').value = '0';
                 document.getElementById('changeDisplay').innerText = '0.00 DZD';
@@ -1159,11 +1236,32 @@
             let subtotal = 0;
             currentCart.forEach((item, idx) => {
                 subtotal += item.totalPrice;
+
+                // Gros / Détail toggle badge
+                let priceBadgeHtml = '';
+                if (item.wholesalePrice > 0) {
+                    if (item.isWholesale) {
+                        priceBadgeHtml = `<button class="btn-price-badge wholesale" onclick="toggleItemPriceMode(${idx})" title="${currentLang === 'ar' ? 'انقر للتحويل إلى سعر التجزئة' : 'Cliquer pour passer au prix détail'}">${currentLang === 'ar' ? 'جملة' : 'Gros'}</button>`;
+                    } else {
+                        priceBadgeHtml = `<button class="btn-price-badge retail" onclick="toggleItemPriceMode(${idx})" title="${currentLang === 'ar' ? 'انقر للتحويل إلى سعر الجملة' : 'Cliquer pour passer au prix de gros'}">${currentLang === 'ar' ? 'تجزئة' : 'Détail'}</button>`;
+                    }
+                }
+
                 tbody.innerHTML += `
                     <tr>
-                        <td style="font-weight: 700;">${item.reference}</td>
-                        <td>${item.name}</td>
-                        <td>${item.unitPrice.toFixed(2)}</td>
+                        <td>
+                            <div style="font-weight: 700; font-size: 13.5px; color: #0f172a;">${item.name}</div>
+                            <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 1px;">
+                                ${item.dimensions ? `<span style="font-weight: 500;">${item.dimensions}</span> • ` : ''}
+                                <span>${item.reference}</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 5px;">
+                                <span style="font-weight: 600;">${item.unitPrice.toFixed(2)}</span>
+                                ${priceBadgeHtml}
+                            </div>
+                        </td>
                         <td style="text-align: center;">
                             <div class="qty-control">
                                 <button class="qty-btn" onclick="changeQtyDelta(${idx}, -1)">-</button>
@@ -1171,8 +1269,12 @@
                                 <button class="qty-btn" onclick="changeQtyDelta(${idx}, 1)">+</button>
                             </div>
                         </td>
-                        <td style="font-weight: 700; color: var(--primary);">${item.totalPrice.toFixed(2)}</td>
-                        <td><button class="btn btn-secondary" style="padding: 3px 6px; color: var(--danger);" onclick="removeCartItem(${idx})"><i class="fa-solid fa-xmark"></i></button></td>
+                        <td style="font-weight: 800; color: var(--primary); font-size: 13.5px;">${item.totalPrice.toFixed(2)}</td>
+                        <td>
+                            <button class="btn btn-secondary" style="padding: 3px 6px; color: var(--danger); border: none;" onclick="removeCartItem(${idx})" title="${currentLang === 'ar' ? 'حذف من السلة' : 'Supprimer'}">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        </td>
                     </tr>
                 `;
             });
@@ -1334,13 +1436,13 @@
                 tr.style.cursor = 'pointer';
                 tr.onclick = () => selectProductForEdit(p.Id);
                 tr.innerHTML = `
-                    <td style="font-weight: 700;">${p.Reference}</td>
-                    <td>${p.Name}</td>
+                    <td style="font-weight: 700; font-size: 13.5px; color: #0f172a;">${p.Name}</td>
                     <td>${p.Dimensions || '-'}</td>
-                    <td>${p.PurchasePrice.toFixed(2)}</td>
                     <td style="font-weight: 700; color: var(--primary);">${p.SalePrice.toFixed(2)}</td>
-                    <td>${p.WholesalePrice.toFixed(2)}</td>
+                    <td style="color: #0284c7; font-weight: 600;">${p.WholesalePrice > 0 ? p.WholesalePrice.toFixed(2) : '-'}</td>
+                    <td style="color: var(--text-muted);">${p.PurchasePrice.toFixed(2)}</td>
                     <td style="${stockColor}">${p.StockQuantity}</td>
+                    <td style="font-size: 12px; color: var(--text-muted);">${p.Reference}</td>
                     <td><button class="btn btn-secondary" style="padding: 3px 8px; font-size: 11px;"><i class="fa-solid fa-pen-to-square"></i></button></td>
                 `;
                 tbody.appendChild(tr);
@@ -1765,12 +1867,198 @@
 
             if (res.success) {
                 alert(res.message);
-                init();
+                await init();
                 switchTab('caisse');
             } else {
                 alert('Erreur : ' + res.message);
             }
         }
+
+        // Store Settings API
+        async function loadStoreSettings() {
+            try {
+                const res = await fetch('/api/settings').then(r => r.json());
+                // API returns PascalCase keys
+                const name = res.StoreName || res.storeName;
+                const phone = res.Phone1 || res.phone;
+                const address = res.Address || res.address;
+                const lang = res.Language || res.language;
+
+                if (name) {
+                    document.getElementById('settStoreName').value = name;
+                    document.getElementById('ticStoreName').innerText = name.toUpperCase();
+                    const licStore = document.getElementById('licActiveStoreName');
+                    if (licStore) licStore.innerText = name;
+                }
+                if (phone) {
+                    document.getElementById('settPhone').value = phone;
+                    document.getElementById('ticPhone').innerText = `Tél: ${phone}`;
+                }
+                if (address) {
+                    document.getElementById('settAddress').value = address;
+                    document.getElementById('ticAddress').innerText = address;
+                }
+                if (lang && (lang === 'ar' || lang === 'fr')) {
+                    document.getElementById('settLanguage').value = lang;
+                    if (lang !== currentLang) {
+                        setLanguage(lang);
+                    }
+                }
+            } catch (err) {
+                console.error("Failed to load store settings:", err);
+            }
+        }
+
+        async function saveStoreSettings() {
+            const storeName = document.getElementById('settStoreName').value.trim();
+            const phone = document.getElementById('settPhone').value.trim();
+            const address = document.getElementById('settAddress').value.trim();
+            const language = document.getElementById('settLanguage').value;
+
+            try {
+                const res = await fetch('/api/settings', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ storeName, phone, address, language })
+                }).then(r => r.json());
+
+                if (res.success) {
+                    alert(currentLang === 'ar' ? 'تم حفظ الإعدادات بنجاح' : 'Paramètres enregistrés avec succès');
+                    document.getElementById('ticStoreName').innerText = storeName.toUpperCase();
+                    document.getElementById('ticPhone').innerText = `Tél: ${phone}`;
+                    document.getElementById('ticAddress').innerText = address;
+                    const licStore = document.getElementById('licActiveStoreName');
+                    if (licStore) licStore.innerText = storeName;
+                    if (language !== currentLang) {
+                        setLanguage(language);
+                    }
+                } else {
+                    alert('Erreur: ' + (res.error || 'Erreur d\'enregistrement'));
+                }
+            } catch (err) {
+                alert('Erreur réseau : ' + err.message);
+            }
+        }
+
+        // License Modal Management
+        function openLicenseModal() {
+            renderLicenseModal();
+            document.getElementById('licenseModal').classList.add('active');
+        }
+
+        function closeLicenseModal() {
+            document.getElementById('licenseModal').classList.remove('active');
+        }
+
+        async function renderLicenseModal() {
+            try {
+                const status = await fetch('/api/status').then(r => r.json());
+                const actView = document.getElementById('licActivatedView');
+                const trialView = document.getElementById('licTrialView');
+                const topIcon = document.getElementById('topLicenseIcon');
+                const topText = document.getElementById('topLicenseText');
+                const sideMid = document.getElementById('sidebarMid');
+
+                if (sideMid) sideMid.innerText = status.machineId || 'QL-ALG-XXXX-XXXX';
+
+                if (status.isActivated) {
+                    actView.style.display = 'block';
+                    trialView.style.display = 'none';
+
+                    document.getElementById('licActiveMid').innerText = status.machineId || '-';
+                    document.getElementById('licActiveKey').innerText = status.activationKey || 'ACT-7553-A7C5-08AE-6A3C';
+                    if (status.storeName) {
+                        document.getElementById('licActiveStoreName').innerText = status.storeName;
+                    }
+
+                    topIcon.className = 'fa-solid fa-circle-check';
+                    topIcon.style.color = 'var(--success)';
+                    topText.innerText = currentLang === 'ar' ? 'مفعل' : 'Activé';
+                } else {
+                    actView.style.display = 'none';
+                    trialView.style.display = 'block';
+
+                    document.getElementById('licTrialMid').innerText = status.machineId || '-';
+                    const daysLeft = status.remainingDays !== undefined ? status.remainingDays : 7;
+                    const trialHeading = document.getElementById('licTrialStatusTitle');
+                    if (trialHeading) {
+                        trialHeading.innerText = currentLang === 'ar' 
+                            ? `النسخة في الفترة التجريبية (باقي ${daysLeft} أيام)` 
+                            : `Version d'essai (${daysLeft} jour(s) restant(s))`;
+                    }
+
+                    topIcon.className = 'fa-solid fa-clock';
+                    topIcon.style.color = 'var(--warning)';
+                    topText.innerText = currentLang === 'ar' ? 'تجريبي' : 'Essai';
+                }
+            } catch (err) {
+                console.error("Failed to render license status:", err);
+            }
+        }
+
+        // Global Keyboard Shortcuts (F1, F2, F3, F4, F5, Escape)
+        window.addEventListener('keydown', (e) => {
+            // Escape: Close any open modal or dropdown
+            if (e.key === 'Escape') {
+                closeReceiptModal();
+                closeLicenseModal();
+                toggleNotificationPanel(false);
+                const dd = document.getElementById('searchDropdown');
+                if (dd) dd.style.display = 'none';
+                return;
+            }
+
+            // If a modal is open, don't execute POS action shortcuts
+            const receiptOpen = document.getElementById('receiptModal').classList.contains('active');
+            const licenseOpen = document.getElementById('licenseModal').classList.contains('active');
+            if (receiptOpen || licenseOpen) return;
+
+            // F1: Focus Search
+            if (e.key === 'F1') {
+                e.preventDefault();
+                switchTab('caisse');
+                const search = document.getElementById('caisseSearchInput');
+                if (search) {
+                    search.focus();
+                    search.select();
+                }
+                return;
+            }
+
+            // F2: Checkout Cash
+            if (e.key === 'F2') {
+                e.preventDefault();
+                switchTab('caisse');
+                checkoutSale(false);
+                return;
+            }
+
+            // F3: Checkout Credit
+            if (e.key === 'F3') {
+                e.preventDefault();
+                switchTab('caisse');
+                checkoutSale(true);
+                return;
+            }
+
+            // F4: Toggle Retail / Wholesale
+            if (e.key === 'F4') {
+                e.preventDefault();
+                switchTab('caisse');
+                togglePriceMode();
+                return;
+            }
+
+            // F5: Clear Cart
+            if (e.key === 'F5') {
+                e.preventDefault();
+                if (currentCart.length > 0) {
+                    const confirmClear = confirm(currentLang === 'ar' ? 'هل تريد إفراغ سلة المشتريات الحالية؟' : 'Voulez-vous vider le panier en cours ?');
+                    if (confirmClear) clearCart();
+                }
+                return;
+            }
+        });
 
         init();
     </script>
