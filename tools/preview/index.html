@@ -117,6 +117,32 @@
         }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Notification Panel */
+        .notif-panel { position: fixed; top: 0; inset-inline-end: -380px; width: 370px; height: 100vh; background: #fff; border-inline-start: 1px solid var(--border); box-shadow: -8px 0 30px rgba(0,0,0,0.1); z-index: 900; transition: inset-inline-end 0.3s ease; display: flex; flex-direction: column; }
+        .notif-panel.open { inset-inline-end: 0; }
+        .notif-panel-header { padding: 16px 18px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: var(--sidebar-bg); color: #fff; flex-shrink: 0; }
+        .notif-panel-header h3 { font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+        .notif-list { flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+        .notif-item { padding: 11px 13px; border-radius: 7px; border-inline-start: 4px solid; font-size: 12.5px; line-height: 1.5; }
+        .notif-item.danger { background: #fef2f2; border-color: var(--danger); color: #7f1d1d; }
+        .notif-item.warning { background: #fffbeb; border-color: var(--warning); color: #78350f; }
+        .notif-item .notif-title { font-weight: 700; font-size: 12px; margin-bottom: 3px; display: flex; align-items: center; gap: 6px; }
+        .notif-empty { text-align: center; color: var(--text-muted); padding: 40px 20px; font-size: 13px; }
+        .notif-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 800; display: none; }
+        .notif-overlay.open { display: block; }
+
+        /* Analytics */
+        .analytics-bar-wrap { display: flex; flex-direction: column; gap: 7px; }
+        .analytics-bar-row { display: flex; align-items: center; gap: 10px; font-size: 12.5px; }
+        .analytics-bar-label { width: 130px; font-weight: 600; flex-shrink: 0; color: #334155; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .analytics-bar-track { flex: 1; background: #e2e8f0; border-radius: 4px; height: 22px; overflow: hidden; }
+        .analytics-bar-fill { height: 100%; background: var(--primary); border-radius: 4px; transition: width 0.4s ease; display: flex; align-items: center; padding-inline-end: 8px; justify-content: flex-end; font-size: 11px; color: #fff; font-weight: 700; white-space: nowrap; }
+        .analytics-bar-fill.success { background: var(--success); }
+        .period-filter { display: flex; gap: 6px; background: #f1f5f9; border-radius: 6px; padding: 3px; border: 1px solid var(--border); }
+        .period-btn { border: none; background: transparent; padding: 5px 14px; font-size: 12.5px; font-weight: 700; border-radius: 4px; cursor: pointer; color: #475569; }
+        .period-btn.active { background: var(--primary); color: #fff; }
+        .kpi-card-mini { font-size: 11.5px; color: var(--text-muted); margin-top: 2px; }
     </style>
 </head>
 <body>
@@ -180,6 +206,10 @@
                     <button class="lang-btn active" id="btnLangAr" onclick="setLanguage('ar')">العربية</button>
                     <button class="lang-btn" id="btnLangFr" onclick="setLanguage('fr')">Français</button>
                 </div>
+                <button class="btn btn-secondary" style="position: relative; padding: 6px 12px; font-size: 13px;" onclick="toggleNotificationPanel()" id="btnNotif" title="التنبيهات">
+                    <i class="fa-solid fa-bell"></i>
+                    <span id="notifBadge" style="display: none; background: var(--danger); color: #fff; border-radius: 10px; padding: 1px 6px; font-size: 11px; font-weight: bold; margin-inline-start: 4px;">0</span>
+                </button>
                 <div class="license-badge" id="topBadge"><i class="fa-solid fa-shield-halved"></i> <span>فترة تجريبية: باقي 7 أيام</span></div>
             </div>
         </div>
@@ -389,10 +419,16 @@
                         <button class="btn btn-secondary" id="btnDateToday" onclick="setHistoryFilter('today')">مبيعات اليوم</button>
                         <button class="btn btn-secondary" id="btnDateWeek" onclick="setHistoryFilter('week')">آخر 7 أيام</button>
                     </div>
-                    <button class="btn btn-primary" onclick="loadHistory()">
-                        <i class="fa-solid fa-rotate"></i>
-                        <span id="btnRefreshHistory">تحديث</span>
-                    </button>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn btn-primary" onclick="loadHistory()">
+                            <i class="fa-solid fa-rotate"></i>
+                            <span id="btnRefreshHistory">تحديث</span>
+                        </button>
+                        <button class="btn btn-danger" onclick="confirmClearHistory()" id="btnClearHistory" title="مسح كل المبيعات">
+                            <i class="fa-solid fa-trash-can"></i>
+                            <span id="btnClearHistoryText">مسح السجل</span>
+                        </button>
+                    </div>
                 </div>
 
                 <div class="card" style="padding: 0; overflow-x: auto;">
@@ -463,28 +499,77 @@
                 </div>
             </div>
 
-            <!-- TAB 5: REPORTS -->
+            <!-- TAB 5: REPORTS & ANALYTICS -->
             <div id="tab-reports" class="tab-content">
-                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px;">
-                    <div class="card" style="border-inline-start: 4px solid var(--primary);">
-                        <div style="font-size: 12.5px; color: var(--text-muted);" id="repLblSales">رقم الأعمال اليوم</div>
-                        <div style="font-size: 22px; font-weight: 800; color: var(--primary); margin-top: 4px;" id="repSales">0.00 DZD</div>
-                        <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 4px;" id="repCount">0 عملية بيع اليوم</div>
+                <!-- Period Filter Toolbar -->
+                <div class="card" style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; margin-bottom: 16px;">
+                    <div style="font-weight: 700; font-size: 14px; color: #1e293b; display: flex; align-items: center; gap: 8px;">
+                        <i class="fa-solid fa-chart-pie" style="color: var(--primary);"></i>
+                        <span id="repPeriodTitle">تحليلات الأرباح والمبيعات</span>
                     </div>
-                    <div class="card" style="border-inline-start: 4px solid var(--success);">
-                        <div style="font-size: 12.5px; color: var(--text-muted);" id="repLblCash">مقبوضات الكاش اليوم</div>
+                    <div class="period-filter">
+                        <button class="period-btn active" id="btnRepToday" onclick="setAnalyticsPeriod('today')">اليوم</button>
+                        <button class="period-btn" id="btnRepWeek" onclick="setAnalyticsPeriod('week')">هذا الأسبوع</button>
+                        <button class="period-btn" id="btnRepMonth" onclick="setAnalyticsPeriod('month')">هذا الشهر</button>
+                        <button class="period-btn" id="btnRepAll" onclick="setAnalyticsPeriod('all')">كل المبيعات</button>
+                    </div>
+                    <button class="btn btn-secondary" style="padding: 5px 12px; font-size: 12.5px;" onclick="loadAnalytics(currentAnalyticsPeriod)">
+                        <i class="fa-solid fa-rotate"></i> <span id="btnRepRefresh">تحديث</span>
+                    </button>
+                </div>
+
+                <!-- 4 KPI Cards -->
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px;">
+                    <div class="card" style="border-inline-start: 4px solid var(--primary); padding: 14px;">
+                        <div style="font-size: 12.5px; color: var(--text-muted);" id="repLblSales">رقم الأعمال المحقق</div>
+                        <div style="font-size: 22px; font-weight: 800; color: var(--primary); margin-top: 4px;" id="repSales">0.00 DZD</div>
+                        <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 4px;" id="repCount">0 عملية بيع</div>
+                    </div>
+                    <div class="card" style="border-inline-start: 4px solid var(--success); padding: 14px;">
+                        <div style="font-size: 12.5px; color: var(--text-muted);" id="repLblCash">مقبوضات الكاش الصافية</div>
                         <div style="font-size: 22px; font-weight: 800; color: var(--success); margin-top: 4px;" id="repCash">0.00 DZD</div>
                         <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 4px;" id="repLblCashBox">في الصندوق</div>
                     </div>
-                    <div class="card" style="border-inline-start: 4px solid var(--danger);">
-                        <div style="font-size: 12.5px; color: var(--text-muted);" id="repLblCredit">مبيعات بالكريدي اليوم</div>
+                    <div class="card" style="border-inline-start: 4px solid var(--danger); padding: 14px;">
+                        <div style="font-size: 12.5px; color: var(--text-muted);" id="repLblCredit">مبيعات بالكريدي</div>
                         <div style="font-size: 22px; font-weight: 800; color: var(--danger); margin-top: 4px;" id="repCredit">0.00 DZD</div>
-                        <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 4px;" id="repLblNewDebt">ديون جديدة</div>
+                        <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 4px;" id="repLblNewDebt">ديون على الزبائن</div>
                     </div>
-                    <div class="card" style="border-inline-start: 4px solid #0284c7;">
-                        <div style="font-size: 12.5px; color: var(--text-muted);" id="repLblProfit">صافي الربح المقدر اليوم</div>
+                    <div class="card" style="border-inline-start: 4px solid #0284c7; padding: 14px;">
+                        <div style="font-size: 12.5px; color: var(--text-muted);" id="repLblProfit">صافي الربح المقدر</div>
                         <div style="font-size: 22px; font-weight: 800; color: #0284c7; margin-top: 4px;" id="repProfit">0.00 DZD</div>
-                        <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 4px;" id="repLblMargin">هامش الفائدة</div>
+                        <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 4px;" id="repLblMargin">هامش الفائدة للمحل</div>
+                    </div>
+                </div>
+
+                <!-- Deep Analytics Grid (Top Products + Peak Hours) -->
+                <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 16px;">
+                    <!-- Top Selling Products -->
+                    <div class="card">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid var(--border);">
+                            <h3 style="font-size: 14px; color: var(--primary); font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                                <i class="fa-solid fa-trophy" style="color: #f59e0b;"></i>
+                                <span id="repTopTitle">السلع الأكثر مبيعاً وطلباً في المحل</span>
+                            </h3>
+                            <span style="font-size: 11.5px; color: var(--text-muted);" id="repTopSub">أعلى 5 سلع</span>
+                        </div>
+                        <div id="topProductsContainer" class="analytics-bar-wrap">
+                            <div style="text-align: center; color: var(--text-muted); padding: 30px;" id="repTopEmpty">لا توجد مبيعات في هذه الفترة</div>
+                        </div>
+                    </div>
+
+                    <!-- Peak Rush Hours -->
+                    <div class="card">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid var(--border);">
+                            <h3 style="font-size: 14px; color: var(--primary); font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                                <i class="fa-solid fa-clock" style="color: #3b82f6;"></i>
+                                <span id="repHourTitle">أوقات الذروة والمبيعات بالساعة</span>
+                            </h3>
+                            <span style="font-size: 11.5px; color: var(--text-muted);" id="repHourSub">توزيع النشاط اليومي</span>
+                        </div>
+                        <div id="hourlySalesContainer" class="analytics-bar-wrap">
+                            <div style="text-align: center; color: var(--text-muted); padding: 30px;" id="repHourEmpty">لا توجد بيانات ساعات كافية</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -626,6 +711,26 @@
         </div>
     </div>
 
+    <!-- Notification Drawer Panel -->
+    <div id="notifOverlay" class="notif-overlay" onclick="toggleNotificationPanel(false)"></div>
+    <div id="notifPanel" class="notif-panel">
+        <div class="notif-panel-header">
+            <h3><i class="fa-solid fa-bell"></i> <span id="notifPanelTitle">مركز التنبيهات الذكية</span></h3>
+            <button class="btn btn-secondary" style="padding: 4px 8px; color: #fff; background: transparent; border: none; font-size: 16px; cursor: pointer;" onclick="toggleNotificationPanel(false)">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <div style="padding: 10px 14px; background: #f8fafc; border-bottom: 1px solid var(--border); font-size: 11.5px; color: var(--text-muted); display: flex; justify-content: space-between; align-items: center;">
+            <span id="notifSubCount">0 تنبيه نشط</span>
+            <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="loadNotifications()">
+                <i class="fa-solid fa-rotate"></i> <span id="btnNotifRefresh">تحديث</span>
+            </button>
+        </div>
+        <div class="notif-list" id="notifList">
+            <div class="notif-empty" id="notifLoading">جاري فحص حالة المخزون والديون...</div>
+        </div>
+    </div>
+
     <script>
         let currentLang = 'ar';
         let priceMode = 'retail';
@@ -729,7 +834,19 @@
                 lockContact: "للطلب والتفعيل: اتصل بالمطور عبر الهاتف أو واتساب: 0550 12 34 56",
                 lockEnterKey: "أدخل كود التفعيل المستلم:",
                 btnActText: "تفعيل البرنامج",
-                btnTicClose: "إغلاق الوصل وعملية جديدة"
+                btnTicClose: "إغلاق الوصل وعملية جديدة",
+                btnClearHistoryText: "مسح السجل",
+                repPeriodTitle: "تحليلات الأرباح والمبيعات",
+                btnRepToday: "اليوم",
+                btnRepWeek: "هذا الأسبوع",
+                btnRepMonth: "هذا الشهر",
+                btnRepAll: "كل المبيعات",
+                repTopTitle: "السلع الأكثر مبيعاً وطلباً في المحل",
+                repTopSub: "أعلى 5 سلع",
+                repHourTitle: "أوقات الذروة والمبيعات بالساعة",
+                repHourSub: "توزيع النشاط اليومي",
+                notifPanelTitle: "مركز التنبيهات الذكية",
+                btnNotifRefresh: "تحديث"
             },
             fr: {
                 brandSub: "Quincaillerie Algérie",
@@ -805,10 +922,10 @@
                 lblPayAmount: "Montant Versé DZD :",
                 lblPayNotes: "Notes (Chèque, Reçu...) :",
                 btnConfirmPayment: "Valider le Versement",
-                repLblSales: "Chiffre d'Affaires du Jour",
+                repLblSales: "Chiffre d'Affaires",
                 repLblCash: "Espèces Encaissées",
                 repLblCashBox: "En Caisse",
-                repLblCredit: "Ventes à Crédit du Jour",
+                repLblCredit: "Ventes à Crédit",
                 repLblNewDebt: "Nouvelles Dettes",
                 repLblProfit: "Bénéfice Net Estimé",
                 repLblMargin: "Marge Réalisée",
@@ -824,7 +941,19 @@
                 lockContact: "Pour activation : Contactez le développeur par Téléphone ou WhatsApp : 0550 12 34 56",
                 lockEnterKey: "Entrez la Clé d'Activation Reçue :",
                 btnActText: "Activer la Licence",
-                btnTicClose: "Fermer le Ticket & Nouvelle Vente"
+                btnTicClose: "Fermer le Ticket & Nouvelle Vente",
+                btnClearHistoryText: "Effacer l'historique",
+                repPeriodTitle: "Analyses & Ventes",
+                btnRepToday: "Aujourd'hui",
+                btnRepWeek: "Cette Semaine",
+                btnRepMonth: "Ce Mois",
+                btnRepAll: "Tout",
+                repTopTitle: "Top 5 Articles les Plus Vendus",
+                repTopSub: "Top 5",
+                repHourTitle: "Heures de Pointe & Activité",
+                repHourSub: "Distribution Horaire",
+                notifPanelTitle: "Centre d'Alertes Intelligentes",
+                btnNotifRefresh: "Actualiser"
             }
         };
 
@@ -851,6 +980,8 @@
             renderCart();
             loadStock();
             loadHistory();
+            loadAnalytics(currentAnalyticsPeriod);
+            loadNotifications();
         }
 
         function setPriceMode(mode) {
@@ -891,14 +1022,20 @@
             loadReports();
             loadCredit();
             loadHistory();
+            loadNotifications();
         }
+
+        let currentAnalyticsPeriod = 'today';
 
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
 
-            document.getElementById(`tab-${tabId}`).classList.add('active');
-            event.currentTarget.classList.add('active');
+            const targetTab = document.getElementById(`tab-${tabId}`);
+            if (targetTab) targetTab.classList.add('active');
+
+            const navBtn = document.querySelector(`.nav-btn[onclick*="'${tabId}'"]`);
+            if (navBtn) navBtn.classList.add('active');
 
             const titles = {
                 'caisse': i18n[currentLang].caisseTitle,
@@ -912,6 +1049,7 @@
             document.getElementById('headerTitle').innerText = titles[tabId] || '';
 
             if (tabId === 'history') loadHistory();
+            if (tabId === 'reports') loadAnalytics(currentAnalyticsPeriod);
         }
 
         // Caisse Search
@@ -1102,6 +1240,8 @@
                 loadStock();
                 loadCredit();
                 loadHistory();
+                loadNotifications();
+                loadAnalytics(currentAnalyticsPeriod);
             } else {
                 alert('Erreur : ' + res.error);
             }
@@ -1411,14 +1551,202 @@
             }
         }
 
-        // Reports
+        // Analytics & Reports
         async function loadReports() {
-            const rep = await fetch('/api/reports/daily').then(r => r.json());
-            document.getElementById('repSales').innerText = `${rep.TotalSales.toFixed(2)} DZD`;
-            document.getElementById('repCount').innerText = `${rep.TotalCount} ${currentLang === 'ar' ? 'عملية بيع اليوم' : 'ventes aujourd\'hui'}`;
-            document.getElementById('repCash').innerText = `${rep.CashCollected.toFixed(2)} DZD`;
-            document.getElementById('repCredit').innerText = `${rep.CreditGiven.toFixed(2)} DZD`;
-            document.getElementById('repProfit').innerText = `${rep.NetProfit.toFixed(2)} DZD`;
+            return loadAnalytics(currentAnalyticsPeriod);
+        }
+
+        function setAnalyticsPeriod(period) {
+            currentAnalyticsPeriod = period;
+            document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+            const idMap = { 'today': 'btnRepToday', 'week': 'btnRepWeek', 'month': 'btnRepMonth', 'all': 'btnRepAll' };
+            const activeBtn = document.getElementById(idMap[period]);
+            if (activeBtn) activeBtn.classList.add('active');
+            loadAnalytics(period);
+        }
+
+        async function loadAnalytics(period = 'today') {
+            try {
+                const res = await fetch(`/api/reports/analytics?period=${period}`).then(r => r.json());
+                const kpis = res.kpis || {};
+                
+                document.getElementById('repSales').innerText = `${(kpis.TotalSales || 0).toFixed(2)} DZD`;
+                document.getElementById('repCount').innerText = `${kpis.TotalCount || 0} ${currentLang === 'ar' ? 'عملية بيع' : 'ventes'}`;
+                document.getElementById('repCash').innerText = `${(kpis.CashCollected || 0).toFixed(2)} DZD`;
+                document.getElementById('repCredit').innerText = `${(kpis.CreditGiven || 0).toFixed(2)} DZD`;
+                document.getElementById('repProfit').innerText = `${(kpis.NetProfit || 0).toFixed(2)} DZD`;
+
+                renderTopProducts(res.topProducts || []);
+                renderHourlyChart(res.hourlySales || []);
+            } catch (err) {
+                console.error("Failed to load analytics:", err);
+            }
+        }
+
+        function renderTopProducts(list) {
+            const container = document.getElementById('topProductsContainer');
+            if (!container) return;
+            if (!list || list.length === 0) {
+                container.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 30px;">${currentLang === 'ar' ? 'لا توجد مبيعات مسجلة في هذه الفترة' : 'Aucune vente pour cette période'}</div>`;
+                return;
+            }
+
+            const maxQty = Math.max(...list.map(p => p.TotalQty), 1);
+            let html = '';
+            list.forEach((p, idx) => {
+                const pct = Math.round((p.TotalQty / maxQty) * 100);
+                const medal = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `#${idx+1}`;
+                html += `
+                    <div style="background: #f8fafc; border: 1px solid var(--border); border-radius: 6px; padding: 9px 12px; margin-bottom: 6px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                            <div style="font-weight: 700; font-size: 13px; display: flex; align-items: center; gap: 8px;">
+                                <span style="font-size: 14px;">${medal}</span>
+                                <span>${p.ProductName}</span>
+                                <span style="font-size: 11px; color: var(--text-muted); font-family: monospace;">(${p.ProductReference})</span>
+                            </div>
+                            <div style="text-align: end;">
+                                <span style="font-weight: 800; color: var(--primary); font-size: 13px;">${p.TotalRevenue.toFixed(2)} DZD</span>
+                                <span style="font-size: 11.5px; color: var(--text-muted); margin-inline-start: 6px;">(${p.TotalQty} ${currentLang === 'ar' ? 'قطعة' : 'unités'})</span>
+                            </div>
+                        </div>
+                        <div class="analytics-bar-track">
+                            <div class="analytics-bar-fill" style="width: ${Math.max(pct, 12)}%;">
+                                ${p.TotalQty} ${currentLang === 'ar' ? 'مباعة' : 'vendus'}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function renderHourlyChart(list) {
+            const container = document.getElementById('hourlySalesContainer');
+            if (!container) return;
+            if (!list || list.length === 0) {
+                container.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 30px;">${currentLang === 'ar' ? 'لا توجد بيانات ساعات كافية' : 'Pas assez de données horaires'}</div>`;
+                return;
+            }
+
+            const maxAmount = Math.max(...list.map(h => h.TotalAmount), 1);
+            let html = '';
+            list.forEach(h => {
+                const hourLabel = `${h.Hour}:00`;
+                const pct = Math.round((h.TotalAmount / maxAmount) * 100);
+                html += `
+                    <div class="analytics-bar-row" style="margin-bottom: 7px;">
+                        <div class="analytics-bar-label" style="width: 70px; font-weight: 700;">
+                            <i class="fa-regular fa-clock" style="color: var(--text-muted); margin-inline-end: 4px;"></i>${hourLabel}
+                        </div>
+                        <div class="analytics-bar-track">
+                            <div class="analytics-bar-fill success" style="width: ${Math.max(pct, 14)}%;">
+                                ${h.TotalAmount.toFixed(0)} DZD (${h.Count})
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        // Clear History
+        async function confirmClearHistory() {
+            const msg = currentLang === 'ar'
+                ? 'تحذير هام: هل أنت متأكد تماماً من رغبتك في مسح كل سجل المبيعات والوصولات السابقة؟\nهذا الإجراء سيفرغ أرشيف المبيعات تماماً ولا يمكن التراجع عنه!'
+                : 'Attention : Êtes-vous sûr de vouloir effacer tout l\'historique des ventes ? Cette action est irréversible !';
+            
+            if (!confirm(msg)) return;
+
+            try {
+                const res = await fetch('/api/sales/clear', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({})
+                }).then(r => r.json());
+
+                if (res.success) {
+                    alert(currentLang === 'ar' ? 'تم مسح سجل المبيعات بنجاح.' : 'Historique des ventes effacé avec succès.');
+                    loadHistory();
+                    loadAnalytics(currentAnalyticsPeriod);
+                    loadNotifications();
+                } else {
+                    alert('Erreur : ' + (res.error || 'Failed to clear'));
+                }
+            } catch (err) {
+                alert('Erreur de connexion : ' + err.message);
+            }
+        }
+
+        // Notifications
+        function toggleNotificationPanel(show) {
+            const panel = document.getElementById('notifPanel');
+            const overlay = document.getElementById('notifOverlay');
+            const isOpen = panel.classList.contains('open');
+            const shouldOpen = show !== undefined ? show : !isOpen;
+
+            panel.classList.toggle('open', shouldOpen);
+            overlay.classList.toggle('open', shouldOpen);
+
+            if (shouldOpen) {
+                loadNotifications();
+            }
+        }
+
+        async function loadNotifications() {
+            try {
+                const alerts = await fetch('/api/notifications').then(r => r.json());
+                const badge = document.getElementById('notifBadge');
+                const list = document.getElementById('notifList');
+                const subCount = document.getElementById('notifSubCount');
+
+                const count = alerts.length;
+                if (count > 0) {
+                    badge.style.display = 'inline-block';
+                    badge.innerText = count;
+                    subCount.innerText = currentLang === 'ar' ? `${count} تنبيهات نشطة تستوجب المتابعة` : `${count} alerte(s) active(s)`;
+                } else {
+                    badge.style.display = 'none';
+                    subCount.innerText = currentLang === 'ar' ? 'لا توجد تنبيهات عاجلة حالياً' : 'Aucune alerte urgente';
+                }
+
+                if (alerts.length === 0) {
+                    list.innerHTML = `<div class="notif-empty"><i class="fa-solid fa-circle-check" style="font-size: 28px; color: var(--success); display: block; margin-bottom: 8px;"></i>${currentLang === 'ar' ? 'المخزون والديون في حالة ممتازة! لا توجد تنبيهات.' : 'Stock et créances sous contrôle !'}</div>`;
+                    return;
+                }
+
+                let html = '';
+                alerts.forEach(a => {
+                    const isDanger = a.level === 'danger';
+                    const icon = a.type.startsWith('stock') 
+                        ? (isDanger ? 'fa-triangle-exclamation' : 'fa-box-open') 
+                        : 'fa-hand-holding-dollar';
+                    const text = currentLang === 'ar' ? a.messageAr : a.messageFr;
+                    const actionOnClick = a.reference ? `onclick="goToProductFromNotif('${a.reference}')"` : `onclick="switchTab('credit')"`;
+
+                    html += `
+                        <div class="notif-item ${isDanger ? 'danger' : 'warning'}" style="cursor: pointer;" ${actionOnClick}>
+                            <div class="notif-title">
+                                <i class="fa-solid ${icon}"></i>
+                                <span>${a.type === 'stock_out' ? (currentLang === 'ar' ? 'نفاد كلي للمخزون' : 'Rupture Stock') : a.type === 'stock_low' ? (currentLang === 'ar' ? 'تنبيه مخزون ضعيف' : 'Stock Faible') : (currentLang === 'ar' ? 'تنبيه دين مرتفع' : 'Créance Élevée')}</span>
+                            </div>
+                            <div>${text}</div>
+                        </div>
+                    `;
+                });
+                list.innerHTML = html;
+            } catch (err) {
+                console.error("Failed to load notifications:", err);
+            }
+        }
+
+        function goToProductFromNotif(ref) {
+            toggleNotificationPanel(false);
+            switchTab('stock');
+            const input = document.getElementById('stockSearchInput');
+            if (input) {
+                input.value = ref;
+                loadStock();
+            }
         }
 
         // Activation

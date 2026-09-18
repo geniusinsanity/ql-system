@@ -215,13 +215,109 @@ class QLRequestHandler(http.server.SimpleHTTPRequestHandler):
             self.send_json(stat)
             return
 
-        if parsed.path == "/api/settings":
+        if parsed.path == "/api/reports/analytics":
+            period = params.get('period', ['all'])[0]
             conn = get_db()
             cur = conn.cursor()
-            cur.execute("SELECT * FROM StoreSettings WHERE Id = 1")
-            row = cur.fetchone()
+
+            where_clause = ""
+            where_params = []
+            if period == 'today':
+                today = datetime.now().strftime("%Y-%m-%d")
+                where_clause = "WHERE s.CreatedAt >= ?"
+                where_params = [f"{today}T00:00:00"]
+            elif period == 'week':
+                week_ago = (datetime.now() - timedelta(days=7)).strftime("%Y-%m-%d")
+                where_clause = "WHERE s.CreatedAt >= ?"
+                where_params = [f"{week_ago}T00:00:00"]
+            elif period == 'month':
+                month_ago = (datetime.now() - timedelta(days=30)).strftime("%Y-%m-%d")
+                where_clause = "WHERE s.CreatedAt >= ?"
+                where_params = [f"{month_ago}T00:00:00"]
+
+            # 1. Top 5 Best Selling Products
+            cur.execute(f"""
+                SELECT si.ProductName, si.ProductReference, SUM(si.Quantity) as TotalQty, SUM(si.TotalPrice) as TotalRevenue
+                FROM SaleItems si
+                JOIN Sales s ON si.SaleId = s.Id
+                {where_clause}
+                GROUP BY si.ProductName
+                ORDER BY TotalQty DESC LIMIT 5
+            """, where_params)
+            top_products = [dict(r) for r in cur.fetchall()]
+
+            # 2. Sales by Hour (Peak Rush Times)
+            cur.execute(f"""
+                SELECT strftime('%H', s.CreatedAt) as Hour, COUNT(*) as Count, SUM(s.TotalAmount) as TotalAmount
+                FROM Sales s
+                {where_clause}
+                GROUP BY Hour
+                ORDER BY Hour ASC
+            """, where_params)
+            hourly_sales = [dict(r) for r in cur.fetchall()]
+
+            # 3. Summary KPIs for the selected period
+            cur.execute(f"""
+                SELECT 
+                    COUNT(*) as TotalCount,
+                    COALESCE(SUM(TotalAmount), 0) as TotalSales,
+                    COALESCE(SUM(PaidAmount), 0) as CashCollected,
+                    COALESCE(SUM(DebtAmount), 0) as CreditGiven,
+                    COALESCE(SUM(ProfitAmount), 0) as NetProfit
+                FROM Sales s
+                {where_clause}
+            """, where_params)
+            kpis = dict(cur.fetchone())
+
             conn.close()
-            self.send_json(dict(row) if row else {})
+            self.send_json({
+                "topProducts": top_products,
+                "hourlySales": hourly_sales,
+                "kpis": kpis
+            })
+            return
+
+        if parsed.path == "/api/notifications":
+            conn = get_db()
+            cur = conn.cursor()
+
+            # Low & Zero Stock Alerts
+            cur.execute("""
+                SELECT Id, Reference, Name, StockQuantity, MinStockAlert, SaleUnit 
+                FROM Products 
+                WHERE IsActive = 1 AND StockQuantity <= MinStockAlert 
+                ORDER BY StockQuantity ASC LIMIT 10
+            """)
+            alerts = []
+            for p in cur.fetchall():
+                is_zero = p["StockQuantity"] <= 0
+                alerts.append({
+                    "type": "stock_out" if is_zero else "stock_low",
+                    "level": "danger" if is_zero else "warning",
+                    "productId": p["Id"],
+                    "reference": p["Reference"],
+                    "name": p["Name"],
+                    "stock": p["StockQuantity"],
+                    "minAlert": p["MinStockAlert"],
+                    "messageAr": f"نفدت السلعة تماماً من المحل ({p['Name']})! الكمية: 0" if is_zero else f"السلعة ({p['Name']}) قاربت على النفاد! متبقي {p['StockQuantity']} فقط (الحد الأدنى: {p['MinStockAlert']})",
+                    "messageFr": f"Rupture totale : {p['Name']} (Stock: 0) !" if is_zero else f"Stock critique : {p['Name']} (Reste: {p['StockQuantity']}, Alerte: {p['MinStockAlert']})"
+                })
+
+            # High customer debt alerts (> 30,000 DZD)
+            cur.execute("SELECT Id, FullName, CurrentDebt, Phone FROM Customers WHERE CurrentDebt >= 30000 ORDER BY CurrentDebt DESC LIMIT 5")
+            for c in cur.fetchall():
+                alerts.append({
+                    "type": "credit_high",
+                    "level": "warning",
+                    "customerId": c["Id"],
+                    "name": c["FullName"],
+                    "debt": c["CurrentDebt"],
+                    "messageAr": f"الزبون ({c['FullName']}) تجاوز رصيد دينه {int(c['CurrentDebt']):,} دج!",
+                    "messageFr": f"Créance élevée : {c['FullName']} ({int(c['CurrentDebt']):,} DZD) !"
+                })
+
+            conn.close()
+            self.send_json(alerts)
             return
 
         self.send_error(404, "Not Found")
@@ -365,6 +461,21 @@ class QLRequestHandler(http.server.SimpleHTTPRequestHandler):
             try:
                 p_id = data.get("id")
                 cur.execute("UPDATE Products SET IsActive = 0, UpdatedAt = ? WHERE Id = ?", (datetime.now().isoformat(), p_id))
+                conn.commit()
+                self.send_json({"success": True})
+            except Exception as e:
+                conn.rollback()
+                self.send_json({"success": False, "error": str(e)})
+            finally:
+                conn.close()
+            return
+
+        if parsed.path == "/api/sales/clear":
+            conn = get_db()
+            cur = conn.cursor()
+            try:
+                cur.execute("DELETE FROM SaleItems")
+                cur.execute("DELETE FROM Sales")
                 conn.commit()
                 self.send_json({"success": True})
             except Exception as e:
