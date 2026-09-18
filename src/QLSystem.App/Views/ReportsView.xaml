@@ -34,7 +34,7 @@
                     <StackPanel>
                         <TextBlock Text="رقم الأعمال (Ventes du jour)" FontSize="13" Foreground="#64748b" FontWeight="SemiBold"/>
                         <TextBlock Text="{Binding Report.TotalSales, StringFormat={}{0:N2} DZD}" FontSize="22" FontWeight="Bold" Foreground="#1e40af" Margin="0,8,0,0"/>
-                        <TextBlock Text="{Binding Report.TotalTransactions, StringFormat={0} عملية بيع}" FontSize="12" Foreground="#94a3b8" Margin="0,4,0,0"/>
+                        <TextBlock Text="{Binding Report.TotalTransactions, StringFormat='{}{0} عملية بيع'}" FontSize="12" Foreground="#94a3b8" Margin="0,4,0,0"/>
                     </StackPanel>
                 </Border>
 
@@ -84,7 +84,7 @@
                 <Border Grid.Column="1" Style="{StaticResource ModernCard}">
                     <StackPanel>
                         <TextBlock Text="حالة المخزون وتنبيهات النقص" FontSize="16" FontWeight="Bold" Foreground="#1e293b" Margin="0,0,0,10"/>
-                        <TextBlock Text="{Binding Report.LowStockAlertsCount, StringFormat={0} سلعة قاربت على النفاد}" FontSize="20" FontWeight="Bold" Foreground="#d97706"/>
+                        <TextBlock Text="{Binding Report.LowStockAlertsCount, StringFormat='{}{0} سلعة قاربت على النفاد'}" FontSize="20" FontWeight="Bold" Foreground="#d97706"/>
                         <TextBlock Text="يرجى طلبها من الموردين لتفادي انقطاع السلعة" FontSize="13" Foreground="#64748b" Margin="0,4,0,0"/>
                     </StackPanel>
                 </Border>

@@ -65,8 +65,8 @@
                 <!-- Customer Header -->
                 <StackPanel Grid.Row="0" Margin="0,0,0,15">
                     <TextBlock Text="تسديد دفعة دين (Versement)" FontSize="18" FontWeight="Bold" Foreground="#1e293b"/>
-                    <TextBlock Text="{Binding SelectedCustomer.FullName, StringFormat=الزبون: {0}}" FontSize="15" FontWeight="SemiBold" Foreground="#1e40af" Margin="0,6,0,4"/>
-                    <TextBlock Text="{Binding SelectedCustomer.CurrentDebt, StringFormat=الدين المتبقي عليه: {0:N2} دج}" FontSize="14" FontWeight="Bold" Foreground="#dc2626"/>
+                    <TextBlock Text="{Binding SelectedCustomer.FullName, StringFormat='الزبون: {0}'}" FontSize="15" FontWeight="SemiBold" Foreground="#1e40af" Margin="0,6,0,4"/>
+                    <TextBlock Text="{Binding SelectedCustomer.CurrentDebt, StringFormat='الدين المتبقي عليه: {0:N2} دج'}" FontSize="14" FontWeight="Bold" Foreground="#dc2626"/>
                 </StackPanel>
 
                 <!-- Payment Form -->

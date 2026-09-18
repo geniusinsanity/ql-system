@@ -1,4 +1,4 @@
-name: Build QL System for Windows
+name: Build QL System Offline Installer for Windows
 
 on:
   push:
@@ -24,24 +24,38 @@ jobs:
     - name: Build Solution
       run: dotnet build QLSystem.sln -c Release --no-restore
 
-    - name: Publish Windows App (Portable x64)
+    # 100% Offline Standalone Builds (No runtime download needed by client)
+    - name: Publish Windows App 64-bit (Self-Contained Offline)
       run: |
-        dotnet publish src/QLSystem.App/QLSystem.App.csproj -c Release -r win-x64 --self-contained false -o ./output/QLSystem-App
-        dotnet publish src/QLSystem.KeyGen/QLSystem.KeyGen.csproj -c Release -r win-x64 --self-contained false -o ./output/QLSystem-KeyGen
+        dotnet publish src/QLSystem.App/QLSystem.App.csproj -c Release -r win-x64 --self-contained true /p:PublishSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=true -o ./output/QLSystem-App-x64
+        dotnet publish src/QLSystem.KeyGen/QLSystem.KeyGen.csproj -c Release -r win-x64 --self-contained true /p:PublishSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=true -o ./output/QLSystem-KeyGen-x64
 
-    - name: Create Zip Package for Windows
+    - name: Create Portable Zip Packages
       run: |
-        Compress-Archive -Path ./output/QLSystem-App/* -DestinationPath ./output/QLSystem-Windows-x64.zip
-        Compress-Archive -Path ./output/QLSystem-KeyGen/* -DestinationPath ./output/KeyGen-Windows.zip
+        Compress-Archive -Path ./output/QLSystem-App-x64/* -DestinationPath ./output/QLSystem-Portable-Offline-x64.zip
+        Compress-Archive -Path ./output/QLSystem-KeyGen-x64/* -DestinationPath ./output/KeyGen-Portable-x64.zip
 
-    - name: Upload Windows App Artifact
+    - name: Install Inno Setup
+      run: choco install innosetup -y
+
+    - name: Compile Inno Setup Offline Installer
+      run: |
+        & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" ./installer/setup.iss
+
+    - name: Upload Offline Installer (.exe)
       uses: actions/upload-artifact@v4
       with:
-        name: QLSystem-Windows-x64
-        path: ./output/QLSystem-Windows-x64.zip
+        name: QLSystem-Setup-Offline-v1.0
+        path: ./output/installer/QLSystem-Setup-Offline-v1.0.exe
 
-    - name: Upload KeyGen Artifact
+    - name: Upload Portable Zip (.zip)
       uses: actions/upload-artifact@v4
       with:
-        name: KeyGen-Windows
-        path: ./output/KeyGen-Windows.zip
+        name: QLSystem-Portable-Offline-x64
+        path: ./output/QLSystem-Portable-Offline-x64.zip
+
+    - name: Upload KeyGen Tool
+      uses: actions/upload-artifact@v4
+      with:
+        name: KeyGen-Tool-x64
+        path: ./output/KeyGen-Portable-x64.zip

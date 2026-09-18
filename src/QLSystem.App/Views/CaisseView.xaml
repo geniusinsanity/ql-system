@@ -114,7 +114,7 @@
 
                 <!-- Invoice N° & Customer Select -->
                 <StackPanel Grid.Row="0" Margin="0,0,0,15">
-                    <TextBlock Text="{Binding InvoiceNumber, StringFormat=وصل رقم: {0}}" FontSize="14" FontWeight="SemiBold" Foreground="#64748b" Margin="0,0,0,10"/>
+                    <TextBlock Text="{Binding InvoiceNumber, StringFormat='وصل رقم: {0}'}" FontSize="14" FontWeight="SemiBold" Foreground="#64748b" Margin="0,0,0,10"/>
                     <TextBlock Text="الزبون (Client):" FontSize="13" FontWeight="SemiBold" Foreground="#334155" Margin="0,0,0,5"/>
                     <ComboBox ItemsSource="{Binding Customers}" SelectedItem="{Binding SelectedCustomer}" DisplayMemberPath="FullName"
                               Height="38" FontSize="14" VerticalContentAlignment="Center"/>
