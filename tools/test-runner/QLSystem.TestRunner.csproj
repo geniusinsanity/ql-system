@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <RootNamespace>QLSystem.TestRunner</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\QLSystem.Core\QLSystem.Core.csproj" />
+    <ProjectReference Include="..\..\src\QLSystem.Data\QLSystem.Data.csproj" />
+    <ProjectReference Include="..\..\src\QLSystem.Licensing\QLSystem.Licensing.csproj" />
+    <ProjectReference Include="..\..\src\QLSystem.Hardware\QLSystem.Hardware.csproj" />
+  </ItemGroup>
+
+</Project>
