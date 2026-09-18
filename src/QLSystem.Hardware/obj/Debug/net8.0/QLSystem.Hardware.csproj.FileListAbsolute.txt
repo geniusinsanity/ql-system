@@ -1,0 +1,16 @@
+/home/wsm/Desktop/Projects/logiciel quincaillerie/src/QLSystem.Hardware/bin/Debug/net8.0/QLSystem.Hardware.deps.json
+/home/wsm/Desktop/Projects/logiciel quincaillerie/src/QLSystem.Hardware/bin/Debug/net8.0/QLSystem.Hardware.dll
+/home/wsm/Desktop/Projects/logiciel quincaillerie/src/QLSystem.Hardware/bin/Debug/net8.0/QLSystem.Hardware.pdb
+/home/wsm/Desktop/Projects/logiciel quincaillerie/src/QLSystem.Hardware/bin/Debug/net8.0/QLSystem.Core.dll
+/home/wsm/Desktop/Projects/logiciel quincaillerie/src/QLSystem.Hardware/bin/Debug/net8.0/QLSystem.Core.pdb
+/home/wsm/Desktop/Projects/logiciel quincaillerie/src/QLSystem.Hardware/obj/Debug/net8.0/QLSystem.Hardware.csproj.AssemblyReference.cache
+/home/wsm/Desktop/Projects/logiciel quincaillerie/src/QLSystem.Hardware/obj/Debug/net8.0/QLSystem.Hardware.GeneratedMSBuildEditorConfig.editorconfig
+/home/wsm/Desktop/Projects/logiciel quincaillerie/src/QLSystem.Hardware/obj/Debug/net8.0/QLSystem.Hardware.AssemblyInfoInputs.cache
+/home/wsm/Desktop/Projects/logiciel quincaillerie/src/QLSystem.Hardware/obj/Debug/net8.0/QLSystem.Hardware.AssemblyInfo.cs
+/home/wsm/Desktop/Projects/logiciel quincaillerie/src/QLSystem.Hardware/obj/Debug/net8.0/QLSystem.Hardware.csproj.CoreCompileInputs.cache
+/home/wsm/Desktop/Projects/logiciel quincaillerie/src/QLSystem.Hardware/obj/Debug/net8.0/QLSystem.Hardware.sourcelink.json
+/home/wsm/Desktop/Projects/logiciel quincaillerie/src/QLSystem.Hardware/obj/Debug/net8.0/QLSystem.96395510.Up2Date
+/home/wsm/Desktop/Projects/logiciel quincaillerie/src/QLSystem.Hardware/obj/Debug/net8.0/QLSystem.Hardware.dll
+/home/wsm/Desktop/Projects/logiciel quincaillerie/src/QLSystem.Hardware/obj/Debug/net8.0/refint/QLSystem.Hardware.dll
+/home/wsm/Desktop/Projects/logiciel quincaillerie/src/QLSystem.Hardware/obj/Debug/net8.0/QLSystem.Hardware.pdb
+/home/wsm/Desktop/Projects/logiciel quincaillerie/src/QLSystem.Hardware/obj/Debug/net8.0/ref/QLSystem.Hardware.dll

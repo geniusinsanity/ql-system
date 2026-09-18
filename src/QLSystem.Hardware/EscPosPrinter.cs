@@ -50,8 +50,10 @@ namespace QLSystem.Hardware
                 // 3. معلومات الفاتورة
                 SetAlignment(bw, 0); // يسار
                 bw.Write(Encoding.UTF8.GetBytes($"N°: {sale.InvoiceNumber}\n"));
-                bw.Write(Encoding.UTF8.GetBytes($"Date: {sale.CreatedAt:dd/MM/yyyy HH:mm}\n"));
-                bw.Write(Encoding.UTF8.GetBytes($"Client: {sale.CustomerName}\n"));
+                if (!string.IsNullOrWhiteSpace(sale.CustomerName) && !sale.CustomerName.ToLower().Contains("comptoir") && !sale.CustomerName.Contains("زبون عادي"))
+                {
+                    bw.Write(Encoding.UTF8.GetBytes($"Client: {sale.CustomerName}\n"));
+                }
                 bw.Write(Encoding.UTF8.GetBytes(new string('-', _widthChars) + "\n"));
 
                 // 4. رأس جدول السلع

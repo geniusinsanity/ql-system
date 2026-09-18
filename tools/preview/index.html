@@ -101,13 +101,20 @@
         /* Modal */
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 1000; }
         .modal-overlay.active { display: flex; }
-        .ticket-modal { background: #fff; width: 330px; border-radius: 8px; padding: 22px; box-shadow: 0 15px 35px rgba(0,0,0,0.3); font-family: monospace; font-size: 12px; line-height: 1.4; }
+        .ticket-modal { background: #fff; width: 340px; border-radius: 8px; padding: 22px; box-shadow: 0 15px 35px rgba(0,0,0,0.3); font-family: monospace; font-size: 12px; line-height: 1.35; color: #000; }
         .ticket-header { text-align: center; border-bottom: 1px dashed #000; padding-bottom: 10px; margin-bottom: 10px; }
         .ticket-footer { text-align: center; border-top: 1px dashed #000; padding-top: 10px; margin-top: 12px; }
 
         .badge-pill { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 11.5px; font-weight: 700; }
         .badge-success { background: #d1fae5; color: #065f46; }
         .badge-danger { background: #fee2e2; color: #991b1b; }
+
+        @media print {
+            body * { visibility: hidden !important; }
+            #printableTicket, #printableTicket * { visibility: visible !important; }
+            #printableTicket { position: fixed; left: 0; top: 0; width: 80mm !important; margin: 0 !important; box-shadow: none !important; border: none !important; padding: 10px !important; }
+            #printableTicket button { display: none !important; }
+        }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: translateY(0); } }
     </style>
@@ -548,41 +555,73 @@
     </div>
 
     <!-- Thermal Ticket Modal Simulation -->
-    <div id="receiptModal" class="modal-overlay">
-        <div class="ticket-modal">
+    <div id="receiptModal" class="modal-overlay" onclick="if(event.target===this) closeReceiptModal()">
+        <div class="ticket-modal" id="printableTicket">
             <div class="ticket-header">
-                <h2 id="ticStoreName" style="font-size: 16px;">Quincaillerie El-Baraka</h2>
-                <div id="ticAddress">Alger, Algérie</div>
-                <div id="ticPhone">Tél: 0550 12 34 56</div>
-                <div style="margin-top: 4px; font-weight: bold;">Ticket de Caisse</div>
+                <div style="font-size: 17px; font-weight: 900; letter-spacing: 0.5px;" id="ticStoreName">QUINCAILLERIE EL-BARAKA</div>
+                <div style="font-size: 11px; color: #475569; margin: 2px 0;">Vente Quincaillerie & Outillage</div>
+                <div style="font-size: 11.5px;" id="ticPhone">Tél: 0550 12 34 56</div>
+                <div style="font-size: 11px; color: #475569;" id="ticAddress">Alger, Algérie</div>
             </div>
 
-            <div style="margin-bottom: 8px;">
-                <div id="ticInvNum">N°: TICK-2026-00001</div>
-                <div id="ticDate">Date: 18/09/2026</div>
-                <div id="ticClient">Client: Comptoir</div>
+            <div style="display: flex; justify-content: space-between; font-size: 11px; border-bottom: 1px dashed #475569; padding-bottom: 6px; margin-bottom: 8px;">
+                <span id="ticInvNum" style="font-weight: bold;">N°: TICK-2026-00001</span>
+                <span id="ticDate">18/09/2026 20:15</span>
             </div>
 
-            <div style="border-bottom: 1px dashed #000; margin-bottom: 6px;"></div>
-            <div id="ticItemsList"></div>
-            <div style="border-bottom: 1px dashed #000; margin: 6px 0;"></div>
+            <!-- Client line: ONLY shown for real named client, NEVER shown for Comptoir/normal -->
+            <div id="ticClientRow" style="display: none; font-size: 12px; margin-bottom: 8px; padding: 4px 6px; background: #f1f5f9; border-radius: 4px;">
+                <span style="color: #64748b;">Client : </span><strong id="ticClientName"></strong>
+            </div>
 
-            <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 14px;">
-                <span>TOTAL:</span>
+            <div style="font-size: 11px; color: #475569; display: flex; justify-content: space-between; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; margin-bottom: 6px; font-weight: bold;">
+                <span>Désignation</span>
+                <span>Total</span>
+            </div>
+
+            <div id="ticItemsList" style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px;"></div>
+
+            <div style="border-bottom: 1px dashed #000; margin: 8px 0;"></div>
+
+            <div style="display: flex; justify-content: space-between; font-size: 11.5px; color: #475569; margin-bottom: 3px;">
+                <span id="ticItemCount">0 article(s)</span>
+                <span id="ticSubtotal"></span>
+            </div>
+            <div id="ticDiscountRow" style="display: none; justify-content: space-between; font-size: 11.5px; color: #dc2626; margin-bottom: 3px;">
+                <span>Remise :</span>
+                <span id="ticDiscount"></span>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-weight: 900; font-size: 15.5px; margin: 6px 0 8px; border-top: 1px solid #000; border-bottom: 1px solid #000; padding: 5px 0;">
+                <span>TOTAL NET :</span>
                 <span id="ticTotal">0.00 DZD</span>
             </div>
-            <div style="display: flex; justify-content: space-between;">
-                <span>Espèces:</span>
+            <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 2px;">
+                <span>Espèces versé :</span>
                 <span id="ticPaid">0.00 DZD</span>
             </div>
-            <div style="display: flex; justify-content: space-between;">
-                <span>Rendu:</span>
+            <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 2px;">
+                <span>Monnaie rendu :</span>
                 <span id="ticChange">0.00 DZD</span>
+            </div>
+            <div id="ticDebtRow" style="display: none; justify-content: space-between; font-size: 12px; font-weight: bold; color: #dc2626; margin-top: 4px; padding-top: 4px; border-top: 1px dashed #cbd5e1;">
+                <span>Reste à payer (Crédit) :</span>
+                <span id="ticDebt">0.00 DZD</span>
             </div>
 
             <div class="ticket-footer">
-                <div>Merci de votre visite - شكراً لزيارتكم</div>
-                <button class="btn btn-primary" style="margin-top: 14px; width: 100%;" onclick="closeReceiptModal()" id="btnTicClose">إغلاق الوصل وعملية جديدة</button>
+                <div style="font-size: 10.5px; color: #64748b; margin-bottom: 4px;">Les articles vendus ne sont ni repris ni échangés après 48h</div>
+                <div style="font-weight: bold; font-size: 12px;">Merci de votre visite • شكراً لزيارتكم</div>
+                <div style="margin: 8px auto 2px; font-family: monospace; letter-spacing: 3px; font-size: 15px; font-weight: 900; opacity: 0.85;">||| | |||| || ||| |||| |</div>
+                <div style="font-size: 9.5px; color: #94a3b8;" id="ticBarcodeNum">TICK-2026-00001</div>
+            </div>
+
+            <div style="display: flex; gap: 8px; margin-top: 14px;">
+                <button class="btn btn-primary" style="flex: 1;" onclick="window.print()">
+                    <i class="fa-solid fa-print"></i> <span>طباعة</span>
+                </button>
+                <button class="btn btn-secondary" style="flex: 1;" onclick="closeReceiptModal()" id="btnTicClose">
+                    <span>إغلاق</span>
+                </button>
             </div>
         </div>
     </div>
@@ -1056,7 +1095,7 @@
             }).then(r => r.json());
 
             if (res.success) {
-                displayTicket(res.invoiceNumber, new Date().toLocaleString(), custName, net, paid, change, currentCart);
+                displayTicket(res.invoiceNumber, new Date().toLocaleString(), custName, net, paid, change, currentCart, discount, debt);
                 currentCart = [];
                 renderCart();
                 loadReports();
@@ -1068,22 +1107,64 @@
             }
         }
 
-        function displayTicket(invNum, date, client, total, paid, change, items) {
+        function displayTicket(invNum, date, client, total, paid, change, items, discount = 0, debt = 0) {
             document.getElementById('ticInvNum').innerText = `N°: ${invNum}`;
-            document.getElementById('ticDate').innerText = `Date: ${date}`;
-            document.getElementById('ticClient').innerText = `Client: ${client}`;
+            document.getElementById('ticDate').innerText = date;
+            document.getElementById('ticBarcodeNum').innerText = invNum;
+
+            // Client row: NEVER display "Comptoir" or "زبون عادي"
+            const clientRow = document.getElementById('ticClientRow');
+            if (client && !client.toLowerCase().includes('comptoir') && !client.includes('زبون عادي')) {
+                clientRow.style.display = 'block';
+                document.getElementById('ticClientName').innerText = client;
+            } else {
+                clientRow.style.display = 'none';
+            }
+
+            const itemsList = document.getElementById('ticItemsList');
+            itemsList.innerHTML = '';
+            let totalPieces = 0;
+
+            items.forEach(it => {
+                const name = it.name || it.ProductName || 'Article';
+                const qty = parseFloat(it.quantity || it.Quantity || 1);
+                const unitP = parseFloat(it.unitPrice || it.UnitPrice || 0);
+                const tot = parseFloat(it.totalPrice || it.TotalPrice || (qty * unitP));
+                totalPieces += qty;
+
+                const itemDiv = document.createElement('div');
+                itemDiv.innerHTML = `
+                    <div style="font-weight: bold; font-size: 11.5px;">${name}</div>
+                    <div style="display: flex; justify-content: space-between; font-size: 11px; color: #475569; padding-inline-start: 4px;">
+                        <span>${qty} x ${unitP.toFixed(2)} DZD</span>
+                        <span style="font-weight: bold; color: #000;">${tot.toFixed(2)}</span>
+                    </div>
+                `;
+                itemsList.appendChild(itemDiv);
+            });
+
+            document.getElementById('ticItemCount').innerText = `${items.length} article(s) (${totalPieces} pcs)`;
             document.getElementById('ticTotal').innerText = `${parseFloat(total).toFixed(2)} DZD`;
             document.getElementById('ticPaid').innerText = `${parseFloat(paid).toFixed(2)} DZD`;
             document.getElementById('ticChange').innerText = `${parseFloat(change).toFixed(2)} DZD`;
 
-            const itemsList = document.getElementById('ticItemsList');
-            itemsList.innerHTML = '';
-            items.forEach(it => {
-                const name = it.name || it.ProductName;
-                const qty = it.quantity || it.Quantity;
-                const tot = it.totalPrice || it.TotalPrice;
-                itemsList.innerHTML += `<div style="display: flex; justify-content: space-between;"><span>${name.substring(0, 18)} x${qty}</span><span>${parseFloat(tot).toFixed(2)}</span></div>`;
-            });
+            // Discount
+            const discRow = document.getElementById('ticDiscountRow');
+            if (discount > 0) {
+                discRow.style.display = 'flex';
+                document.getElementById('ticDiscount').innerText = `-${parseFloat(discount).toFixed(2)} DZD`;
+            } else {
+                discRow.style.display = 'none';
+            }
+
+            // Debt / Credit
+            const debtRow = document.getElementById('ticDebtRow');
+            if (debt > 0) {
+                debtRow.style.display = 'flex';
+                document.getElementById('ticDebt').innerText = `${parseFloat(debt).toFixed(2)} DZD`;
+            } else {
+                debtRow.style.display = 'none';
+            }
 
             document.getElementById('receiptModal').classList.add('active');
         }
@@ -1272,7 +1353,7 @@
         }
 
         function reprintTicket(sale) {
-            displayTicket(sale.InvoiceNumber, sale.CreatedAt.replace('T', ' ').substring(0, 16), sale.CustomerName || 'Comptoir', sale.TotalAmount, sale.PaidAmount, sale.ChangeAmount, sale.Items || []);
+            displayTicket(sale.InvoiceNumber, sale.CreatedAt.replace('T', ' ').substring(0, 16), sale.CustomerName, sale.TotalAmount, sale.PaidAmount, sale.ChangeAmount, sale.Items || [], sale.Discount || 0, sale.DebtAmount || 0);
         }
 
         // Credit
