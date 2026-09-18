@@ -72,19 +72,21 @@
                 <!-- Brand Logo & Title -->
                 <StackPanel Grid.Row="0" Margin="5,10,0,30">
                     <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="🛠️" FontSize="26" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                        <Border Background="#1e40af" CornerRadius="6" Width="34" Height="34" VerticalAlignment="Center" Margin="0,0,10,0">
+                            <TextBlock Text="QL" FontSize="16" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
                         <TextBlock Text="QL SYSTEM" FontSize="20" FontWeight="Bold" Foreground="White" VerticalAlignment="Center"/>
                     </StackPanel>
-                    <TextBlock Text="Quincaillerie Management" FontSize="11" Foreground="#64748b" Margin="36,2,0,0"/>
+                    <TextBlock Text="Quincaillerie Management" FontSize="11" Foreground="#64748b" Margin="44,2,0,0"/>
                 </StackPanel>
 
                 <!-- Navigation Menu Buttons -->
                 <StackPanel Grid.Row="1">
-                    <Button Content="🛒  الكاسة والبيع (Caisse)" Command="{Binding NavigateCaisseCommand}" Style="{StaticResource BtnNav}"/>
-                    <Button Content="📦  المخزون والسلع (Stock)" Command="{Binding NavigateStockCommand}" Style="{StaticResource BtnNav}"/>
-                    <Button Content="👥  ديون الزبائن (Crédit)" Command="{Binding NavigateCreditCommand}" Style="{StaticResource BtnNav}"/>
-                    <Button Content="📊  التقارير والأرباح (Rapports)" Command="{Binding NavigateReportsCommand}" Style="{StaticResource BtnNav}"/>
-                    <Button Content="⚙️  الإعدادات (Paramètres)" Command="{Binding NavigateSettingsCommand}" Style="{StaticResource BtnNav}"/>
+                    <Button Content="الكاسة والبيع (Caisse)" Command="{Binding NavigateCaisseCommand}" Style="{StaticResource BtnNav}"/>
+                    <Button Content="المخزون والسلع (Stock)" Command="{Binding NavigateStockCommand}" Style="{StaticResource BtnNav}"/>
+                    <Button Content="ديون الزبائن (Crédit)" Command="{Binding NavigateCreditCommand}" Style="{StaticResource BtnNav}"/>
+                    <Button Content="التقارير والأرباح (Rapports)" Command="{Binding NavigateReportsCommand}" Style="{StaticResource BtnNav}"/>
+                    <Button Content="الإعدادات (Paramètres)" Command="{Binding NavigateSettingsCommand}" Style="{StaticResource BtnNav}"/>
                 </StackPanel>
 
                 <!-- Footer: Version & Machine ID -->

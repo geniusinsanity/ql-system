@@ -1,90 +1,115 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar" dir="rtl" id="htmlRoot">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QL System - واجهة التجربة المباشرة (Linux Preview)</title>
+    <title>QL System - Quincaillerie Algérie</title>
+    <!-- Offline FontAwesome 6 Icons -->
+    <link rel="stylesheet" href="/static/all.min.css">
     <style>
         :root {
             --primary: #1e40af;
             --primary-hover: #1d4ed8;
-            --success: #10b981;
-            --danger: #ef4444;
-            --warning: #f59e0b;
+            --success: #059669;
+            --success-hover: #047857;
+            --danger: #dc2626;
+            --danger-hover: #b91c1c;
+            --warning: #d97706;
             --sidebar-bg: #0f172a;
+            --sidebar-active: #1e293b;
             --app-bg: #f8fafc;
             --card-bg: #ffffff;
             --border: #e2e8f0;
-            --text-dark: #1e293b;
+            --text-dark: #0f172a;
             --text-muted: #64748b;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
-        body { background: var(--app-bg); color: var(--text-dark); display: flex; height: 100vh; overflow: hidden; }
+        body { background: var(--app-bg); color: var(--text-dark); display: flex; height: 100vh; overflow: hidden; font-size: 14px; }
 
         /* Sidebar */
-        .sidebar { width: 250px; background: var(--sidebar-bg); color: #fff; display: flex; flex-direction: column; justify-content: space-between; padding: 20px 15px; border-left: 1px solid #1e293b; }
-        .brand { display: flex; align-items: center; gap: 10px; margin-bottom: 30px; }
-        .brand-icon { font-size: 28px; }
-        .brand-title { font-size: 20px; font-weight: 800; letter-spacing: 0.5px; }
-        .brand-sub { font-size: 11px; color: var(--text-muted); }
+        .sidebar { width: 260px; background: var(--sidebar-bg); color: #fff; display: flex; flex-direction: column; justify-content: space-between; padding: 18px 14px; border-inline-end: 1px solid #1e293b; flex-shrink: 0; }
+        .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid #1e293b; }
+        .brand-logo { background: var(--primary); width: 38px; height: 38px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 18px; color: #fff; }
+        .brand-title { font-size: 18px; font-weight: 800; letter-spacing: 0.5px; }
+        .brand-sub { font-size: 11px; color: #94a3b8; }
 
-        .nav-links { list-style: none; display: flex; flex-direction: column; gap: 6px; }
-        .nav-btn { width: 100%; display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: transparent; border: none; color: #94a3b8; font-size: 14px; font-weight: 600; border-radius: 8px; cursor: pointer; text-align: right; transition: 0.2s; }
-        .nav-btn:hover { background: #1e293b; color: #fff; }
+        .nav-links { list-style: none; display: flex; flex-direction: column; gap: 5px; }
+        .nav-btn { width: 100%; display: flex; align-items: center; gap: 12px; padding: 11px 14px; background: transparent; border: none; color: #94a3b8; font-size: 13.5px; font-weight: 600; border-radius: 7px; cursor: pointer; text-align: start; transition: 0.15s; }
+        .nav-btn:hover { background: var(--sidebar-active); color: #fff; }
         .nav-btn.active { background: var(--primary); color: #fff; }
+        .nav-btn i { font-size: 15px; width: 20px; text-align: center; }
 
-        .sidebar-footer { font-size: 11px; color: var(--text-muted); border-top: 1px solid #1e293b; padding-top: 15px; }
-        .mid-badge { font-family: monospace; font-size: 11px; color: #38bdf8; word-break: break-all; margin-top: 4px; }
+        .sidebar-footer { font-size: 11px; color: #64748b; border-top: 1px solid #1e293b; padding-top: 15px; }
+        .mid-badge { font-family: monospace; font-size: 11px; color: #38bdf8; word-break: break-all; margin-top: 4px; background: #020617; padding: 4px 6px; border-radius: 4px; border: 1px solid #1e293b; }
 
-        /* Main Content */
-        .main-wrapper { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-        .top-header { background: #fff; height: 60px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 25px; }
-        .header-title { font-size: 16px; font-weight: 700; color: #334155; }
-        .license-badge { padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 700; color: #fff; background: var(--warning); display: flex; align-items: center; gap: 6px; }
+        /* Main Area */
+        .main-wrapper { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+        .top-header { background: #fff; height: 58px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; flex-shrink: 0; }
+        .header-title { font-size: 16px; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 10px; }
+        .header-actions { display: flex; align-items: center; gap: 12px; }
+
+        .lang-switch { display: flex; background: #f1f5f9; border-radius: 6px; padding: 2px; border: 1px solid var(--border); }
+        .lang-btn { border: none; background: transparent; padding: 5px 10px; font-size: 12px; font-weight: 700; border-radius: 4px; cursor: pointer; color: #475569; }
+        .lang-btn.active { background: var(--primary); color: #fff; }
+
+        .license-badge { padding: 5px 12px; border-radius: 6px; font-size: 12px; font-weight: 700; color: #fff; background: var(--warning); display: flex; align-items: center; gap: 6px; }
         .license-badge.activated { background: var(--success); }
 
-        .content-area { flex: 1; overflow-y: auto; padding: 20px; }
+        .content-area { flex: 1; overflow-y: auto; padding: 18px; }
         .tab-content { display: none; }
-        .tab-content.active { display: block; animation: fadeIn 0.2s ease; }
+        .tab-content.active { display: block; animation: fadeIn 0.15s ease; }
 
-        /* Modern UI Cards */
-        .card { background: var(--card-bg); border-radius: 10px; border: 1px solid var(--border); padding: 18px; box-shadow: 0 2px 5px rgba(0,0,0,0.03); margin-bottom: 20px; }
-        .btn { padding: 9px 16px; border-radius: 7px; font-size: 14px; font-weight: 700; border: none; cursor: pointer; transition: 0.15s; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+        /* UI Elements */
+        .card { background: var(--card-bg); border-radius: 8px; border: 1px solid var(--border); padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.03); margin-bottom: 16px; }
+        .btn { padding: 8px 14px; border-radius: 6px; font-size: 13.5px; font-weight: 600; border: none; cursor: pointer; transition: 0.15s; display: inline-flex; align-items: center; justify-content: center; gap: 7px; }
         .btn-primary { background: var(--primary); color: #fff; }
         .btn-primary:hover { background: var(--primary-hover); }
         .btn-success { background: var(--success); color: #fff; }
-        .btn-success:hover { background: #059669; }
+        .btn-success:hover { background: var(--success-hover); }
         .btn-danger { background: var(--danger); color: #fff; }
-        .btn-danger:hover { background: #dc2626; }
-        .input-text { width: 100%; padding: 10px 12px; border-radius: 7px; border: 1px solid var(--border); font-size: 14px; outline: none; transition: 0.2s; background: #fff; }
+        .btn-danger:hover { background: var(--danger-hover); }
+        .btn-secondary { background: #f1f5f9; color: #334155; border: 1px solid var(--border); }
+        .btn-secondary:hover { background: #e2e8f0; }
+
+        .input-text { width: 100%; padding: 8px 10px; border-radius: 6px; border: 1px solid var(--border); font-size: 13.5px; outline: none; transition: 0.15s; background: #fff; }
         .input-text:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.15); }
 
         /* Tables */
-        table { width: 100%; border-collapse: collapse; text-align: right; font-size: 13.5px; }
-        th { background: #f1f5f9; color: #475569; padding: 10px 12px; font-weight: 700; border-bottom: 1px solid var(--border); }
-        td { padding: 10px 12px; border-bottom: 1px solid #f1f5f9; }
+        table { width: 100%; border-collapse: collapse; text-align: start; font-size: 13px; }
+        th { background: #f8fafc; color: #475569; padding: 10px 12px; font-weight: 700; border-bottom: 1px solid var(--border); }
+        td { padding: 8px 12px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
         tr:hover td { background: #f8fafc; }
+        tr.selected-row td { background: #eff6ff !important; }
 
-        /* Caisse Screen Layout */
-        .caisse-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+        /* Caisse Screen */
+        .caisse-grid { display: grid; grid-template-columns: 1.8fr 1fr; gap: 16px; }
         .search-container { position: relative; }
-        .search-dropdown { position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); max-height: 250px; overflow-y: auto; z-index: 100; display: none; margin-top: 5px; }
-        .search-item { padding: 10px 14px; border-bottom: 1px solid #f8fafc; cursor: pointer; display: flex; justify-content: space-between; }
+        .search-dropdown { position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 1px solid var(--border); border-radius: 6px; box-shadow: 0 10px 25px rgba(0,0,0,0.12); max-height: 280px; overflow-y: auto; z-index: 100; display: none; margin-top: 4px; }
+        .search-item { padding: 9px 12px; border-bottom: 1px solid #f8fafc; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
         .search-item:hover { background: #eff6ff; }
 
-        .total-banner { background: var(--primary); color: #fff; padding: 18px; border-radius: 8px; margin-bottom: 20px; }
-        .total-amount { font-size: 30px; font-weight: 800; margin-top: 4px; }
-        .qty-btn { width: 28px; height: 28px; border-radius: 4px; border: 1px solid var(--border); background: #f8fafc; font-weight: bold; cursor: pointer; }
+        .total-banner { background: var(--primary); color: #fff; padding: 16px; border-radius: 8px; margin-bottom: 16px; }
+        .total-amount { font-size: 28px; font-weight: 800; margin-top: 2px; }
 
-        /* Receipt Modal */
+        /* Quantity Input */
+        .qty-control { display: inline-flex; align-items: center; border: 1px solid var(--border); border-radius: 6px; background: #fff; overflow: hidden; }
+        .qty-btn { width: 28px; height: 28px; border: none; background: #f8fafc; color: #334155; font-weight: bold; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; }
+        .qty-btn:hover { background: #e2e8f0; }
+        .qty-input { width: 55px; height: 28px; border: none; border-inline-start: 1px solid var(--border); border-inline-end: 1px solid var(--border); text-align: center; font-weight: 700; font-size: 13px; outline: none; }
+
+        /* Modal */
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 1000; }
         .modal-overlay.active { display: flex; }
-        .ticket-modal { background: #fff; width: 340px; border-radius: 12px; padding: 25px; box-shadow: 0 15px 35px rgba(0,0,0,0.3); font-family: monospace; font-size: 13px; line-height: 1.4; }
-        .ticket-header { text-align: center; border-bottom: 1px dashed #000; padding-bottom: 10px; margin-bottom: 12px; }
-        .ticket-footer { text-align: center; border-top: 1px dashed #000; padding-top: 10px; margin-top: 15px; }
+        .ticket-modal { background: #fff; width: 330px; border-radius: 8px; padding: 22px; box-shadow: 0 15px 35px rgba(0,0,0,0.3); font-family: monospace; font-size: 12px; line-height: 1.4; }
+        .ticket-header { text-align: center; border-bottom: 1px dashed #000; padding-bottom: 10px; margin-bottom: 10px; }
+        .ticket-footer { text-align: center; border-top: 1px dashed #000; padding-top: 10px; margin-top: 12px; }
 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+        .badge-pill { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 11.5px; font-weight: 700; }
+        .badge-success { background: #d1fae5; color: #065f46; }
+        .badge-danger { background: #fee2e2; color: #991b1b; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
@@ -93,25 +118,47 @@
     <div class="sidebar">
         <div>
             <div class="brand">
-                <div class="brand-icon">🛠️</div>
+                <div class="brand-logo">QL</div>
                 <div>
                     <div class="brand-title">QL SYSTEM</div>
-                    <div class="brand-sub">Quincaillerie DZ • نسخة لينكس</div>
+                    <div class="brand-sub" id="brandSub">Quincaillerie Algérie</div>
                 </div>
             </div>
 
             <ul class="nav-links">
-                <li><button class="nav-btn active" onclick="switchTab('caisse')">🛒 الكاسة والبيع (Caisse)</button></li>
-                <li><button class="nav-btn" onclick="switchTab('stock')">📦 المخزون والسلع (Stock)</button></li>
-                <li><button class="nav-btn" onclick="switchTab('credit')">👥 ديون الزبائن (Crédit)</button></li>
-                <li><button class="nav-btn" onclick="switchTab('reports')">📊 التقارير والأرباح (Rapports)</button></li>
-                <li><button class="nav-btn" onclick="switchTab('settings')">⚙️ الإعدادات (Paramètres)</button></li>
-                <li><button class="nav-btn" onclick="switchTab('lock')">🔒 تجربة القفل (Trial Lock)</button></li>
+                <li><button class="nav-btn active" onclick="switchTab('caisse')">
+                    <i class="fa-solid fa-cash-register fa-fw"></i>
+                    <span id="navCaisse">الكاسة والبيع (Caisse)</span>
+                </button></li>
+                <li><button class="nav-btn" onclick="switchTab('stock')">
+                    <i class="fa-solid fa-boxes-stacked fa-fw"></i>
+                    <span id="navStock">المخزون والسلع (Stock)</span>
+                </button></li>
+                <li><button class="nav-btn" onclick="switchTab('history')">
+                    <i class="fa-solid fa-clock-rotate-left fa-fw"></i>
+                    <span id="navHistory">سجل المبيعات (Historique)</span>
+                </button></li>
+                <li><button class="nav-btn" onclick="switchTab('credit')">
+                    <i class="fa-solid fa-hand-holding-dollar fa-fw"></i>
+                    <span id="navCredit">ديون الزبائن (Crédits)</span>
+                </button></li>
+                <li><button class="nav-btn" onclick="switchTab('reports')">
+                    <i class="fa-solid fa-chart-line fa-fw"></i>
+                    <span id="navReports">التقارير والأرباح (Rapports)</span>
+                </button></li>
+                <li><button class="nav-btn" onclick="switchTab('settings')">
+                    <i class="fa-solid fa-gear fa-fw"></i>
+                    <span id="navSettings">الإعدادات (Paramètres)</span>
+                </button></li>
+                <li><button class="nav-btn" onclick="switchTab('lock')">
+                    <i class="fa-solid fa-lock fa-fw"></i>
+                    <span id="navLock">شاشة القفل (Verrouillage)</span>
+                </button></li>
             </ul>
         </div>
 
         <div class="sidebar-footer">
-            <div>حاسوب واحد (Monoposte)</div>
+            <div id="lblMonoposte">نسخة حاسوب واحد (Monoposte)</div>
             <div class="mid-badge" id="sidebarMid">QL-ALG-XXXX-XXXX</div>
             <div style="margin-top: 4px;">v1.0.0 DZ • 2026</div>
         </div>
@@ -121,7 +168,13 @@
     <div class="main-wrapper">
         <div class="top-header">
             <div class="header-title" id="headerTitle">نقطة البيع والكاسة (Caisse / Comptoir)</div>
-            <div class="license-badge" id="topBadge">⏳ فترة تجريبية: باقي 7 أيام</div>
+            <div class="header-actions">
+                <div class="lang-switch">
+                    <button class="lang-btn active" id="btnLangAr" onclick="setLanguage('ar')">العربية</button>
+                    <button class="lang-btn" id="btnLangFr" onclick="setLanguage('fr')">Français</button>
+                </div>
+                <div class="license-badge" id="topBadge"><i class="fa-solid fa-shield-halved"></i> <span>فترة تجريبية: باقي 7 أيام</span></div>
+            </div>
         </div>
 
         <div class="content-area">
@@ -131,70 +184,83 @@
                 <div class="caisse-grid">
                     <!-- Left: Search & Cart -->
                     <div>
-                        <div class="card" style="padding: 12px;">
-                            <div class="search-container">
-                                <input type="text" id="caisseSearchInput" class="input-text" placeholder="🔍 ابحث بالاسم، المرجع (vis, pvc 32, cable...) أو امسح الباركود..." autocomplete="off">
+                        <div class="card" style="padding: 10px 14px; margin-bottom: 12px; display: flex; gap: 10px; align-items: center;">
+                            <div class="search-container" style="flex: 1;">
+                                <input type="text" id="caisseSearchInput" class="input-text" placeholder="ابحث بالاسم، المرجع (vis, pvc, cable...) أو امسح الباركود..." autocomplete="off">
                                 <div id="searchDropdown" class="search-dropdown"></div>
+                            </div>
+                            <div style="display: flex; gap: 4px; border: 1px solid var(--border); border-radius: 6px; padding: 2px;">
+                                <button class="btn btn-secondary active" id="btnPriceRetail" style="padding: 5px 10px; font-size: 12px;" onclick="setPriceMode('retail')">تجزئة (Détail)</button>
+                                <button class="btn btn-secondary" id="btnPriceWholesale" style="padding: 5px 10px; font-size: 12px;" onclick="setPriceMode('wholesale')">جملة (Gros)</button>
                             </div>
                         </div>
 
-                        <div class="card" style="padding: 0; overflow: hidden; min-height: 400px;">
+                        <div class="card" style="padding: 0; overflow: hidden; min-height: 420px;">
                             <table id="cartTable">
                                 <thead>
                                     <tr>
-                                        <th style="width: 100px;">المرجع</th>
-                                        <th>تسمية السلعة</th>
-                                        <th style="width: 100px;">السعر</th>
-                                        <th style="width: 120px; text-align: center;">الكمية</th>
-                                        <th style="width: 110px;">المجموع</th>
-                                        <th style="width: 50px;"></th>
+                                        <th style="width: 110px;" id="thRef">المرجع</th>
+                                        <th id="thName">تسمية السلعة</th>
+                                        <th style="width: 95px;" id="thPrice">السعر</th>
+                                        <th style="width: 140px; text-align: center;" id="thQty">الكمية</th>
+                                        <th style="width: 110px;" id="thTotal">المجموع</th>
+                                        <th style="width: 45px;"></th>
                                     </tr>
                                 </thead>
                                 <tbody id="cartTbody">
-                                    <tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 40px;">السلة فارغة. ابحث عن سلعة لإضافتها</td></tr>
+                                    <tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 45px;" id="cartEmptyMsg">السلة فارغة. ابحث عن سلعة لإضافتها</td></tr>
                                 </tbody>
                             </table>
                         </div>
                     </div>
 
-                    <!-- Right: Summary & Actions -->
+                    <!-- Right: Summary & Checkout -->
                     <div>
                         <div class="card">
-                            <div style="margin-bottom: 15px;">
-                                <label style="font-size: 13px; font-weight: 700; color: #475569; display: block; margin-bottom: 6px;">الزبون (Client):</label>
-                                <select id="caisseCustomerSelect" class="input-text" style="height: 42px;">
+                            <div style="margin-bottom: 14px;">
+                                <label style="font-size: 12.5px; font-weight: 700; color: #475569; display: block; margin-bottom: 5px;" id="lblCustomer">الزبون (Client):</label>
+                                <select id="caisseCustomerSelect" class="input-text" style="height: 38px;">
                                     <option value="">زبون عادي (Comptoir)</option>
                                 </select>
                             </div>
 
                             <div class="total-banner">
-                                <div style="font-size: 13px; opacity: 0.9;">المجموع الصافي الواجب دفعه:</div>
+                                <div style="font-size: 12px; opacity: 0.9;" id="lblNetToPay">المجموع الصافي الواجب دفعه:</div>
                                 <div class="total-amount" id="totalAmountDisplay">0.00 DZD</div>
                             </div>
 
-                            <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;">
+                            <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px;">
                                 <div style="display: flex; justify-content: space-between; align-items: center;">
-                                    <span style="font-size: 13px; font-weight: 600;">تخفيض (Remise DA):</span>
-                                    <input type="number" id="discountInput" class="input-text" style="width: 110px; text-align: left;" value="0" min="0">
+                                    <span style="font-size: 12.5px; font-weight: 600;" id="lblDiscount">تخفيض (Remise DZD):</span>
+                                    <input type="number" id="discountInput" class="input-text" style="width: 105px; text-align: start;" value="0" min="0">
                                 </div>
                                 <div style="display: flex; justify-content: space-between; align-items: center;">
-                                    <span style="font-size: 13px; font-weight: 700;">المبلغ المدفوع (كاش):</span>
-                                    <input type="number" id="paidInput" class="input-text" style="width: 110px; text-align: left; font-weight: bold;" value="0" min="0">
+                                    <span style="font-size: 12.5px; font-weight: 700;" id="lblCashPaid">المبلغ المدفوع (Espèces):</span>
+                                    <input type="number" id="paidInput" class="input-text" style="width: 105px; text-align: start; font-weight: bold;" value="0" min="0">
                                 </div>
                                 <div style="display: flex; justify-content: space-between; align-items: center;">
-                                    <span style="font-size: 13px; font-weight: 700; color: var(--success);">الصرف المرجع (Rendu):</span>
-                                    <span id="changeDisplay" style="font-size: 16px; font-weight: 800; color: var(--success);">0.00 دج</span>
+                                    <span style="font-size: 12.5px; font-weight: 700; color: var(--success);" id="lblChange">الصرف المرجع (Rendu):</span>
+                                    <span id="changeDisplay" style="font-size: 15px; font-weight: 800; color: var(--success);">0.00 DZD</span>
                                 </div>
                                 <div id="debtRow" style="display: flex; justify-content: space-between; align-items: center;">
-                                    <span style="font-size: 13px; font-weight: 700; color: var(--danger);">المتبقي كريدي (Dette):</span>
-                                    <span id="debtDisplay" style="font-size: 16px; font-weight: 800; color: var(--danger);">0.00 دج</span>
+                                    <span style="font-size: 12.5px; font-weight: 700; color: var(--danger);" id="lblDebt">المتبقي دين (Crédit):</span>
+                                    <span id="debtDisplay" style="font-size: 15px; font-weight: 800; color: var(--danger);">0.00 DZD</span>
                                 </div>
                             </div>
 
-                            <div style="display: flex; flex-direction: column; gap: 10px;">
-                                <button class="btn btn-success" style="height: 48px; font-size: 15px;" onclick="checkoutSale(false)">💵 [F2] دفع نقداً وطباعة التذكرة</button>
-                                <button class="btn btn-primary" style="height: 42px;" onclick="checkoutSale(true)">📋 [F3] تسجيل بالكريدي (على الحساب)</button>
-                                <button class="btn btn-danger" style="height: 36px; font-size: 13px;" onclick="clearCart()">🗑️ [F5] إفراغ السلة</button>
+                            <div style="display: flex; flex-direction: column; gap: 8px;">
+                                <button class="btn btn-success" style="height: 44px; font-size: 14px;" onclick="checkoutSale(false)">
+                                    <i class="fa-solid fa-money-bill-wave"></i>
+                                    <span id="btnPayCash">[F2] دفع نقداً وطباعة الوصل</span>
+                                </button>
+                                <button class="btn btn-primary" style="height: 40px;" onclick="checkoutSale(true)">
+                                    <i class="fa-solid fa-file-invoice"></i>
+                                    <span id="btnPayCredit">[F3] تسجيل بالكريدي (على الحساب)</span>
+                                </button>
+                                <button class="btn btn-secondary" style="height: 34px; font-size: 12px;" onclick="clearCart()">
+                                    <i class="fa-solid fa-trash"></i>
+                                    <span id="btnClearCart">[F5] إفراغ السلة</span>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -203,29 +269,31 @@
 
             <!-- TAB 2: STOCK -->
             <div id="tab-stock" class="tab-content">
-                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px;">
+                <div style="display: grid; grid-template-columns: 2fr 1.1fr; gap: 16px;">
                     <div>
-                        <div class="card" style="display: flex; justify-content: space-between; align-items: center; gap: 15px;">
-                            <input type="text" id="stockSearchInput" class="input-text" placeholder="🔍 تصفية السلع بالاسم، المقاس، المرجع..." style="max-width: 350px;">
-                            <label style="font-size: 13px; font-weight: 700; color: #b45309; display: flex; align-items: center; gap: 6px; cursor: pointer;">
-                                <input type="checkbox" id="stockLowFilter"> ⚠️ المخزون الضعيف فقط
+                        <div class="card" style="display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 14px;">
+                            <input type="text" id="stockSearchInput" class="input-text" placeholder="تصفية السلع بالاسم، المقاس، المرجع..." style="max-width: 320px;">
+                            <label style="font-size: 12.5px; font-weight: 700; color: #b45309; display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                                <input type="checkbox" id="stockLowFilter"> <span id="lblLowStockFilter">المخزون الضعيف فقط</span>
                             </label>
-                            <button class="btn btn-primary" onclick="loadStock()">تحديث 🔄</button>
+                            <button class="btn btn-secondary" onclick="loadStock()">
+                                <i class="fa-solid fa-rotate"></i>
+                                <span id="btnRefresh">تحديث</span>
+                            </button>
                         </div>
 
-                        <div class="card" style="padding: 0; overflow-x: auto; max-height: 550px;">
+                        <div class="card" style="padding: 0; overflow-x: auto; max-height: 560px;">
                             <table id="stockTable">
                                 <thead>
                                     <tr>
-                                        <th>المرجع</th>
-                                        <th>الباركود</th>
-                                        <th>التسمية</th>
-                                        <th>المقاس</th>
-                                        <th>سعر الشراء</th>
-                                        <th>سعر البيع</th>
-                                        <th>سعر الجملة</th>
-                                        <th>المخزون</th>
-                                        <th>الوحدة</th>
+                                        <th id="stRef">المرجع</th>
+                                        <th id="stName">التسمية</th>
+                                        <th id="stDim">المقاس</th>
+                                        <th id="stCost">الشراء</th>
+                                        <th id="stPrice">البيع</th>
+                                        <th id="stWholesale">الجملة</th>
+                                        <th id="stStock">المخزون</th>
+                                        <th style="width: 70px;"></th>
                                     </tr>
                                 </thead>
                                 <tbody id="stockTbody"></tbody>
@@ -233,72 +301,131 @@
                         </div>
                     </div>
 
-                    <!-- Add/Edit form -->
-                    <div class="card">
-                        <h3 style="margin-bottom: 15px; color: #1e293b;">إضافة / تعديل سلعة</h3>
-                        <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <!-- Add / Edit Product Form -->
+                    <div class="card" id="productFormCard">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border);">
+                            <h3 style="font-size: 15px; color: var(--primary);" id="formTitle">إضافة سلعة جديدة</h3>
+                            <button class="btn btn-secondary" style="padding: 3px 8px; font-size: 11.5px;" onclick="resetProductForm()" id="btnNewProduct">
+                                <i class="fa-solid fa-plus"></i> <span id="btnNewProdText">سلعة جديدة</span>
+                            </button>
+                        </div>
+                        <input type="hidden" id="editProductId">
+
+                        <div style="display: flex; flex-direction: column; gap: 9px;">
                             <div>
-                                <label style="font-size: 12px; font-weight: 600;">المرجع (Référence):</label>
+                                <label style="font-size: 12px; font-weight: 600;" id="fLblRef">المرجع (Référence):</label>
                                 <input type="text" id="prodRef" class="input-text">
                             </div>
                             <div>
-                                <label style="font-size: 12px; font-weight: 600;">كود الباركود:</label>
+                                <label style="font-size: 12px; font-weight: 600;" id="fLblBarcode">كود الباركود:</label>
                                 <div style="display: flex; gap: 6px;">
                                     <input type="text" id="prodBarcode" class="input-text">
-                                    <button class="btn btn-primary" onclick="generateRandomBarcode()">توليد 🏷️</button>
+                                    <button class="btn btn-secondary" style="font-size: 12px;" onclick="generateRandomBarcode()" id="btnGenBarcode">
+                                        <i class="fa-solid fa-barcode"></i> <span>توليد</span>
+                                    </button>
                                 </div>
                             </div>
                             <div>
-                                <label style="font-size: 12px; font-weight: 600;">اسم السلعة (Désignation):</label>
+                                <label style="font-size: 12px; font-weight: 600;" id="fLblName">اسم السلعة (Désignation):</label>
                                 <input type="text" id="prodName" class="input-text">
                             </div>
                             <div>
-                                <label style="font-size: 12px; font-weight: 600;">القياسات / المقاس (Dimensions):</label>
+                                <label style="font-size: 12px; font-weight: 600;" id="fLblDim">القياسات / المقاس (Dimensions):</label>
                                 <input type="text" id="prodDim" class="input-text" placeholder="مثال: 4x40, Ø32, M8">
                             </div>
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
                                 <div>
-                                    <label style="font-size: 12px; font-weight: 600;">سعر الشراء دج:</label>
+                                    <label style="font-size: 12px; font-weight: 600;" id="fLblCost">سعر الشراء دج:</label>
                                     <input type="number" id="prodCost" class="input-text" value="0">
                                 </div>
                                 <div>
-                                    <label style="font-size: 12px; font-weight: 600;">سعر البيع دج:</label>
+                                    <label style="font-size: 12px; font-weight: 600;" id="fLblPrice">سعر البيع دج:</label>
                                     <input type="number" id="prodPrice" class="input-text" value="0">
                                 </div>
                             </div>
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
                                 <div>
-                                    <label style="font-size: 12px; font-weight: 600;">سعر الجملة دج:</label>
+                                    <label style="font-size: 12px; font-weight: 600;" id="fLblWholesale">سعر الجملة دج:</label>
                                     <input type="number" id="prodWholesale" class="input-text" value="0">
                                 </div>
                                 <div>
-                                    <label style="font-size: 12px; font-weight: 600;">الكمية الحالية:</label>
+                                    <label style="font-size: 12px; font-weight: 600;" id="fLblStock">الكمية بالمخزن:</label>
                                     <input type="number" id="prodStock" class="input-text" value="10">
                                 </div>
                             </div>
-                            <button class="btn btn-success" style="margin-top: 10px;" onclick="saveProduct()">💾 حفظ السلعة في المخزن</button>
+                            <div>
+                                <label style="font-size: 12px; font-weight: 600;" id="fLblAlert">تنبيه الحد الأدنى للمخزون:</label>
+                                <input type="number" id="prodAlert" class="input-text" value="5">
+                            </div>
+
+                            <div style="display: flex; gap: 8px; margin-top: 6px;">
+                                <button class="btn btn-success" style="flex: 1;" onclick="saveProduct()">
+                                    <i class="fa-solid fa-floppy-disk"></i>
+                                    <span id="btnSaveProd">حفظ السلعة</span>
+                                </button>
+                                <button class="btn btn-danger" id="btnDeleteProd" style="display: none;" onclick="deleteProduct()">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                    <span id="btnDelText">حذف</span>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- TAB 3: CREDIT -->
+            <!-- TAB 3: SALES HISTORY -->
+            <div id="tab-history" class="tab-content">
+                <div class="card" style="display: flex; justify-content: space-between; align-items: center; gap: 15px; padding: 10px 14px;">
+                    <input type="text" id="historySearchInput" class="input-text" placeholder="بحث برقم الوصل أو اسم الزبون..." style="max-width: 320px;" oninput="loadHistory()">
+                    <div style="display: flex; gap: 6px;">
+                        <button class="btn btn-secondary active" id="btnDateAll" onclick="setHistoryFilter('all')">كل العمليات</button>
+                        <button class="btn btn-secondary" id="btnDateToday" onclick="setHistoryFilter('today')">مبيعات اليوم</button>
+                        <button class="btn btn-secondary" id="btnDateWeek" onclick="setHistoryFilter('week')">آخر 7 أيام</button>
+                    </div>
+                    <button class="btn btn-primary" onclick="loadHistory()">
+                        <i class="fa-solid fa-rotate"></i>
+                        <span id="btnRefreshHistory">تحديث</span>
+                    </button>
+                </div>
+
+                <div class="card" style="padding: 0; overflow-x: auto;">
+                    <table id="historyTable">
+                        <thead>
+                            <tr>
+                                <th style="width: 140px;" id="htInvNum">رقم الوصل</th>
+                                <th style="width: 140px;" id="htDate">التاريخ والوقت</th>
+                                <th id="htClient">الزبون</th>
+                                <th style="width: 110px;" id="htMode">طريقة الدفع</th>
+                                <th style="width: 120px;" id="htTotal">المجموع</th>
+                                <th style="width: 110px;" id="htPaid">المدفوع</th>
+                                <th style="width: 110px;" id="htDebt">الكريدي</th>
+                                <th style="width: 90px; text-align: center;" id="htActions">الإجراء</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTbody">
+                            <tr><td colspan="8" style="text-align: center; color: var(--text-muted); padding: 40px;">جاري تحميل سجل المبيعات...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TAB 4: CREDIT -->
             <div id="tab-credit" class="tab-content">
-                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px;">
+                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px;">
                     <div>
-                        <div class="card" style="background: #b91c1c; color: #fff; padding: 20px;">
-                            <div style="font-size: 13px; opacity: 0.9;">المجموع الكلي لديون الزبائن والمقاولين في المحل:</div>
-                            <div style="font-size: 30px; font-weight: 800; margin-top: 5px;" id="totalCreditDisplay">0.00 DZD</div>
+                        <div class="card" style="background: #b91c1c; color: #fff; padding: 18px;">
+                            <div style="font-size: 12.5px; opacity: 0.9;" id="lblTotalCredit">المجموع الكلي لديون الزبائن والمقاولين في المحل:</div>
+                            <div style="font-size: 28px; font-weight: 800; margin-top: 3px;" id="totalCreditDisplay">0.00 DZD</div>
                         </div>
 
                         <div class="card" style="padding: 0; overflow: hidden;">
                             <table id="custTable">
                                 <thead>
                                     <tr>
-                                        <th>الزبون</th>
-                                        <th>النشاط / الورشة</th>
-                                        <th>الهاتف</th>
-                                        <th>الدين الحالي</th>
+                                        <th id="crClient">الزبون</th>
+                                        <th id="crActivity">النشاط / الورشة</th>
+                                        <th id="crPhone">الهاتف</th>
+                                        <th id="crDebt">الدين الحالي</th>
                                         <th></th>
                                     </tr>
                                 </thead>
@@ -309,93 +436,110 @@
 
                     <!-- Payment Repayment form -->
                     <div class="card">
-                        <h3 style="margin-bottom: 15px;">تسديد دفعة دين (Versement)</h3>
-                        <div id="creditSelectedCustomerName" style="font-weight: bold; color: var(--primary); margin-bottom: 10px;">اختر زبوناً من القائمة أولاً</div>
+                        <h3 style="margin-bottom: 12px; font-size: 15px;" id="lblVersementTitle">تسديد دفعة دين (Versement)</h3>
+                        <div id="creditSelectedCustomerName" style="font-weight: bold; color: var(--primary); margin-bottom: 12px; font-size: 13.5px;">اختر زبوناً من القائمة أولاً</div>
                         <div style="display: flex; flex-direction: column; gap: 12px;">
                             <div>
-                                <label style="font-size: 13px; font-weight: 600;">المبلغ المسدد دج:</label>
+                                <label style="font-size: 12.5px; font-weight: 600;" id="lblPayAmount">المبلغ المسدد دج:</label>
                                 <input type="number" id="paymentAmountInput" class="input-text" placeholder="0.00">
                             </div>
                             <div>
-                                <label style="font-size: 13px; font-weight: 600;">ملاحظات (شيك، وصل...):</label>
+                                <label style="font-size: 12.5px; font-weight: 600;" id="lblPayNotes">ملاحظات (شيك، وصل...):</label>
                                 <input type="text" id="paymentNotesInput" class="input-text">
                             </div>
-                            <button class="btn btn-success" onclick="recordCustomerPayment()">💵 تسجيل الدفعة وتحديث الحساب</button>
+                            <button class="btn btn-success" onclick="recordCustomerPayment()">
+                                <i class="fa-solid fa-check"></i>
+                                <span id="btnConfirmPayment">تسجيل الدفعة وتحديث الحساب</span>
+                            </button>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- TAB 4: REPORTS -->
+            <!-- TAB 5: REPORTS -->
             <div id="tab-reports" class="tab-content">
-                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 25px;">
-                    <div class="card" style="border-right: 4px solid var(--primary);">
-                        <div style="font-size: 13px; color: var(--text-muted);">رقم الأعمال اليوم</div>
-                        <div style="font-size: 24px; font-weight: 800; color: var(--primary); margin-top: 6px;" id="repSales">0.00 DZD</div>
-                        <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;" id="repCount">0 عملية بيع</div>
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px;">
+                    <div class="card" style="border-inline-start: 4px solid var(--primary);">
+                        <div style="font-size: 12.5px; color: var(--text-muted);" id="repLblSales">رقم الأعمال اليوم</div>
+                        <div style="font-size: 22px; font-weight: 800; color: var(--primary); margin-top: 4px;" id="repSales">0.00 DZD</div>
+                        <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 4px;" id="repCount">0 عملية بيع اليوم</div>
                     </div>
-                    <div class="card" style="border-right: 4px solid var(--success);">
-                        <div style="font-size: 13px; color: var(--text-muted);">مقبوضات الكاش اليوم</div>
-                        <div style="font-size: 24px; font-weight: 800; color: var(--success); margin-top: 6px;" id="repCash">0.00 DZD</div>
-                        <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">في الصندوق</div>
+                    <div class="card" style="border-inline-start: 4px solid var(--success);">
+                        <div style="font-size: 12.5px; color: var(--text-muted);" id="repLblCash">مقبوضات الكاش اليوم</div>
+                        <div style="font-size: 22px; font-weight: 800; color: var(--success); margin-top: 4px;" id="repCash">0.00 DZD</div>
+                        <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 4px;" id="repLblCashBox">في الصندوق</div>
                     </div>
-                    <div class="card" style="border-right: 4px solid var(--danger);">
-                        <div style="font-size: 13px; color: var(--text-muted);">مبيعات بالكريدي اليوم</div>
-                        <div style="font-size: 24px; font-weight: 800; color: var(--danger); margin-top: 6px;" id="repCredit">0.00 DZD</div>
-                        <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">ديون جديدة</div>
+                    <div class="card" style="border-inline-start: 4px solid var(--danger);">
+                        <div style="font-size: 12.5px; color: var(--text-muted);" id="repLblCredit">مبيعات بالكريدي اليوم</div>
+                        <div style="font-size: 22px; font-weight: 800; color: var(--danger); margin-top: 4px;" id="repCredit">0.00 DZD</div>
+                        <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 4px;" id="repLblNewDebt">ديون جديدة</div>
                     </div>
-                    <div class="card" style="border-right: 4px solid #0284c7;">
-                        <div style="font-size: 13px; color: var(--text-muted);">صافي الربح المقدر اليوم</div>
-                        <div style="font-size: 24px; font-weight: 800; color: #0284c7; margin-top: 6px;" id="repProfit">0.00 DZD</div>
-                        <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">هامش الفائدة</div>
+                    <div class="card" style="border-inline-start: 4px solid #0284c7;">
+                        <div style="font-size: 12.5px; color: var(--text-muted);" id="repLblProfit">صافي الربح المقدر اليوم</div>
+                        <div style="font-size: 22px; font-weight: 800; color: #0284c7; margin-top: 4px;" id="repProfit">0.00 DZD</div>
+                        <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 4px;" id="repLblMargin">هامش الفائدة</div>
                     </div>
                 </div>
             </div>
 
-            <!-- TAB 5: SETTINGS -->
+            <!-- TAB 6: SETTINGS -->
             <div id="tab-settings" class="tab-content">
-                <div class="card" style="max-width: 600px;">
-                    <h3 style="margin-bottom: 15px; color: var(--primary);">معلومات المحل والطباعة</h3>
-                    <div style="display: flex; flex-direction: column; gap: 12px;">
+                <div class="card" style="max-width: 580px;">
+                    <h3 style="margin-bottom: 14px; color: var(--primary); font-size: 15px;" id="setStoreInfoTitle">معلومات المحل والطباعة</h3>
+                    <div style="display: flex; flex-direction: column; gap: 11px;">
                         <div>
-                            <label style="font-size: 13px; font-weight: 600;">اسم المحل:</label>
+                            <label style="font-size: 12.5px; font-weight: 600;" id="setLblName">اسم المحل:</label>
                             <input type="text" id="settStoreName" class="input-text" value="Quincaillerie El-Baraka">
                         </div>
                         <div>
-                            <label style="font-size: 13px; font-weight: 600;">رقم الهاتف:</label>
+                            <label style="font-size: 12.5px; font-weight: 600;" id="setLblPhone">رقم الهاتف:</label>
                             <input type="text" id="settPhone" class="input-text" value="0550 12 34 56">
                         </div>
                         <div>
-                            <label style="font-size: 13px; font-weight: 600;">العنوان:</label>
+                            <label style="font-size: 12.5px; font-weight: 600;" id="setLblAddress">العنوان:</label>
                             <input type="text" id="settAddress" class="input-text" value="Alger, Algérie">
                         </div>
-                        <button class="btn btn-success" style="align-self: flex-start; margin-top: 10px;">💾 حفظ الإعدادات</button>
+                        <div>
+                            <label style="font-size: 12.5px; font-weight: 600;" id="setLblLang">لغة الواجهة الافتراضية:</label>
+                            <select id="settLanguage" class="input-text" onchange="setLanguage(this.value)">
+                                <option value="ar">العربية (Algérie)</option>
+                                <option value="fr">Français</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-success" style="align-self: flex-start; margin-top: 8px;">
+                            <i class="fa-solid fa-floppy-disk"></i>
+                            <span id="setBtnSave">حفظ الإعدادات</span>
+                        </button>
                     </div>
                 </div>
             </div>
 
-            <!-- TAB 6: TRIAL LOCK SIMULATOR -->
+            <!-- TAB 7: TRIAL LOCK SIMULATOR -->
             <div id="tab-lock" class="tab-content">
-                <div style="max-width: 650px; margin: 20px auto; background: #fff; border-radius: 12px; padding: 35px; border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center;">
-                    <div style="font-size: 48px; margin-bottom: 10px;">🔒</div>
-                    <h2 style="color: #1e293b; margin-bottom: 10px;">انتهت الفترة التجريبية المجانية (7 أيام)</h2>
-                    <p style="color: var(--text-muted); font-size: 14px; line-height: 1.6; margin-bottom: 25px;">
-                        هذه هي الشاشة الرسمية التي ستظهر لصاحب المحل في اليوم الثامن بعد انتهاء الأسبوع التجريبي. جميع بياناته ومبيعاته تبقى محفوظة بالكامل!
+                <div style="max-width: 620px; margin: 15px auto; background: #fff; border-radius: 10px; padding: 30px; border: 1px solid var(--border); box-shadow: 0 4px 20px rgba(0,0,0,0.06); text-align: center;">
+                    <div style="width: 48px; height: 48px; background: #fee2e2; color: var(--danger); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px; font-size: 20px;">
+                        <i class="fa-solid fa-lock"></i>
+                    </div>
+                    <h2 style="color: #1e293b; margin-bottom: 8px; font-size: 18px;" id="lockTitle">انتهت الفترة التجريبية المجانية (7 أيام)</h2>
+                    <p style="color: var(--text-muted); font-size: 13.5px; line-height: 1.6; margin-bottom: 20px;" id="lockDesc">
+                        هذه هي الشاشة الرسمية التي تظهر لصاحب المحل في اليوم الثامن. جميع بياناته ومبيعاته ومخزونه تبقى محفوظة بالكامل.
                     </p>
 
-                    <div style="background: #f1f5f9; border-radius: 8px; padding: 15px; margin-bottom: 20px; border: 1px solid #cbd5e1;">
-                        <div style="font-size: 12px; color: #475569; margin-bottom: 6px;">معرف جهاز الزبون (Machine ID):</div>
-                        <div style="font-size: 20px; font-weight: 800; color: var(--primary); letter-spacing: 1px;" id="lockMid">QL-ALG-XXXX-XXXX</div>
+                    <div style="background: #f8fafc; border-radius: 6px; padding: 14px; margin-bottom: 18px; border: 1px solid #cbd5e1;">
+                        <div style="font-size: 12px; color: #475569; margin-bottom: 4px;" id="lockMidLbl">معرف جهاز الزبون (Machine ID):</div>
+                        <div style="font-size: 18px; font-weight: 800; color: var(--primary); letter-spacing: 1px;" id="lockMid">QL-ALG-XXXX-XXXX</div>
                     </div>
 
-                    <div style="background: #ecfdf5; border-radius: 8px; padding: 12px; margin-bottom: 25px; border: 1px solid #a7f3d0; color: #065f46; font-weight: bold;">
-                        📱 للطلب والتفعيل: اتصل بالمطور عبر الهاتف أو واتساب: 0550 12 34 56
+                    <div style="background: #ecfdf5; border-radius: 6px; padding: 10px; margin-bottom: 20px; border: 1px solid #a7f3d0; color: #065f46; font-weight: bold; font-size: 13px;" id="lockContact">
+                        للطلب والتفعيل: اتصل بالمطور عبر الهاتف أو واتساب: 0550 12 34 56
                     </div>
 
-                    <div style="text-align: right; margin-bottom: 8px; font-size: 13px; font-weight: 700;">أدخل كود التفعيل المستلم من المطور:</div>
-                    <div style="display: flex; gap: 10px;">
-                        <input type="text" id="activationKeyInput" class="input-text" style="font-size: 16px; font-weight: bold; text-align: center;" placeholder="ACT-XXXX-XXXX-XXXX-XXXX">
-                        <button class="btn btn-success" style="padding: 0 25px; font-size: 15px;" onclick="activateSoftware()">تفعيل الآن</button>
+                    <div style="text-align: start; margin-bottom: 6px; font-size: 12.5px; font-weight: 700;" id="lockEnterKey">أدخل كود التفعيل المستلم:</div>
+                    <div style="display: flex; gap: 8px;">
+                        <input type="text" id="activationKeyInput" class="input-text" style="font-size: 15px; font-weight: bold; text-align: center;" placeholder="ACT-XXXX-XXXX-XXXX-XXXX">
+                        <button class="btn btn-success" style="padding: 0 20px;" onclick="activateSoftware()" id="btnActivate">
+                            <i class="fa-solid fa-key"></i> <span id="btnActText">تفعيل البرنامج</span>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -407,28 +551,28 @@
     <div id="receiptModal" class="modal-overlay">
         <div class="ticket-modal">
             <div class="ticket-header">
-                <h2 id="ticStoreName">Quincaillerie El-Baraka</h2>
+                <h2 id="ticStoreName" style="font-size: 16px;">Quincaillerie El-Baraka</h2>
                 <div id="ticAddress">Alger, Algérie</div>
                 <div id="ticPhone">Tél: 0550 12 34 56</div>
-                <div style="margin-top: 5px; font-weight: bold;">مرحباً بكم - Vente Quincaillerie</div>
+                <div style="margin-top: 4px; font-weight: bold;">Ticket de Caisse</div>
             </div>
 
-            <div style="margin-bottom: 10px;">
+            <div style="margin-bottom: 8px;">
                 <div id="ticInvNum">N°: TICK-2026-00001</div>
-                <div id="ticDate">Date: 18/09/2026 19:45</div>
+                <div id="ticDate">Date: 18/09/2026</div>
                 <div id="ticClient">Client: Comptoir</div>
             </div>
 
-            <div style="border-bottom: 1px dashed #000; margin-bottom: 8px;"></div>
+            <div style="border-bottom: 1px dashed #000; margin-bottom: 6px;"></div>
             <div id="ticItemsList"></div>
-            <div style="border-bottom: 1px dashed #000; margin: 8px 0;"></div>
+            <div style="border-bottom: 1px dashed #000; margin: 6px 0;"></div>
 
-            <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 15px;">
+            <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 14px;">
                 <span>TOTAL:</span>
                 <span id="ticTotal">0.00 DZD</span>
             </div>
             <div style="display: flex; justify-content: space-between;">
-                <span>Versé (Espèces):</span>
+                <span>Espèces:</span>
                 <span id="ticPaid">0.00 DZD</span>
             </div>
             <div style="display: flex; justify-content: space-between;">
@@ -437,41 +581,277 @@
             </div>
 
             <div class="ticket-footer">
-                <div>شكراً لزيارتكم - Merci de votre visite</div>
-                <button class="btn btn-primary" style="margin-top: 15px; width: 100%;" onclick="closeReceiptModal()">✓ إغلاق الوصل وعملية جديدة</button>
+                <div>Merci de votre visite - شكراً لزيارتكم</div>
+                <button class="btn btn-primary" style="margin-top: 14px; width: 100%;" onclick="closeReceiptModal()" id="btnTicClose">إغلاق الوصل وعملية جديدة</button>
             </div>
         </div>
     </div>
 
     <script>
+        let currentLang = 'ar';
+        let priceMode = 'retail';
         let currentCart = [];
         let customersList = [];
         let selectedCustomerIdForCredit = null;
+        let productsCache = [];
+        let historyFilter = 'all';
+
+        const i18n = {
+            ar: {
+                brandSub: "Quincaillerie Algérie",
+                navCaisse: "الكاسة والبيع (Caisse)",
+                navStock: "المخزون والسلع (Stock)",
+                navHistory: "سجل المبيعات (Historique)",
+                navCredit: "ديون الزبائن (Crédits)",
+                navReports: "التقارير والأرباح (Rapports)",
+                navSettings: "الإعدادات (Paramètres)",
+                navLock: "شاشة القفل (Verrouillage)",
+                lblMonoposte: "نسخة حاسوب واحد (Monoposte)",
+                caisseTitle: "نقطة البيع والكاسة (Caisse / Comptoir)",
+                stockTitle: "إدارة السلع والمخزون (Stock & Produits)",
+                historyTitle: "سجل المبيعات والوصولات السابقة (Historique)",
+                creditTitle: "ديون الزبائن والتسديدات (Crédit Clients)",
+                reportsTitle: "التقارير والأرباح اليومية (Rapports)",
+                settingsTitle: "إعدادات المحل والطباعة (Paramètres)",
+                lockNavTitle: "محاكاة شاشة القفل بعد 7 أيام (Verrouillage)",
+                searchPlaceholder: "ابحث بالاسم، المرجع (vis, pvc, cable...) أو امسح الباركود...",
+                thRef: "المرجع",
+                thName: "تسمية السلعة",
+                thPrice: "السعر",
+                thQty: "الكمية",
+                thTotal: "المجموع",
+                cartEmptyMsg: "السلة فارغة. ابحث عن سلعة لإضافتها",
+                lblCustomer: "الزبون (Client):",
+                lblNetToPay: "المجموع الصافي الواجب دفعه:",
+                lblDiscount: "تخفيض (Remise DZD):",
+                lblCashPaid: "المبلغ المدفوع (Espèces):",
+                lblChange: "الصرف المرجع (Rendu):",
+                lblDebt: "المتبقي دين (Crédit):",
+                btnPayCash: "[F2] دفع نقداً وطباعة الوصل",
+                btnPayCredit: "[F3] تسجيل بالكريدي (على الحساب)",
+                btnClearCart: "[F5] إفراغ السلة",
+                lblLowStockFilter: "المخزون الضعيف فقط",
+                btnRefresh: "تحديث",
+                stRef: "المرجع",
+                stName: "التسمية",
+                stDim: "المقاس",
+                stCost: "الشراء",
+                stPrice: "البيع",
+                stWholesale: "الجملة",
+                stStock: "المخزون",
+                formTitleAdd: "إضافة سلعة جديدة",
+                formTitleEdit: "تعديل السلعة",
+                btnNewProdText: "سلعة جديدة",
+                fLblRef: "المرجع (Référence):",
+                fLblBarcode: "كود الباركود:",
+                fLblName: "اسم السلعة (Désignation):",
+                fLblDim: "القياسات / المقاس (Dimensions):",
+                fLblCost: "سعر الشراء دج:",
+                fLblPrice: "سعر البيع دج:",
+                fLblWholesale: "سعر الجملة دج:",
+                fLblStock: "الكمية بالمخزن:",
+                fLblAlert: "تنبيه الحد الأدنى للمخزون:",
+                btnSaveProd: "حفظ السلعة",
+                btnDelText: "حذف",
+                htInvNum: "رقم الوصل",
+                htDate: "التاريخ والوقت",
+                htClient: "الزبون",
+                htMode: "طريقة الدفع",
+                htTotal: "المجموع",
+                htPaid: "المدفوع",
+                htDebt: "الكريدي",
+                htActions: "الإجراء",
+                btnRefreshHistory: "تحديث السجل",
+                lblTotalCredit: "المجموع الكلي لديون الزبائن والمقاولين في المحل:",
+                crClient: "الزبون",
+                crActivity: "النشاط / الورشة",
+                crPhone: "الهاتف",
+                crDebt: "الدين الحالي",
+                lblVersementTitle: "تسديد دفعة دين (Versement)",
+                lblPayAmount: "المبلغ المسدد دج:",
+                lblPayNotes: "ملاحظات (شيك، وصل...):",
+                btnConfirmPayment: "تسجيل الدفعة وتحديث الحساب",
+                repLblSales: "رقم الأعمال اليوم",
+                repLblCash: "مقبوضات الكاش اليوم",
+                repLblCashBox: "في الصندوق",
+                repLblCredit: "مبيعات بالكريدي اليوم",
+                repLblNewDebt: "ديون جديدة",
+                repLblProfit: "صافي الربح المقدر اليوم",
+                repLblMargin: "هامش الفائدة",
+                setStoreInfoTitle: "معلومات المحل والطباعة",
+                setLblName: "اسم المحل:",
+                setLblPhone: "رقم الهاتف:",
+                setLblAddress: "العنوان:",
+                setLblLang: "لغة الواجهة الافتراضية:",
+                setBtnSave: "حفظ الإعدادات",
+                lockTitle: "انتهت الفترة التجريبية المجانية (7 أيام)",
+                lockDesc: "هذه هي الشاشة الرسمية التي تظهر لصاحب المحل في اليوم الثامن. جميع بياناته ومبيعاته ومخزونه تبقى محفوظة بالكامل.",
+                lockMidLbl: "معرف جهاز الزبون (Machine ID):",
+                lockContact: "للطلب والتفعيل: اتصل بالمطور عبر الهاتف أو واتساب: 0550 12 34 56",
+                lockEnterKey: "أدخل كود التفعيل المستلم:",
+                btnActText: "تفعيل البرنامج",
+                btnTicClose: "إغلاق الوصل وعملية جديدة"
+            },
+            fr: {
+                brandSub: "Quincaillerie Algérie",
+                navCaisse: "Vente & Caisse",
+                navStock: "Stock & Articles",
+                navHistory: "Historique Ventes",
+                navCredit: "Crédits Clients",
+                navReports: "Rapports & Ventes",
+                navSettings: "Paramètres",
+                navLock: "Verrouillage Trial",
+                lblMonoposte: "Version Monoposte (1 PC)",
+                caisseTitle: "Point de Vente au Comptoir (Caisse)",
+                stockTitle: "Gestion du Stock & Produits",
+                historyTitle: "Historique des Ventes & Reçus",
+                creditTitle: "Crédits Clients & Versements",
+                reportsTitle: "Rapports Journaliers & Bénéfices",
+                settingsTitle: "Paramètres du Magasin",
+                lockNavTitle: "Simulation Écran de Verrouillage (7 jours)",
+                searchPlaceholder: "Rechercher par nom, réf (vis, pvc, câble...) ou scanner code-barres...",
+                thRef: "Réf",
+                thName: "Désignation",
+                thPrice: "Prix",
+                thQty: "Quantité",
+                thTotal: "Total",
+                cartEmptyMsg: "Panier vide. Recherchez un article pour l'ajouter",
+                lblCustomer: "Client :",
+                lblNetToPay: "Total Net à Payer :",
+                lblDiscount: "Remise (DZD) :",
+                lblCashPaid: "Montant Versé (Espèces) :",
+                lblChange: "Monnaie Rendu :",
+                lblDebt: "Reste en Crédit :",
+                btnPayCash: "[F2] Payer Espèces & Ticket",
+                btnPayCredit: "[F3] Enregistrer en Crédit",
+                btnClearCart: "[F5] Vider le Panier",
+                lblLowStockFilter: "Stock Faible Uniquement",
+                btnRefresh: "Actualiser",
+                stRef: "Réf",
+                stName: "Désignation",
+                stDim: "Dimensions",
+                stCost: "Prix Achat",
+                stPrice: "Prix Détail",
+                stWholesale: "Prix Gros",
+                stStock: "Stock",
+                formTitleAdd: "Ajouter un Produit",
+                formTitleEdit: "Modifier le Produit",
+                btnNewProdText: "Nouveau Produit",
+                fLblRef: "Référence :",
+                fLblBarcode: "Code-barres :",
+                fLblName: "Désignation :",
+                fLblDim: "Dimensions :",
+                fLblCost: "Prix d'Achat DZD :",
+                fLblPrice: "Prix de Vente Détail DZD :",
+                fLblWholesale: "Prix de Vente Gros DZD :",
+                fLblStock: "Quantité en Stock :",
+                fLblAlert: "Alerte Stock Min :",
+                btnSaveProd: "Enregistrer Produit",
+                btnDelText: "Supprimer",
+                htInvNum: "N° Facture/Ticket",
+                htDate: "Date & Heure",
+                htClient: "Client",
+                htMode: "Paiement",
+                htTotal: "Total",
+                htPaid: "Payé",
+                htDebt: "Crédit",
+                htActions: "Action",
+                btnRefreshHistory: "Actualiser",
+                lblTotalCredit: "Total des Créances & Dettes Clients :",
+                crClient: "Client",
+                crActivity: "Activité / Chantier",
+                crPhone: "Téléphone",
+                crDebt: "Dette Actuelle",
+                lblVersementTitle: "Enregistrer un Versement",
+                lblPayAmount: "Montant Versé DZD :",
+                lblPayNotes: "Notes (Chèque, Reçu...) :",
+                btnConfirmPayment: "Valider le Versement",
+                repLblSales: "Chiffre d'Affaires du Jour",
+                repLblCash: "Espèces Encaissées",
+                repLblCashBox: "En Caisse",
+                repLblCredit: "Ventes à Crédit du Jour",
+                repLblNewDebt: "Nouvelles Dettes",
+                repLblProfit: "Bénéfice Net Estimé",
+                repLblMargin: "Marge Réalisée",
+                setStoreInfoTitle: "Coordonnées du Magasin",
+                setLblName: "Nom du Magasin :",
+                setLblPhone: "N° Téléphone :",
+                setLblAddress: "Adresse :",
+                setLblLang: "Langue par Défaut :",
+                setBtnSave: "Enregistrer",
+                lockTitle: "Période d'Essai Gratuite Terminée (7 jours)",
+                lockDesc: "Ceci est l'écran officiel qui s'affiche au commerçant le 8ème jour. Toutes ses données, ventes et stocks restent intégralement conservés.",
+                lockMidLbl: "Identifiant Machine (Machine ID) :",
+                lockContact: "Pour activation : Contactez le développeur par Téléphone ou WhatsApp : 0550 12 34 56",
+                lockEnterKey: "Entrez la Clé d'Activation Reçue :",
+                btnActText: "Activer la Licence",
+                btnTicClose: "Fermer le Ticket & Nouvelle Vente"
+            }
+        };
+
+        function setLanguage(lang) {
+            currentLang = lang;
+            const root = document.getElementById('htmlRoot');
+            root.setAttribute('lang', lang);
+            root.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
+
+            document.getElementById('btnLangAr').classList.toggle('active', lang === 'ar');
+            document.getElementById('btnLangFr').classList.toggle('active', lang === 'fr');
+            document.getElementById('settLanguage').value = lang;
+
+            const t = i18n[lang];
+            for (const key in t) {
+                const el = document.getElementById(key);
+                if (el) {
+                    if (el.tagName === 'INPUT') el.placeholder = t[key];
+                    else el.innerText = t[key];
+                }
+            }
+
+            document.getElementById('caisseSearchInput').placeholder = t.searchPlaceholder;
+            renderCart();
+            loadStock();
+            loadHistory();
+        }
+
+        function setPriceMode(mode) {
+            priceMode = mode;
+            document.getElementById('btnPriceRetail').classList.toggle('active', mode === 'retail');
+            document.getElementById('btnPriceWholesale').classList.toggle('active', mode === 'wholesale');
+
+            currentCart.forEach(it => {
+                it.unitPrice = mode === 'wholesale' && it.wholesalePrice > 0 ? it.wholesalePrice : it.retailPrice;
+                it.totalPrice = it.quantity * it.unitPrice;
+            });
+            renderCart();
+        }
 
         async function init() {
             const statusRes = await fetch('/api/status').then(r => r.json());
             document.getElementById('sidebarMid').innerText = statusRes.machineId;
             document.getElementById('lockMid').innerText = statusRes.machineId;
 
+            const badgeSpan = document.querySelector('#topBadge span');
             if (statusRes.isActivated) {
                 document.getElementById('topBadge').className = 'license-badge activated';
-                document.getElementById('topBadge').innerText = '✓ نسخة مفعلة رسمياً';
+                if (badgeSpan) badgeSpan.innerText = currentLang === 'ar' ? 'نسخة مفعلة رسمياً' : 'Licence Activée';
             } else {
-                document.getElementById('topBadge').innerText = `⏳ فترة تجريبية: باقي ${statusRes.remainingDays} أيام`;
+                if (badgeSpan) badgeSpan.innerText = currentLang === 'ar' ? `فترة تجريبية: باقي ${statusRes.remainingDays} أيام` : `Essai : ${statusRes.remainingDays} j restants`;
             }
 
             // Load customers
             const custRes = await fetch('/api/customers').then(r => r.json());
             customersList = custRes;
             const select = document.getElementById('caisseCustomerSelect');
-            select.innerHTML = '<option value="">زبون عادي (Comptoir)</option>';
+            select.innerHTML = `<option value="">${currentLang === 'ar' ? 'زبون عادي (Comptoir)' : 'Client Comptoir'}</option>`;
             custRes.forEach(c => {
-                select.innerHTML += `<option value="${c.Id}">${c.FullName} (دين: ${c.CurrentDebt} دج)</option>`;
+                select.innerHTML += `<option value="${c.Id}">${c.FullName} (${c.CurrentDebt} DZD)</option>`;
             });
 
             loadStock();
             loadReports();
             loadCredit();
+            loadHistory();
         }
 
         function switchTab(tabId) {
@@ -479,17 +859,20 @@
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
 
             document.getElementById(`tab-${tabId}`).classList.add('active');
-            event.target.classList.add('active');
+            event.currentTarget.classList.add('active');
 
             const titles = {
-                'caisse': 'نقطة البيع والكاسة (Caisse / Comptoir)',
-                'stock': 'إدارة السلع والمخزون (Stock & Produits)',
-                'credit': 'ديون الزبائن والتسديدات (Crédit Clients)',
-                'reports': 'التقارير والأرباح اليومية (Rapports & Statistiques)',
-                'settings': 'إعدادات المحل والطباعة (Paramètres)',
-                'lock': 'محاكاة شاشة القفل بعد 7 أيام (Trial Lock Screen)'
+                'caisse': i18n[currentLang].caisseTitle,
+                'stock': i18n[currentLang].stockTitle,
+                'history': i18n[currentLang].historyTitle,
+                'credit': i18n[currentLang].creditTitle,
+                'reports': i18n[currentLang].reportsTitle,
+                'settings': i18n[currentLang].settingsTitle,
+                'lock': i18n[currentLang].lockNavTitle
             };
             document.getElementById('headerTitle').innerText = titles[tabId] || '';
+
+            if (tabId === 'history') loadHistory();
         }
 
         // Caisse Search
@@ -511,9 +894,10 @@
             prods.forEach(p => {
                 const div = document.createElement('div');
                 div.className = 'search-item';
+                const pPrice = priceMode === 'wholesale' && p.WholesalePrice > 0 ? p.WholesalePrice : p.SalePrice;
                 div.innerHTML = `
                     <div><strong>${p.Name}</strong> <span style="color: var(--text-muted); font-size: 12px;">(${p.Reference} - ${p.Dimensions || ''})</span></div>
-                    <div style="font-weight: bold; color: var(--primary);">${p.SalePrice} دج</div>
+                    <div style="font-weight: bold; color: var(--primary);">${pPrice.toFixed(2)} DZD</div>
                 `;
                 div.onclick = () => {
                     addToCart(p);
@@ -525,8 +909,16 @@
             dropdown.style.display = 'block';
         });
 
+        searchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                const first = dropdown.querySelector('.search-item');
+                if (first) first.click();
+            }
+        });
+
         function addToCart(prod) {
             const existing = currentCart.find(x => x.productId === prod.Id);
+            const activePrice = priceMode === 'wholesale' && prod.WholesalePrice > 0 ? prod.WholesalePrice : prod.SalePrice;
             if (existing) {
                 existing.quantity += 1;
                 existing.totalPrice = existing.quantity * existing.unitPrice;
@@ -535,21 +927,36 @@
                     productId: prod.Id,
                     reference: prod.Reference,
                     name: prod.Name,
-                    unitPrice: prod.SalePrice,
+                    retailPrice: prod.SalePrice,
+                    wholesalePrice: prod.WholesalePrice,
+                    unitPrice: activePrice,
                     purchasePrice: prod.PurchasePrice,
                     quantity: 1,
-                    totalPrice: prod.SalePrice
+                    totalPrice: activePrice
                 });
             }
             renderCart();
         }
 
-        function changeQty(index, delta) {
-            currentCart[index].quantity += delta;
-            if (currentCart[index].quantity <= 0) {
+        function setQtyDirect(index, value) {
+            const qty = parseFloat(value) || 0;
+            if (qty <= 0) {
                 currentCart.splice(index, 1);
             } else {
-                currentCart[index].totalPrice = currentCart[index].quantity * currentCart[index].unitPrice;
+                currentCart[index].quantity = qty;
+                currentCart[index].totalPrice = qty * currentCart[index].unitPrice;
+            }
+            renderCart();
+        }
+
+        function changeQtyDelta(index, delta) {
+            const current = currentCart[index].quantity;
+            const newQty = Math.max(0, current + delta);
+            if (newQty === 0) {
+                currentCart.splice(index, 1);
+            } else {
+                currentCart[index].quantity = newQty;
+                currentCart[index].totalPrice = newQty * currentCart[index].unitPrice;
             }
             renderCart();
         }
@@ -561,12 +968,13 @@
 
         function renderCart() {
             const tbody = document.getElementById('cartTbody');
+            const emptyText = i18n[currentLang].cartEmptyMsg;
             if (currentCart.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 40px;">السلة فارغة. ابحث عن سلعة لإضافتها</td></tr>';
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 45px;">${emptyText}</td></tr>`;
                 document.getElementById('totalAmountDisplay').innerText = '0.00 DZD';
                 document.getElementById('paidInput').value = '0';
-                document.getElementById('changeDisplay').innerText = '0.00 دج';
-                document.getElementById('debtDisplay').innerText = '0.00 دج';
+                document.getElementById('changeDisplay').innerText = '0.00 DZD';
+                document.getElementById('debtDisplay').innerText = '0.00 DZD';
                 return;
             }
 
@@ -576,16 +984,18 @@
                 subtotal += item.totalPrice;
                 tbody.innerHTML += `
                     <tr>
-                        <td style="font-weight: bold;">${item.reference}</td>
+                        <td style="font-weight: 700;">${item.reference}</td>
                         <td>${item.name}</td>
-                        <td>${item.unitPrice.toFixed(2)} دج</td>
+                        <td>${item.unitPrice.toFixed(2)}</td>
                         <td style="text-align: center;">
-                            <button class="qty-btn" onclick="changeQty(${idx}, -1)">-</button>
-                            <span style="font-weight: bold; margin: 0 6px;">${item.quantity}</span>
-                            <button class="qty-btn" onclick="changeQty(${idx}, 1)">+</button>
+                            <div class="qty-control">
+                                <button class="qty-btn" onclick="changeQtyDelta(${idx}, -1)">-</button>
+                                <input type="number" step="any" min="0" class="qty-input" value="${item.quantity}" onchange="setQtyDirect(${idx}, this.value)">
+                                <button class="qty-btn" onclick="changeQtyDelta(${idx}, 1)">+</button>
+                            </div>
                         </td>
-                        <td style="font-weight: bold; color: var(--primary);">${item.totalPrice.toFixed(2)} دج</td>
-                        <td><button class="btn btn-danger" style="padding: 4px 8px; font-size: 11px;" onclick="removeCartItem(${idx})">✕</button></td>
+                        <td style="font-weight: 700; color: var(--primary);">${item.totalPrice.toFixed(2)}</td>
+                        <td><button class="btn btn-secondary" style="padding: 3px 6px; color: var(--danger);" onclick="removeCartItem(${idx})"><i class="fa-solid fa-xmark"></i></button></td>
                     </tr>
                 `;
             });
@@ -598,11 +1008,11 @@
             document.getElementById('paidInput').value = paid;
 
             if (paid >= net) {
-                document.getElementById('changeDisplay').innerText = `${(paid - net).toFixed(2)} دج`;
-                document.getElementById('debtDisplay').innerText = '0.00 دج';
+                document.getElementById('changeDisplay').innerText = `${(paid - net).toFixed(2)} DZD`;
+                document.getElementById('debtDisplay').innerText = '0.00 DZD';
             } else {
-                document.getElementById('changeDisplay').innerText = '0.00 دج';
-                document.getElementById('debtDisplay').innerText = `${(net - paid).toFixed(2)} دج`;
+                document.getElementById('changeDisplay').innerText = '0.00 DZD';
+                document.getElementById('debtDisplay').innerText = `${(net - paid).toFixed(2)} DZD`;
             }
         }
 
@@ -611,7 +1021,7 @@
 
         async function checkoutSale(isCredit) {
             if (currentCart.length === 0) {
-                alert('السلة فارغة!');
+                alert(currentLang === 'ar' ? 'السلة فارغة!' : 'Panier vide !');
                 return;
             }
 
@@ -620,7 +1030,7 @@
             const custName = custSelect.options[custSelect.selectedIndex].text;
 
             if (isCredit && !custId) {
-                alert('يرجى اختيار الزبون من القائمة لتسجيل البيع بالكريدي!');
+                alert(currentLang === 'ar' ? 'يرجى اختيار الزبون من القائمة لتسجيل البيع بالكريدي!' : 'Veuillez sélectionner un client pour enregistrer à crédit !');
                 return;
             }
 
@@ -646,29 +1056,36 @@
             }).then(r => r.json());
 
             if (res.success) {
-                // Show thermal ticket
-                document.getElementById('ticInvNum').innerText = `N°: ${res.invoiceNumber}`;
-                document.getElementById('ticDate').innerText = `Date: ${new Date().toLocaleString()}`;
-                document.getElementById('ticClient').innerText = `Client: ${custName}`;
-                document.getElementById('ticTotal').innerText = `${net.toFixed(2)} DZD`;
-                document.getElementById('ticPaid').innerText = `${paid.toFixed(2)} DZD`;
-                document.getElementById('ticChange').innerText = `${change.toFixed(2)} DZD`;
-
-                const itemsList = document.getElementById('ticItemsList');
-                itemsList.innerHTML = '';
-                currentCart.forEach(it => {
-                    itemsList.innerHTML += `<div style="display: flex; justify-content: space-between;"><span>${it.name.substring(0, 18)} x${it.quantity}</span><span>${it.totalPrice} DA</span></div>`;
-                });
-
-                document.getElementById('receiptModal').classList.add('active');
+                displayTicket(res.invoiceNumber, new Date().toLocaleString(), custName, net, paid, change, currentCart);
                 currentCart = [];
                 renderCart();
                 loadReports();
                 loadStock();
                 loadCredit();
+                loadHistory();
             } else {
-                alert('خطأ أثناء حفظ العملية: ' + res.error);
+                alert('Erreur : ' + res.error);
             }
+        }
+
+        function displayTicket(invNum, date, client, total, paid, change, items) {
+            document.getElementById('ticInvNum').innerText = `N°: ${invNum}`;
+            document.getElementById('ticDate').innerText = `Date: ${date}`;
+            document.getElementById('ticClient').innerText = `Client: ${client}`;
+            document.getElementById('ticTotal').innerText = `${parseFloat(total).toFixed(2)} DZD`;
+            document.getElementById('ticPaid').innerText = `${parseFloat(paid).toFixed(2)} DZD`;
+            document.getElementById('ticChange').innerText = `${parseFloat(change).toFixed(2)} DZD`;
+
+            const itemsList = document.getElementById('ticItemsList');
+            itemsList.innerHTML = '';
+            items.forEach(it => {
+                const name = it.name || it.ProductName;
+                const qty = it.quantity || it.Quantity;
+                const tot = it.totalPrice || it.TotalPrice;
+                itemsList.innerHTML += `<div style="display: flex; justify-content: space-between;"><span>${name.substring(0, 18)} x${qty}</span><span>${parseFloat(tot).toFixed(2)}</span></div>`;
+            });
+
+            document.getElementById('receiptModal').classList.add('active');
         }
 
         function closeReceiptModal() {
@@ -680,48 +1097,92 @@
             renderCart();
         }
 
-        // Stock
+        // STOCK MANAGEMENT
         async function loadStock() {
             const isLow = document.getElementById('stockLowFilter').checked;
             const q = document.getElementById('stockSearchInput').value;
             const prods = await fetch(`/api/products?low=${isLow}&q=${encodeURIComponent(q)}`).then(r => r.json());
+            productsCache = prods;
 
             const tbody = document.getElementById('stockTbody');
             tbody.innerHTML = '';
             prods.forEach(p => {
                 const stockColor = p.StockQuantity <= p.MinStockAlert ? 'color: var(--danger); font-weight: bold;' : 'font-weight: bold;';
-                tbody.innerHTML += `
-                    <tr>
-                        <td style="font-weight: bold;">${p.Reference}</td>
-                        <td>${p.Barcode || '-'}</td>
-                        <td>${p.Name}</td>
-                        <td>${p.Dimensions || '-'}</td>
-                        <td>${p.PurchasePrice} دج</td>
-                        <td style="font-weight: bold; color: var(--primary);">${p.SalePrice} دج</td>
-                        <td>${p.WholesalePrice} دج</td>
-                        <td style="${stockColor}">${p.StockQuantity}</td>
-                        <td>${p.SaleUnit === 0 ? 'حبة' : (p.SaleUnit === 2 ? 'متر' : 'وحدة')}</td>
-                    </tr>
+                const tr = document.createElement('tr');
+                tr.id = `stock-row-${p.Id}`;
+                tr.style.cursor = 'pointer';
+                tr.onclick = () => selectProductForEdit(p.Id);
+                tr.innerHTML = `
+                    <td style="font-weight: 700;">${p.Reference}</td>
+                    <td>${p.Name}</td>
+                    <td>${p.Dimensions || '-'}</td>
+                    <td>${p.PurchasePrice.toFixed(2)}</td>
+                    <td style="font-weight: 700; color: var(--primary);">${p.SalePrice.toFixed(2)}</td>
+                    <td>${p.WholesalePrice.toFixed(2)}</td>
+                    <td style="${stockColor}">${p.StockQuantity}</td>
+                    <td><button class="btn btn-secondary" style="padding: 3px 8px; font-size: 11px;"><i class="fa-solid fa-pen-to-square"></i></button></td>
                 `;
+                tbody.appendChild(tr);
             });
         }
 
         document.getElementById('stockSearchInput').addEventListener('input', loadStock);
         document.getElementById('stockLowFilter').addEventListener('change', loadStock);
 
+        function selectProductForEdit(id) {
+            const p = productsCache.find(x => x.Id === id);
+            if (!p) return;
+
+            document.querySelectorAll('#stockTbody tr').forEach(r => r.classList.remove('selected-row'));
+            const row = document.getElementById(`stock-row-${id}`);
+            if (row) row.classList.add('selected-row');
+
+            document.getElementById('editProductId').value = p.Id;
+            document.getElementById('formTitle').innerText = currentLang === 'ar' ? `تعديل السلعة: ${p.Name}` : `Modifier : ${p.Name}`;
+            document.getElementById('prodRef').value = p.Reference;
+            document.getElementById('prodBarcode').value = p.Barcode || '';
+            document.getElementById('prodName').value = p.Name;
+            document.getElementById('prodDim').value = p.Dimensions || '';
+            document.getElementById('prodCost').value = p.PurchasePrice;
+            document.getElementById('prodPrice').value = p.SalePrice;
+            document.getElementById('prodWholesale').value = p.WholesalePrice;
+            document.getElementById('prodStock').value = p.StockQuantity;
+            document.getElementById('prodAlert').value = p.MinStockAlert;
+
+            document.getElementById('btnDeleteProd').style.display = 'inline-flex';
+        }
+
+        function resetProductForm() {
+            document.querySelectorAll('#stockTbody tr').forEach(r => r.classList.remove('selected-row'));
+            document.getElementById('editProductId').value = '';
+            document.getElementById('formTitle').innerText = i18n[currentLang].formTitleAdd;
+            document.getElementById('prodRef').value = '';
+            document.getElementById('prodBarcode').value = '';
+            document.getElementById('prodName').value = '';
+            document.getElementById('prodDim').value = '';
+            document.getElementById('prodCost').value = '0';
+            document.getElementById('prodPrice').value = '0';
+            document.getElementById('prodWholesale').value = '0';
+            document.getElementById('prodStock').value = '10';
+            document.getElementById('prodAlert').value = '5';
+            document.getElementById('btnDeleteProd').style.display = 'none';
+        }
+
         function generateRandomBarcode() {
             document.getElementById('prodBarcode').value = '200' + Math.floor(Math.random() * 900000000 + 100000000);
         }
 
         async function saveProduct() {
+            const pId = document.getElementById('editProductId').value;
             const ref = document.getElementById('prodRef').value.trim();
             const name = document.getElementById('prodName').value.trim();
             if (!ref || !name) {
-                alert('يرجى ملء المرجع واسم السلعة!');
+                alert(currentLang === 'ar' ? 'يرجى ملء المرجع واسم السلعة!' : 'Veuillez renseigner la référence et le nom !');
                 return;
             }
 
             const payload = {
+                id: pId ? parseInt(pId) : null,
                 reference: ref,
                 barcode: document.getElementById('prodBarcode').value.trim(),
                 name: name,
@@ -729,7 +1190,8 @@
                 purchasePrice: parseFloat(document.getElementById('prodCost').value) || 0,
                 salePrice: parseFloat(document.getElementById('prodPrice').value) || 0,
                 wholesalePrice: parseFloat(document.getElementById('prodWholesale').value) || 0,
-                stockQuantity: parseFloat(document.getElementById('prodStock').value) || 0
+                stockQuantity: parseFloat(document.getElementById('prodStock').value) || 0,
+                minStockAlert: parseFloat(document.getElementById('prodAlert').value) || 5
             };
 
             const res = await fetch('/api/products/save', {
@@ -739,13 +1201,78 @@
             }).then(r => r.json());
 
             if (res.success) {
-                alert('تمت إضافة السلعة بنجاح إلى المخزن!');
-                document.getElementById('prodRef').value = '';
-                document.getElementById('prodName').value = '';
-                document.getElementById('prodBarcode').value = '';
-                document.getElementById('prodDim').value = '';
+                alert(currentLang === 'ar' ? 'تم حفظ السلعة بنجاح في المخزن!' : 'Produit enregistré avec succès !');
+                resetProductForm();
                 loadStock();
             }
+        }
+
+        async function deleteProduct() {
+            const pId = document.getElementById('editProductId').value;
+            if (!pId) return;
+
+            const confirmMsg = currentLang === 'ar' ? 'هل أنت متأكد من حذف هذه السلعة؟' : 'Voulez-vous vraiment supprimer cet article ?';
+            if (!confirm(confirmMsg)) return;
+
+            const res = await fetch('/api/products/delete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: parseInt(pId) })
+            }).then(r => r.json());
+
+            if (res.success) {
+                alert(currentLang === 'ar' ? 'تم حذف السلعة بنجاح!' : 'Article supprimé !');
+                resetProductForm();
+                loadStock();
+            }
+        }
+
+        // SALES HISTORY
+        function setHistoryFilter(f) {
+            historyFilter = f;
+            document.getElementById('btnDateAll').classList.toggle('active', f === 'all');
+            document.getElementById('btnDateToday').classList.toggle('active', f === 'today');
+            document.getElementById('btnDateWeek').classList.toggle('active', f === 'week');
+            loadHistory();
+        }
+
+        async function loadHistory() {
+            const q = document.getElementById('historySearchInput').value.trim();
+            const res = await fetch(`/api/sales/history?date=${historyFilter}&q=${encodeURIComponent(q)}`).then(r => r.json());
+
+            const tbody = document.getElementById('historyTbody');
+            tbody.innerHTML = '';
+            if (res.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted); padding: 40px;">لا توجد عمليات بيع مسجلة</td></tr>`;
+                return;
+            }
+
+            res.forEach(s => {
+                const dateStr = s.CreatedAt ? s.CreatedAt.replace('T', ' ').substring(0, 16) : '-';
+                const isDebt = s.DebtAmount > 0;
+                const modeBadge = isDebt ? '<span class="badge-pill badge-danger">كريدي (Dette)</span>' : '<span class="badge-pill badge-success">كاش (Espèces)</span>';
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td style="font-weight: 700; color: var(--primary);">${s.InvoiceNumber}</td>
+                    <td style="font-size: 12px; color: var(--text-muted);">${dateStr}</td>
+                    <td style="font-weight: 600;">${s.CustomerName || 'Comptoir'}</td>
+                    <td>${modeBadge}</td>
+                    <td style="font-weight: 800;">${s.TotalAmount.toFixed(2)} DZD</td>
+                    <td>${s.PaidAmount.toFixed(2)}</td>
+                    <td style="color: ${isDebt ? 'var(--danger)' : '#64748b'}; font-weight: ${isDebt ? 'bold' : 'normal'};">${s.DebtAmount.toFixed(2)}</td>
+                    <td style="text-align: center;">
+                        <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 11.5px;" onclick='reprintTicket(${JSON.stringify(s)})'>
+                            <i class="fa-solid fa-receipt"></i> الوصل
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function reprintTicket(sale) {
+            displayTicket(sale.InvoiceNumber, sale.CreatedAt.replace('T', ' ').substring(0, 16), sale.CustomerName || 'Comptoir', sale.TotalAmount, sale.PaidAmount, sale.ChangeAmount, sale.Items || []);
         }
 
         // Credit
@@ -758,11 +1285,11 @@
                 totalCredit += c.CurrentDebt;
                 tbody.innerHTML += `
                     <tr>
-                        <td style="font-weight: bold;">${c.FullName}</td>
+                        <td style="font-weight: 700;">${c.FullName}</td>
                         <td>${c.Activity || '-'}</td>
                         <td>${c.Phone || '-'}</td>
-                        <td style="font-weight: bold; color: var(--danger); font-size: 15px;">${c.CurrentDebt.toFixed(2)} دج</td>
-                        <td><button class="btn btn-primary" style="padding: 4px 10px; font-size: 12px;" onclick="selectCustForPayment(${c.Id}, '${c.FullName}', ${c.CurrentDebt})">تسديد دفعة</button></td>
+                        <td style="font-weight: 800; color: var(--danger);">${c.CurrentDebt.toFixed(2)} DZD</td>
+                        <td><button class="btn btn-secondary" style="padding: 3px 8px; font-size: 11px;" onclick="selectCustForPayment(${c.Id}, '${c.FullName}', ${c.CurrentDebt})">تسديد</button></td>
                     </tr>
                 `;
             });
@@ -771,17 +1298,17 @@
 
         function selectCustForPayment(id, name, debt) {
             selectedCustomerIdForCredit = id;
-            document.getElementById('creditSelectedCustomerName').innerText = `الزبون: ${name} (الدين: ${debt} دج)`;
+            document.getElementById('creditSelectedCustomerName').innerText = `${name} (Dette: ${debt.toFixed(2)} DZD)`;
         }
 
         async function recordCustomerPayment() {
             if (!selectedCustomerIdForCredit) {
-                alert('اختر زبوناً من القائمة أولاً!');
+                alert(currentLang === 'ar' ? 'اختر زبوناً من القائمة أولاً!' : 'Veuillez sélectionner un client d\'abord !');
                 return;
             }
             const amount = parseFloat(document.getElementById('paymentAmountInput').value) || 0;
             if (amount <= 0) {
-                alert('أدخل مبلغ تسديد صحيح!');
+                alert(currentLang === 'ar' ? 'أدخل مبلغ تسديد صحيح!' : 'Montant invalide !');
                 return;
             }
 
@@ -796,7 +1323,7 @@
             }).then(r => r.json());
 
             if (res.success) {
-                alert(`تم تسجيل الدفعة بنجاح! الرصيد المتبقي: ${res.remainingDebt} دج`);
+                alert(currentLang === 'ar' ? `تم تسجيل الدفعة بنجاح! الرصيد المتبقي: ${res.remainingDebt} دج` : `Versement validé ! Reste : ${res.remainingDebt} DZD`);
                 document.getElementById('paymentAmountInput').value = '';
                 loadCredit();
                 loadReports();
@@ -807,7 +1334,7 @@
         async function loadReports() {
             const rep = await fetch('/api/reports/daily').then(r => r.json());
             document.getElementById('repSales').innerText = `${rep.TotalSales.toFixed(2)} DZD`;
-            document.getElementById('repCount').innerText = `${rep.TotalCount} عملية بيع اليوم`;
+            document.getElementById('repCount').innerText = `${rep.TotalCount} ${currentLang === 'ar' ? 'عملية بيع اليوم' : 'ventes aujourd\'hui'}`;
             document.getElementById('repCash').innerText = `${rep.CashCollected.toFixed(2)} DZD`;
             document.getElementById('repCredit').innerText = `${rep.CreditGiven.toFixed(2)} DZD`;
             document.getElementById('repProfit').innerText = `${rep.NetProfit.toFixed(2)} DZD`;
@@ -817,7 +1344,7 @@
         async function activateSoftware() {
             const key = document.getElementById('activationKeyInput').value.trim();
             if (!key) {
-                alert('أدخل مفتاح التفعيل أولاً!');
+                alert(currentLang === 'ar' ? 'أدخل مفتاح التفعيل أولاً!' : 'Veuillez saisir la clé d\'activation !');
                 return;
             }
 
@@ -828,11 +1355,11 @@
             }).then(r => r.json());
 
             if (res.success) {
-                alert('مبروك! ' + res.message);
+                alert(res.message);
                 init();
                 switchTab('caisse');
             } else {
-                alert('خطأ: ' + res.message);
+                alert('Erreur : ' + res.message);
             }
         }
 

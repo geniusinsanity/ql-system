@@ -33,11 +33,11 @@
                              Style="{StaticResource ModernTextBox}" Height="40" FontSize="14"
                              ToolTip="تصفية السلع بالاسم، المرجع، المقاس..."/>
 
-                    <CheckBox Grid.Column="1" Content="⚠️ المخزون الضعيف فقط (Stock faible)" 
+                    <CheckBox Grid.Column="1" Content="المخزون الضعيف فقط (Stock faible)" 
                               IsChecked="{Binding OnlyLowStock}" VerticalAlignment="Center" 
                               FontSize="13" FontWeight="SemiBold" Foreground="#b45309" Margin="15,0,10,0"/>
 
-                    <Button Grid.Column="2" Content="تحديث 🔄" Command="{Binding RefreshCommand}"
+                    <Button Grid.Column="2" Content="تحديث (Actualiser)" Command="{Binding RefreshCommand}"
                             Style="{StaticResource BtnPrimary}" Height="40" Padding="12,0"/>
                 </Grid>
             </Border>
@@ -138,8 +138,8 @@
                         </StackPanel>
                     </Grid>
 
-                    <Button Content="💾 حفظ السلعة" Command="{Binding SaveProductCommand}" Style="{StaticResource BtnSuccess}" Height="42" FontSize="15" Margin="0,0,0,10"/>
-                    <Button Content="🗑️ حذف السلعة" Command="{Binding DeleteProductCommand}" Style="{StaticResource BtnDanger}" Height="36" FontSize="13"/>
+                    <Button Content="حفظ السلعة (Enregistrer)" Command="{Binding SaveProductCommand}" Style="{StaticResource BtnSuccess}" Height="42" FontSize="14" Margin="0,0,0,10"/>
+                    <Button Content="حذف السلعة (Supprimer)" Command="{Binding DeleteProductCommand}" Style="{StaticResource BtnDanger}" Height="36" FontSize="13"/>
                 </StackPanel>
             </ScrollViewer>
         </Border>

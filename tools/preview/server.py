@@ -86,6 +86,19 @@ class QLRequestHandler(http.server.SimpleHTTPRequestHandler):
                 self.wfile.write(f.read())
             return
 
+        if parsed.path.startswith("/static/") or parsed.path.startswith("/webfonts/"):
+            file_path = os.path.join(BASE_DIR, parsed.path.lstrip("/"))
+            if os.path.exists(file_path) and os.path.isfile(file_path):
+                self.send_response(200)
+                if file_path.endswith(".css"):
+                    self.send_header('Content-Type', 'text/css')
+                elif file_path.endswith(".woff2"):
+                    self.send_header('Content-Type', 'font/woff2')
+                self.end_headers()
+                with open(file_path, "rb") as f:
+                    self.wfile.write(f.read())
+                return
+
         if parsed.path == "/api/status":
             self.send_json(check_license())
             return
@@ -134,6 +147,41 @@ class QLRequestHandler(http.server.SimpleHTTPRequestHandler):
             rows = [dict(r) for r in cur.fetchall()]
             conn.close()
             self.send_json(rows)
+            return
+
+        if parsed.path == "/api/sales/history":
+            conn = get_db()
+            cur = conn.cursor()
+            q = params.get('q', [''])[0].strip()
+            date_filter = params.get('date', ['all'])[0]
+
+            sql = "SELECT * FROM Sales WHERE 1=1"
+            query_params = []
+
+            if date_filter == 'today':
+                today = datetime.now().strftime("%Y-%m-%d")
+                sql += " AND CreatedAt >= ? AND CreatedAt <= ?"
+                query_params.extend([f"{today}T00:00:00", f"{today}T23:59:59"])
+            elif date_filter == 'week':
+                week_ago = (datetime.now() - timedelta(days=7)).strftime("%Y-%m-%d")
+                sql += " AND CreatedAt >= ?"
+                query_params.append(f"{week_ago}T00:00:00")
+
+            if q:
+                sql += " AND (InvoiceNumber LIKE ? OR CustomerName LIKE ?)"
+                like_q = f"%{q}%"
+                query_params.extend([like_q, like_q])
+
+            sql += " ORDER BY Id DESC LIMIT 100"
+            cur.execute(sql, query_params)
+            sales = [dict(r) for r in cur.fetchall()]
+
+            for s in sales:
+                cur.execute("SELECT * FROM SaleItems WHERE SaleId = ?", (s["Id"],))
+                s["Items"] = [dict(it) for it in cur.fetchall()]
+
+            conn.close()
+            self.send_json(sales)
             return
 
         if parsed.path == "/api/reports/daily":
@@ -302,6 +350,21 @@ class QLRequestHandler(http.server.SimpleHTTPRequestHandler):
                         VALUES (?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?)
                     """, (ref, barcode, name, name_ar, dim, cost, price, wholesale, stock, alert, now, now))
 
+                conn.commit()
+                self.send_json({"success": True})
+            except Exception as e:
+                conn.rollback()
+                self.send_json({"success": False, "error": str(e)})
+            finally:
+                conn.close()
+            return
+
+        if parsed.path == "/api/products/delete":
+            conn = get_db()
+            cur = conn.cursor()
+            try:
+                p_id = data.get("id")
+                cur.execute("UPDATE Products SET IsActive = 0, UpdatedAt = ? WHERE Id = ?", (datetime.now().isoformat(), p_id))
                 conn.commit()
                 self.send_json({"success": True})
             except Exception as e:
