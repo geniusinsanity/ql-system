@@ -8,7 +8,6 @@
     <LangVersion>latest</LangVersion>
     <RootNamespace>QLSystem.App</RootNamespace>
     <AssemblyName>QLSystem.App</AssemblyName>
-    <ApplicationIcon>icon.ico</ApplicationIcon>
     <StartupObject>QLSystem.App.App</StartupObject>
   </PropertyGroup>
 
