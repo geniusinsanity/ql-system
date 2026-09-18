@@ -1,0 +1,12 @@
+{
+  "dotnet.defaultSolution": "QLSystem.sln",
+  "omnisharp.enableRoslynAnalyzers": true,
+  "omnisharp.enableEditorConfigSupport": true,
+  "editor.formatOnSave": true,
+  "files.autoSave": "afterDelay",
+  "files.autoSaveDelay": 1000,
+  "files.exclude": {
+    "**/bin": true,
+    "**/obj": true
+  }
+}

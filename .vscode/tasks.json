@@ -1,0 +1,61 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Build Solution",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "build",
+        "${workspaceFolder}/QLSystem.sln",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "Run QL System App",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "run",
+        "--project",
+        "${workspaceFolder}/src/QLSystem.App/QLSystem.App.csproj"
+      ],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "Run KeyGen Tool",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "run",
+        "--project",
+        "${workspaceFolder}/src/QLSystem.KeyGen/QLSystem.KeyGen.csproj"
+      ],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "Publish Windows 64-bit Release",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "publish",
+        "${workspaceFolder}/src/QLSystem.App/QLSystem.App.csproj",
+        "-c",
+        "Release",
+        "-r",
+        "win-x64",
+        "--self-contained",
+        "false",
+        "-o",
+        "${workspaceFolder}/publish/win-x64"
+      ],
+      "problemMatcher": "$msCompile"
+    }
+  ]
+}

@@ -1,0 +1,102 @@
+<UserControl x:Class="QLSystem.App.Views.CreditView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="700" d:DesignWidth="1100">
+
+    <Grid Background="#f8fafc" Margin="20">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="2*"/>
+            <ColumnDefinition Width="1*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Left: Customers & Debts -->
+        <Grid Grid.Column="0" Margin="0,0,20,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Total Credit Banner -->
+            <Border Grid.Row="0" Background="#b91c1c" CornerRadius="8" Padding="15" Margin="0,0,0,15">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="إجمالي ديون الزبائن في المحل (Total Crédit Clients)" Foreground="#fecaca" FontSize="13" FontWeight="SemiBold"/>
+                        <TextBlock Text="{Binding TotalCredit, StringFormat={}{0:N2} DZD}" Foreground="White" FontSize="26" FontWeight="Bold" Margin="0,4,0,0"/>
+                    </StackPanel>
+                    <Button Grid.Column="1" Content="تحديث 🔄" Command="{Binding RefreshCommand}" Style="{StaticResource BtnPrimary}" Height="38" Padding="15,0" VerticalAlignment="Center"/>
+                </Grid>
+            </Border>
+
+            <!-- Customers Table -->
+            <Border Grid.Row="1" Style="{StaticResource ModernCard}" Padding="0">
+                <DataGrid ItemsSource="{Binding Customers}" SelectedItem="{Binding SelectedCustomer}"
+                          AutoGenerateColumns="False" CanUserAddRows="False" SelectionMode="Single"
+                          GridLinesVisibility="Horizontal" HeadersVisibility="Column" Background="White"
+                          RowHeight="40" FontSize="13" BorderThickness="0">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="الاسم الكامل (Client)" Binding="{Binding FullName}" Width="*" FontWeight="SemiBold"/>
+                        <DataGridTextColumn Header="المهنة / الورشة" Binding="{Binding Activity}" Width="150"/>
+                        <DataGridTextColumn Header="رقم الهاتف" Binding="{Binding Phone}" Width="130"/>
+                        <DataGridTextColumn Header="الدين الحالي (Dette)" Binding="{Binding CurrentDebt, StringFormat={}{0:N2} دج}" Width="140" FontWeight="Bold" Foreground="#dc2626"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Border>
+
+            <TextBlock Grid.Row="2" Text="{Binding StatusMessage}" Foreground="#10b981" FontWeight="SemiBold" FontSize="13" Margin="0,10,0,0"/>
+        </Grid>
+
+        <!-- Right: Repayment Form & History -->
+        <Border Grid.Column="1" Style="{StaticResource ModernCard}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- Customer Header -->
+                <StackPanel Grid.Row="0" Margin="0,0,0,15">
+                    <TextBlock Text="تسديد دفعة دين (Versement)" FontSize="18" FontWeight="Bold" Foreground="#1e293b"/>
+                    <TextBlock Text="{Binding SelectedCustomer.FullName, StringFormat=الزبون: {0}}" FontSize="15" FontWeight="SemiBold" Foreground="#1e40af" Margin="0,6,0,4"/>
+                    <TextBlock Text="{Binding SelectedCustomer.CurrentDebt, StringFormat=الدين المتبقي عليه: {0:N2} دج}" FontSize="14" FontWeight="Bold" Foreground="#dc2626"/>
+                </StackPanel>
+
+                <!-- Payment Form -->
+                <StackPanel Grid.Row="1" Margin="0,0,0,20">
+                    <TextBlock Text="المبلغ المراد تسديده (دج):" FontSize="13" Foreground="#475569" Margin="0,0,0,4"/>
+                    <TextBox Text="{Binding PaymentAmount, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBox}" Height="40" FontSize="16" FontWeight="Bold" Margin="0,0,0,10"/>
+
+                    <TextBlock Text="ملاحظات (وصل رقم، شيك...):" FontSize="13" Foreground="#475569" Margin="0,0,0,4"/>
+                    <TextBox Text="{Binding PaymentNotes, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBox}" Height="36" Margin="0,0,0,15"/>
+
+                    <Button Content="💵 تسجيل الدفعة وإعطاء وصل" Command="{Binding RecordPaymentCommand}" Style="{StaticResource BtnSuccess}" Height="42" FontSize="15"/>
+                </StackPanel>
+
+                <!-- History of payments -->
+                <Grid Grid.Row="2">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.Row="0" Text="سجل الدفعات السابقة:" FontSize="13" FontWeight="SemiBold" Foreground="#475569" Margin="0,0,0,6"/>
+                    <DataGrid Grid.Row="1" ItemsSource="{Binding PaymentHistory}" AutoGenerateColumns="False" CanUserAddRows="False"
+                              GridLinesVisibility="Horizontal" HeadersVisibility="Column" Background="#f8fafc" FontSize="12" BorderThickness="1" BorderBrush="#e2e8f0">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="التاريخ" Binding="{Binding PaymentDate, StringFormat={}{0:dd/MM/yyyy}}" Width="90"/>
+                            <DataGridTextColumn Header="المبلغ المسدد" Binding="{Binding Amount, StringFormat={}{0:N0} دج}" Width="100" FontWeight="Bold" Foreground="#047857"/>
+                            <DataGridTextColumn Header="المتبقي" Binding="{Binding RemainingDebt, StringFormat={}{0:N0} دج}" Width="90"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

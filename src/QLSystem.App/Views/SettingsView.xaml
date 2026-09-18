@@ -1,0 +1,80 @@
+<UserControl x:Class="QLSystem.App.Views.SettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="700" d:DesignWidth="1100">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Background="#f8fafc" Margin="30" MaxWidth="800" HorizontalAlignment="Left">
+            <TextBlock Text="إعدادات المحل والطباعة (Paramètres Généraux)" FontSize="22" FontWeight="Bold" Foreground="#1e293b" Margin="0,0,0,20"/>
+
+            <!-- Store Info Card -->
+            <Border Style="{StaticResource ModernCard}" Margin="0,0,0,20">
+                <StackPanel>
+                    <TextBlock Text="معلومات المحل (Informations Magasin)" FontSize="16" FontWeight="Bold" Foreground="#1e40af" Margin="0,0,0,15"/>
+
+                    <TextBlock Text="اسم المحل (Nom de la quincaillerie):" FontSize="13" Foreground="#475569" Margin="0,0,0,4"/>
+                    <TextBox Text="{Binding Settings.StoreName, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBox}" Height="38" Margin="0,0,0,12"/>
+
+                    <TextBlock Text="اسم المالك أو المسؤول (Gérant):" FontSize="13" Foreground="#475569" Margin="0,0,0,4"/>
+                    <TextBox Text="{Binding Settings.OwnerName, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBox}" Height="38" Margin="0,0,0,12"/>
+
+                    <Grid Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Margin="0,0,10,0">
+                            <TextBlock Text="رقم الهاتف الأول:" FontSize="13" Foreground="#475569" Margin="0,0,0,4"/>
+                            <TextBox Text="{Binding Settings.Phone1, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBox}" Height="38"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Margin="10,0,0,0">
+                            <TextBlock Text="رقم الهاتف الثاني:" FontSize="13" Foreground="#475569" Margin="0,0,0,4"/>
+                            <TextBox Text="{Binding Settings.Phone2, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBox}" Height="38"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <TextBlock Text="العنوان (Adresse):" FontSize="13" Foreground="#475569" Margin="0,0,0,4"/>
+                    <TextBox Text="{Binding Settings.Address, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBox}" Height="38"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Printing Settings Card -->
+            <Border Style="{StaticResource ModernCard}" Margin="0,0,0,20">
+                <StackPanel>
+                    <TextBlock Text="إعدادات تذكرة الكاسة (Ticket de Caisse)" FontSize="16" FontWeight="Bold" Foreground="#1e40af" Margin="0,0,0,15"/>
+
+                    <TextBlock Text="الرسالة الترحيبية في أعلى التذكرة:" FontSize="13" Foreground="#475569" Margin="0,0,0,4"/>
+                    <TextBox Text="{Binding Settings.ReceiptHeader, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBox}" Height="38" Margin="0,0,0,12"/>
+
+                    <TextBlock Text="رسالة الشكر في أسفل التذكرة:" FontSize="13" Foreground="#475569" Margin="0,0,0,4"/>
+                    <TextBox Text="{Binding Settings.ReceiptFooter, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBox}" Height="38" Margin="0,0,0,15"/>
+
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                        <CheckBox Content="طبع التذكرة تلقائياً بعد كل عملية بيع" IsChecked="{Binding Settings.AutoPrintReceipt}" FontSize="14" Margin="0,0,25,0"/>
+                        <CheckBox Content="فتح درج النقود تلقائياً (Tiroir-Caisse)" IsChecked="{Binding Settings.AutoOpenCashDrawer}" FontSize="14"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- Backup Card -->
+            <Border Style="{StaticResource ModernCard}" Margin="0,0,0,20">
+                <StackPanel>
+                    <TextBlock Text="النسخ الاحتياطي (Sauvegarde des Données)" FontSize="16" FontWeight="Bold" Foreground="#1e40af" Margin="0,0,0,10"/>
+                    <TextBlock Text="يقوم البرنامج تلقائياً بإنشاء نسخة احتياطية من جميع السلع والمبيعات والديون لحمايتها من التلف." FontSize="13" Foreground="#64748b" Margin="0,0,0,15"/>
+
+                    <Button Content="💾 إنشاء نسخة احتياطية فوراً (Sauvegarder Maintenant)" Command="{Binding BackupNowCommand}"
+                            Style="{StaticResource BtnPrimary}" Height="40" HorizontalAlignment="Left" Padding="20,0"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Save Action Button -->
+            <StackPanel Orientation="Horizontal">
+                <Button Content="💾 حفظ جميع الإعدادات" Command="{Binding SaveSettingsCommand}" Style="{StaticResource BtnSuccess}" Height="45" Padding="25,0" FontSize="15" Margin="0,0,15,0"/>
+                <TextBlock Text="{Binding StatusMessage}" Foreground="#10b981" FontWeight="SemiBold" FontSize="14" VerticalAlignment="Center"/>
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

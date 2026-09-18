@@ -1,0 +1,68 @@
+<UserControl x:Class="QLSystem.App.Views.TrialLockView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="600" d:DesignWidth="800"
+             FlowDirection="RightToLeft">
+
+    <Grid Background="#0f172a">
+        <Border MaxWidth="600" VerticalAlignment="Center" HorizontalAlignment="Center"
+                Background="#ffffff" CornerRadius="12" Padding="35"
+                BorderBrush="#e2e8f0" BorderThickness="1">
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="25" ShadowDepth="5" Opacity="0.3" Color="#000000"/>
+            </Border.Effect>
+
+            <StackPanel>
+                <!-- Lock Icon & Header -->
+                <TextBlock Text="🔒" FontSize="48" HorizontalAlignment="Center" Margin="0,0,0,10"/>
+                
+                <TextBlock Text="انتهت الفترة التجريبية المجانية (7 أيام)" 
+                           FontSize="22" FontWeight="Bold" Foreground="#1e293b" 
+                           HorizontalAlignment="Center" Margin="0,0,0,10"/>
+
+                <TextBlock Text="شكراً لاستعمالك برنامج QL System لإدارة محلات الكانكري. جميع بياناتك، سلعك ومبيعاتك محفوظة بالكامل ولم يتم مسح أي شيء."
+                           FontSize="14" Foreground="#64748b" TextWrapping="Wrap" TextAlignment="Center" LineHeight="22" Margin="0,0,0,25"/>
+
+                <!-- Machine ID Box -->
+                <Border Background="#f1f5f9" BorderBrush="#cbd5e1" BorderThickness="1" CornerRadius="8" Padding="15" Margin="0,0,0,20">
+                    <StackPanel>
+                        <TextBlock Text="معرف جهازك (Machine ID) المخصص لهذا المحل:" FontSize="13" Foreground="#475569" Margin="0,0,0,6"/>
+                        <TextBox Text="{Binding MachineId}" IsReadOnly="True" FontSize="18" FontWeight="Bold" 
+                                 Foreground="#1e40af" Background="Transparent" BorderThickness="0" TextAlignment="Center"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Contact Support -->
+                <Border Background="#ecfdf5" BorderBrush="#a7f3d0" BorderThickness="1" CornerRadius="8" Padding="12" Margin="0,0,0,25">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <TextBlock Text="📱 للطلب والتفعيل عبر الهاتف / واتساب: " FontSize="14" FontWeight="SemiBold" Foreground="#065f46"/>
+                        <TextBlock Text="{Binding WhatsappContact}" FontSize="15" FontWeight="Bold" Foreground="#047857"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Activation Code Input -->
+                <TextBlock Text="أدخل كود التفعيل المستلم من المطور:" FontSize="14" FontWeight="SemiBold" Foreground="#1e293b" Margin="0,0,0,8"/>
+                <Grid Margin="0,0,0,15">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBox Grid.Column="0" Text="{Binding ActivationKeyInput, UpdateSourceTrigger=PropertyChanged}" 
+                             Style="{StaticResource ModernTextBox}" Height="45" FontSize="16" FontWeight="SemiBold"
+                             VerticalContentAlignment="Center" Margin="0,0,10,0"/>
+
+                    <Button Grid.Column="1" Content="تفعيل البرنامج الآن" Command="{Binding ActivateCommand}"
+                            Style="{StaticResource BtnSuccess}" Height="45" Padding="20,0" FontSize="15"/>
+                </Grid>
+
+                <!-- Error Message -->
+                <TextBlock Text="{Binding ErrorMessage}" Foreground="#ef4444" FontSize="13" FontWeight="SemiBold"
+                           HorizontalAlignment="Center" TextWrapping="Wrap" Margin="0,5,0,0"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

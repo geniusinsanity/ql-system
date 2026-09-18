@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;netstandard2.0</TargetFrameworks>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <RootNamespace>QLSystem.Hardware</RootNamespace>
+    <AssemblyName>QLSystem.Hardware</AssemblyName>
+    <Description>Hardware Integration for QL System (ESC/POS Thermal Printing, Barcode, Cash Drawer)</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\QLSystem.Core\QLSystem.Core.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,147 @@
+<UserControl x:Class="QLSystem.App.Views.StockView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="700" d:DesignWidth="1100">
+
+    <Grid Background="#f8fafc" Margin="20">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="2*"/>
+            <ColumnDefinition Width="1*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Left Column: Products List & Filters -->
+        <Grid Grid.Column="0" Margin="0,0,20,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Filter Bar -->
+            <Border Grid.Row="0" Style="{StaticResource ModernCard}" Margin="0,0,0,15" Padding="12">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBox Grid.Column="0" Text="{Binding SearchFilter, UpdateSourceTrigger=PropertyChanged}"
+                             Style="{StaticResource ModernTextBox}" Height="40" FontSize="14"
+                             ToolTip="تصفية السلع بالاسم، المرجع، المقاس..."/>
+
+                    <CheckBox Grid.Column="1" Content="⚠️ المخزون الضعيف فقط (Stock faible)" 
+                              IsChecked="{Binding OnlyLowStock}" VerticalAlignment="Center" 
+                              FontSize="13" FontWeight="SemiBold" Foreground="#b45309" Margin="15,0,10,0"/>
+
+                    <Button Grid.Column="2" Content="تحديث 🔄" Command="{Binding RefreshCommand}"
+                            Style="{StaticResource BtnPrimary}" Height="40" Padding="12,0"/>
+                </Grid>
+            </Border>
+
+            <!-- Products Table -->
+            <Border Grid.Row="1" Style="{StaticResource ModernCard}" Margin="0,0,0,10" Padding="0">
+                <DataGrid ItemsSource="{Binding Products}" SelectedItem="{Binding SelectedProduct}"
+                          AutoGenerateColumns="False" CanUserAddRows="False" SelectionMode="Single"
+                          GridLinesVisibility="Horizontal" HeadersVisibility="Column" Background="White"
+                          RowHeight="38" FontSize="13" BorderThickness="0">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="المرجع (Réf)" Binding="{Binding Reference}" Width="110" FontWeight="SemiBold"/>
+                        <DataGridTextColumn Header="الباركود" Binding="{Binding Barcode}" Width="120"/>
+                        <DataGridTextColumn Header="تسمية السلعة" Binding="{Binding Name}" Width="*"/>
+                        <DataGridTextColumn Header="المقاس" Binding="{Binding Dimensions}" Width="90"/>
+                        <DataGridTextColumn Header="سعر الشراء" Binding="{Binding PurchasePrice, StringFormat={}{0:N0} دج}" Width="95"/>
+                        <DataGridTextColumn Header="سعر التجزئة" Binding="{Binding SalePrice, StringFormat={}{0:N0} دج}" Width="95" FontWeight="SemiBold"/>
+                        <DataGridTextColumn Header="سعر الجملة" Binding="{Binding WholesalePrice, StringFormat={}{0:N0} دج}" Width="95"/>
+                        <DataGridTextColumn Header="المخزون" Binding="{Binding StockQuantity}" Width="80" FontWeight="Bold"/>
+                        <DataGridTextColumn Header="الوحدة" Binding="{Binding SaleUnit}" Width="80"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Border>
+
+            <TextBlock Grid.Row="2" Text="{Binding StatusMessage}" Foreground="#10b981" FontWeight="SemiBold" FontSize="13"/>
+        </Grid>
+
+        <!-- Right Column: Add / Edit Product Form -->
+        <Border Grid.Column="1" Style="{StaticResource ModernCard}">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <StackPanel Margin="5">
+                    <TextBlock Text="تفاصيل السلعة (Fiche Article)" FontSize="18" FontWeight="Bold" Foreground="#1e293b" Margin="0,0,0,15"/>
+
+                    <TextBlock Text="رمز السلعة الداخلي (Référence):" FontSize="13" Foreground="#475569" Margin="0,0,0,4"/>
+                    <TextBox Text="{Binding SelectedProduct.Reference, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBox}" Height="36" Margin="0,0,0,10"/>
+
+                    <TextBlock Text="كود الباركود (Barcode):" FontSize="13" Foreground="#475569" Margin="0,0,0,4"/>
+                    <Grid Margin="0,0,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBox Grid.Column="0" Text="{Binding SelectedProduct.Barcode, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBox}" Height="36"/>
+                        <Button Grid.Column="1" Content="توليد 🏷️" Command="{Binding GenerateBarcodeCommand}" Style="{StaticResource BtnPrimary}" Height="36" Margin="6,0,0,0" Padding="8,0" ToolTip="توليد باركود داخلي للسلع السائبة"/>
+                    </Grid>
+
+                    <TextBlock Text="تسمية السلعة (Désignation):" FontSize="13" Foreground="#475569" Margin="0,0,0,4"/>
+                    <TextBox Text="{Binding SelectedProduct.Name, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBox}" Height="36" Margin="0,0,0,10"/>
+
+                    <TextBlock Text="تسمية بالعربية:" FontSize="13" Foreground="#475569" Margin="0,0,0,4"/>
+                    <TextBox Text="{Binding SelectedProduct.NameAr, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBox}" Height="36" Margin="0,0,0,10"/>
+
+                    <TextBlock Text="القياسات / الأبعاد (Dimensions):" FontSize="13" Foreground="#475569" Margin="0,0,0,4"/>
+                    <TextBox Text="{Binding SelectedProduct.Dimensions, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBox}" Height="36" Margin="0,0,0,10"/>
+
+                    <Grid Margin="0,0,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Margin="0,0,5,0">
+                            <TextBlock Text="سعر الشراء (دج):" FontSize="12" Foreground="#475569" Margin="0,0,0,4"/>
+                            <TextBox Text="{Binding SelectedProduct.PurchasePrice, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBox}" Height="36"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Margin="5,0,0,0">
+                            <TextBlock Text="سعر البيع تجزئة (دج):" FontSize="12" Foreground="#475569" Margin="0,0,0,4"/>
+                            <TextBox Text="{Binding SelectedProduct.SalePrice, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBox}" Height="36" FontWeight="Bold"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <Grid Margin="0,0,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Margin="0,0,5,0">
+                            <TextBlock Text="سعر الجملة/المقاول (دج):" FontSize="12" Foreground="#475569" Margin="0,0,0,4"/>
+                            <TextBox Text="{Binding SelectedProduct.WholesalePrice, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBox}" Height="36"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Margin="5,0,0,0">
+                            <TextBlock Text="الكمية في المخزن:" FontSize="12" Foreground="#475569" Margin="0,0,0,4"/>
+                            <TextBox Text="{Binding SelectedProduct.StockQuantity, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBox}" Height="36" FontWeight="Bold"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <Grid Margin="0,0,0,20">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Margin="0,0,5,0">
+                            <TextBlock Text="حد التنبيه (Min):" FontSize="12" Foreground="#475569" Margin="0,0,0,4"/>
+                            <TextBox Text="{Binding SelectedProduct.MinStockAlert, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBox}" Height="36"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Margin="5,0,0,0">
+                            <TextBlock Text="الموقع في المحل:" FontSize="12" Foreground="#475569" Margin="0,0,0,4"/>
+                            <TextBox Text="{Binding SelectedProduct.Location, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBox}" Height="36"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <Button Content="💾 حفظ السلعة" Command="{Binding SaveProductCommand}" Style="{StaticResource BtnSuccess}" Height="42" FontSize="15" Margin="0,0,0,10"/>
+                    <Button Content="🗑️ حذف السلعة" Command="{Binding DeleteProductCommand}" Style="{StaticResource BtnDanger}" Height="36" FontSize="13"/>
+                </StackPanel>
+            </ScrollViewer>
+        </Border>
+    </Grid>
+</UserControl>

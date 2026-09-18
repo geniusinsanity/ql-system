@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <RootNamespace>QLSystem.KeyGen</RootNamespace>
+    <AssemblyName>QLSystem.KeyGen</AssemblyName>
+    <Description>Developer Key Generator Tool for QL System</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\QLSystem.Licensing\QLSystem.Licensing.csproj" />
+  </ItemGroup>
+
+</Project>

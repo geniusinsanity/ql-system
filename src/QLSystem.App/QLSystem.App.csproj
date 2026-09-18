@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
+    <LangVersion>latest</LangVersion>
+    <RootNamespace>QLSystem.App</RootNamespace>
+    <AssemblyName>QLSystem.App</AssemblyName>
+    <ApplicationIcon>icon.ico</ApplicationIcon>
+    <StartupObject>QLSystem.App.App</StartupObject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\QLSystem.Core\QLSystem.Core.csproj" />
+    <ProjectReference Include="..\QLSystem.Data\QLSystem.Data.csproj" />
+    <ProjectReference Include="..\QLSystem.Licensing\QLSystem.Licensing.csproj" />
+    <ProjectReference Include="..\QLSystem.Hardware\QLSystem.Hardware.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="8.0.8" />
+  </ItemGroup>
+
+</Project>

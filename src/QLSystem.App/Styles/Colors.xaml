@@ -1,0 +1,46 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Primary Palette -->
+    <Color x:Key="PrimaryBlueColor">#1e40af</Color>
+    <Color x:Key="PrimaryBlueHoverColor">#1d4ed8</Color>
+    <SolidColorBrush x:Key="PrimaryBlueBrush" Color="{StaticResource PrimaryBlueColor}" />
+    <SolidColorBrush x:Key="PrimaryBlueHoverBrush" Color="{StaticResource PrimaryBlueHoverColor}" />
+
+    <!-- Accent Green -->
+    <Color x:Key="AccentGreenColor">#10b981</Color>
+    <SolidColorBrush x:Key="AccentGreenBrush" Color="{StaticResource AccentGreenColor}" />
+
+    <!-- Danger Red -->
+    <Color x:Key="DangerRedColor">#ef4444</Color>
+    <SolidColorBrush x:Key="DangerRedBrush" Color="{StaticResource DangerRedColor}" />
+
+    <!-- Warning Amber -->
+    <Color x:Key="WarningAmberColor">#f59e0b</Color>
+    <SolidColorBrush x:Key="WarningAmberBrush" Color="{StaticResource WarningAmberColor}" />
+
+    <!-- Dark & Light Backgrounds -->
+    <Color x:Key="SidebarBgColor">#0f172a</Color>
+    <SolidColorBrush x:Key="SidebarBgBrush" Color="{StaticResource SidebarBgColor}" />
+
+    <Color x:Key="AppBgColor">#f8fafc</Color>
+    <SolidColorBrush x:Key="AppBgBrush" Color="{StaticResource AppBgColor}" />
+
+    <Color x:Key="CardBgColor">#ffffff</Color>
+    <SolidColorBrush x:Key="CardBgBrush" Color="{StaticResource CardBgColor}" />
+
+    <!-- Borders & Dividers -->
+    <Color x:Key="BorderGrayColor">#e2e8f0</Color>
+    <SolidColorBrush x:Key="BorderGrayBrush" Color="{StaticResource BorderGrayColor}" />
+
+    <!-- Text Colors -->
+    <Color x:Key="TextDarkColor">#1e293b</Color>
+    <SolidColorBrush x:Key="TextDarkBrush" Color="{StaticResource TextDarkColor}" />
+
+    <Color x:Key="TextMutedColor">#64748b</Color>
+    <SolidColorBrush x:Key="TextMutedBrush" Color="{StaticResource TextMutedColor}" />
+
+    <Color x:Key="TextWhiteColor">#ffffff</Color>
+    <SolidColorBrush x:Key="TextWhiteBrush" Color="{StaticResource TextWhiteColor}" />
+
+</ResourceDictionary>

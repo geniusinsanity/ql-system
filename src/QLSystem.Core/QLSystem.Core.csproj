@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;netstandard2.0</TargetFrameworks>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <RootNamespace>QLSystem.Core</RootNamespace>
+    <AssemblyName>QLSystem.Core</AssemblyName>
+    <Description>Core Domain Models, DTOs, and Business Interfaces for QL System</Description>
+  </PropertyGroup>
+
+</Project>
