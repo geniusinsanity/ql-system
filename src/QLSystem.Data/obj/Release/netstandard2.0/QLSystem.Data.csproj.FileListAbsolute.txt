@@ -1,0 +1,14 @@
+/home/wsm/Desktop/Projects/logiciel quincaillerie/src/QLSystem.Data/bin/Release/netstandard2.0/QLSystem.Data.deps.json
+/home/wsm/Desktop/Projects/logiciel quincaillerie/src/QLSystem.Data/bin/Release/netstandard2.0/QLSystem.Data.dll
+/home/wsm/Desktop/Projects/logiciel quincaillerie/src/QLSystem.Data/bin/Release/netstandard2.0/QLSystem.Data.pdb
+/home/wsm/Desktop/Projects/logiciel quincaillerie/src/QLSystem.Data/bin/Release/netstandard2.0/QLSystem.Core.dll
+/home/wsm/Desktop/Projects/logiciel quincaillerie/src/QLSystem.Data/bin/Release/netstandard2.0/QLSystem.Core.pdb
+/home/wsm/Desktop/Projects/logiciel quincaillerie/src/QLSystem.Data/obj/Release/netstandard2.0/QLSystem.Data.csproj.AssemblyReference.cache
+/home/wsm/Desktop/Projects/logiciel quincaillerie/src/QLSystem.Data/obj/Release/netstandard2.0/QLSystem.Data.GeneratedMSBuildEditorConfig.editorconfig
+/home/wsm/Desktop/Projects/logiciel quincaillerie/src/QLSystem.Data/obj/Release/netstandard2.0/QLSystem.Data.AssemblyInfoInputs.cache
+/home/wsm/Desktop/Projects/logiciel quincaillerie/src/QLSystem.Data/obj/Release/netstandard2.0/QLSystem.Data.AssemblyInfo.cs
+/home/wsm/Desktop/Projects/logiciel quincaillerie/src/QLSystem.Data/obj/Release/netstandard2.0/QLSystem.Data.csproj.CoreCompileInputs.cache
+/home/wsm/Desktop/Projects/logiciel quincaillerie/src/QLSystem.Data/obj/Release/netstandard2.0/QLSystem.Data.sourcelink.json
+/home/wsm/Desktop/Projects/logiciel quincaillerie/src/QLSystem.Data/obj/Release/netstandard2.0/QLSystem.9C88322B.Up2Date
+/home/wsm/Desktop/Projects/logiciel quincaillerie/src/QLSystem.Data/obj/Release/netstandard2.0/QLSystem.Data.dll
+/home/wsm/Desktop/Projects/logiciel quincaillerie/src/QLSystem.Data/obj/Release/netstandard2.0/QLSystem.Data.pdb

@@ -4,7 +4,17 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
-             d:DesignHeight="700" d:DesignWidth="1100">
+             d:DesignHeight="700" d:DesignWidth="1100"
+             x:Name="CaisseRoot">
+
+    <!-- F1–F5 Keyboard Shortcuts -->
+    <UserControl.InputBindings>
+        <KeyBinding Key="F1" Command="{Binding FocusSearchCommand}" CommandParameter="{Binding ElementName=SearchInput}"/>
+        <KeyBinding Key="F2" Command="{Binding CheckoutCashCommand}"/>
+        <KeyBinding Key="F3" Command="{Binding CheckoutCreditCommand}"/>
+        <KeyBinding Key="F4" Command="{Binding TogglePriceModeCommand}"/>
+        <KeyBinding Key="F5" Command="{Binding ClearCartCommand}"/>
+    </UserControl.InputBindings>
 
     <Grid Background="#f8fafc" Margin="20">
         <Grid.ColumnDefinitions>
@@ -16,79 +26,319 @@
         <Grid Grid.Column="0" Margin="0,0,20,0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <!-- Search & Barcode Bar -->
-            <Border Grid.Row="0" Style="{StaticResource ModernCard}" Margin="0,0,0,15" Padding="12">
+            <!-- Search Bar + Gros/Détail Toggle -->
+            <Border Grid.Row="0" Style="{StaticResource ModernCard}" Margin="0,0,0,8" Padding="12">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
-                    <TextBox Grid.Column="0" x:Name="SearchInput" Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
-                             Style="{StaticResource ModernTextBox}" Height="45" FontSize="16"
-                             Padding="12,0" VerticalContentAlignment="Center"
-                             ToolTip="ابحث بالاسم، المرجع، المقاس، أو امسح الباركود مباشرة"/>
+                    <!-- Search TextBox with placeholder -->
+                    <Grid Grid.Column="0">
+                        <TextBox x:Name="SearchInput" 
+                                 Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
+                                 Style="{StaticResource ModernTextBox}" Height="45" FontSize="16"
+                                 Padding="12,0" VerticalContentAlignment="Center"
+                                 ToolTip="[F1] ابحث بالاسم أو امسح الباركود مباشرة"/>
+                        <TextBlock Text="🔍 [F1] ابحث بالاسم، المقاس (VIS-440, PVC 32...) أو امسح الباركود..."
+                                   Foreground="#94a3b8" FontSize="14" VerticalAlignment="Center" 
+                                   Margin="15,0,0,0" IsHitTestVisible="False">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Text, ElementName=SearchInput}" Value="">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </Grid>
 
-                    <TextBlock Grid.Column="0" Text="🔍 ابحث بالاسم، المرجع (VIS-440, PVC 32...) أو امسح الباركود [F1]..."
-                               Foreground="#94a3b8" FontSize="15" VerticalAlignment="Center" Margin="15,0,0,0" IsHitTestVisible="False">
-                        <TextBlock.Style>
-                            <Style TargetType="TextBlock">
-                                <Setter Property="Visibility" Value="Collapsed"/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding Text, ElementName=SearchInput}" Value="">
-                                        <Setter Property="Visibility" Value="Visible"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </TextBlock.Style>
-                    </TextBlock>
+                    <!-- Détail / Gros Global Toggle -->
+                    <Border Grid.Column="1" BorderBrush="#e2e8f0" BorderThickness="1" CornerRadius="6" 
+                            Margin="10,0" Padding="3">
+                        <StackPanel Orientation="Horizontal">
+                            <Button Content="تجزئة (Détail)" Command="{Binding SetRetailModeCommand}"
+                                    Height="38" Padding="10,0" FontSize="12" FontWeight="SemiBold"
+                                    Background="{Binding IsWholesaleMode, Converter={x:Null}}"
+                                    BorderThickness="0" Cursor="Hand">
+                                <Button.Style>
+                                    <Style TargetType="Button">
+                                        <Setter Property="Background" Value="#eff6ff"/>
+                                        <Setter Property="Foreground" Value="#1e40af"/>
+                                        <Setter Property="BorderThickness" Value="0"/>
+                                        <Setter Property="Cursor" Value="Hand"/>
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="Button">
+                                                    <Border Background="{TemplateBinding Background}" 
+                                                            CornerRadius="4" Padding="{TemplateBinding Padding}">
+                                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                    </Border>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsWholesaleMode}" Value="False">
+                                                <Setter Property="Background" Value="#1e40af"/>
+                                                <Setter Property="Foreground" Value="White"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
+                            <Button Content="جملة (Gros) [F4]" Command="{Binding SetWholesaleModeCommand}"
+                                    Height="38" Padding="10,0" FontSize="12" FontWeight="SemiBold">
+                                <Button.Style>
+                                    <Style TargetType="Button">
+                                        <Setter Property="Background" Value="#fffbeb"/>
+                                        <Setter Property="Foreground" Value="#b45309"/>
+                                        <Setter Property="BorderThickness" Value="0"/>
+                                        <Setter Property="Cursor" Value="Hand"/>
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="Button">
+                                                    <Border Background="{TemplateBinding Background}" 
+                                                            CornerRadius="4" Padding="{TemplateBinding Padding}">
+                                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                    </Border>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsWholesaleMode}" Value="True">
+                                                <Setter Property="Background" Value="#b45309"/>
+                                                <Setter Property="Foreground" Value="White"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
+                        </StackPanel>
+                    </Border>
 
-                    <Button Grid.Column="1" Content="إضافة للسلة ↵" Command="{Binding AddToCartCommand}"
-                            Style="{StaticResource BtnPrimary}" Height="45" Margin="10,0,0,0" Padding="15,0"/>
+                    <Button Grid.Column="2" Content="إضافة ↵" Command="{Binding AddToCartCommand}"
+                            Style="{StaticResource BtnPrimary}" Height="45" Padding="15,0"/>
                 </Grid>
             </Border>
 
-            <!-- Search Dropdown Results (Visible when search has items) -->
-            <Border Grid.Row="1" Style="{StaticResource ModernCard}" Margin="0,0,0,15" Padding="0"
-                    Visibility="{Binding SearchResults.Count, Converter={x:Null}}">
-                <!-- DataGrid for Cart -->
+            <!-- Search Results Dropdown -->
+            <Border Grid.Row="1" Margin="0,0,0,8" Padding="0" CornerRadius="8"
+                    Background="White" BorderBrush="#e2e8f0" BorderThickness="1"
+                    Effect="{x:Null}">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                        <Setter Property="Effect">
+                            <Setter.Value>
+                                <DropShadowEffect BlurRadius="12" ShadowDepth="3" Opacity="0.12" Color="#000"/>
+                            </Setter.Value>
+                        </Setter>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsSearchDropdownVisible}" Value="True">
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+                <ListBox ItemsSource="{Binding SearchResults}" 
+                         SelectedItem="{Binding SelectedSearchProduct}"
+                         MaxHeight="280" BorderThickness="0"
+                         Background="Transparent">
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem">
+                            <Setter Property="Padding" Value="12,8"/>
+                            <Setter Property="Cursor" Value="Hand"/>
+                            <EventSetter Event="MouseDoubleClick" Handler="SearchItem_DoubleClick"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="ListBoxItem">
+                                        <Border Background="{TemplateBinding Background}" 
+                                                BorderBrush="#f1f5f9" BorderThickness="0,0,0,1"
+                                                Padding="{TemplateBinding Padding}">
+                                            <ContentPresenter/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="#f0f9ff"/>
+                                            </Trigger>
+                                            <Trigger Property="IsSelected" Value="True">
+                                                <Setter Property="Background" Value="#dbeafe"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ListBox.ItemContainerStyle>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="14" Foreground="#0f172a"/>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding Dimensions}" FontSize="12" Foreground="#64748b"/>
+                                        <TextBlock Text=" • " FontSize="12" Foreground="#94a3b8" 
+                                                   Visibility="{Binding Dimensions, Converter={x:Null}}"/>
+                                        <TextBlock Text="{Binding Reference}" FontSize="12" Foreground="#94a3b8"/>
+                                        <TextBlock FontSize="11" Margin="8,0,0,0" Foreground="#dc2626" FontWeight="SemiBold">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsLowStock}" Value="True">
+                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                            ⚠ مخزون منخفض
+                                        </TextBlock>
+                                    </StackPanel>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding SalePrice, StringFormat={}{0:N0} دج}" 
+                                               FontWeight="Bold" FontSize="14" Foreground="#1e40af" 
+                                               TextAlignment="Right"/>
+                                    <TextBlock FontSize="11" TextAlignment="Right" Foreground="#0284c7">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding WholesalePrice}" Value="0">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                        <Run Text="جملة: "/>
+                                        <Run Text="{Binding WholesalePrice, StringFormat={}{0:N0}}"/>
+                                        <Run Text=" دج"/>
+                                    </TextBlock>
+                                </StackPanel>
+                            </Grid>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Border>
+
+            <!-- Cart DataGrid — Name First -->
+            <Border Grid.Row="2" Style="{StaticResource ModernCard}" Margin="0,0,0,8" Padding="0">
                 <DataGrid ItemsSource="{Binding CartItems}" AutoGenerateColumns="False" CanUserAddRows="False"
                           GridLinesVisibility="Horizontal" HeadersVisibility="Column" Background="White"
-                          RowHeight="40" FontSize="14" BorderThickness="0">
+                          RowHeight="50" FontSize="13" BorderThickness="0"
+                          SelectionMode="Single" CanUserResizeRows="False">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="المرجع (Réf)" Binding="{Binding Reference}" Width="120" IsReadOnly="True"/>
-                        <DataGridTextColumn Header="تسمية السلعة (Désignation)" Binding="{Binding Name}" Width="*" IsReadOnly="True"/>
-                        <DataGridTextColumn Header="سعر الوحدة" Binding="{Binding UnitPrice, StringFormat={}{0:N2} دج}" Width="110" IsReadOnly="True"/>
-                        
-                        <!-- Quantity Template Column with - and + buttons -->
-                        <DataGridTemplateColumn Header="الكمية" Width="140">
+
+                        <!-- 1. Name + Ref/Dimensions subtitle -->
+                        <DataGridTemplateColumn Header="تسمية السلعة (Désignation)" Width="*" IsReadOnly="True">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
-                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                        <Button Content="-" Command="{Binding DataContext.DecreaseQuantityCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
-                                                CommandParameter="{Binding}" Width="28" Height="28" FontWeight="Bold" Margin="2,0"/>
-                                        <TextBox Text="{Binding Quantity, UpdateSourceTrigger=PropertyChanged}" Width="55" Height="28" TextAlignment="Center" VerticalContentAlignment="Center" FontWeight="Bold" FontSize="13" Margin="3,0"/>
-                                        <Button Content="+" Command="{Binding DataContext.IncreaseQuantityCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
-                                                CommandParameter="{Binding}" Width="28" Height="28" FontWeight="Bold" Margin="2,0"/>
+                                    <StackPanel Margin="8,4">
+                                        <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="13.5" Foreground="#0f172a"/>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{Binding Dimensions}" FontSize="11" Foreground="#64748b"/>
+                                            <TextBlock Text="{Binding Reference}" FontSize="11" Foreground="#94a3b8" Margin="4,0,0,0"/>
+                                        </StackPanel>
                                     </StackPanel>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
 
-                        <DataGridTextColumn Header="الوحدة" Binding="{Binding Unit}" Width="90" IsReadOnly="True"/>
-                        <DataGridTextColumn Header="المجموع" Binding="{Binding TotalPrice, StringFormat={}{0:N2} دج}" Width="120" FontWeight="Bold" IsReadOnly="True"/>
-
-                        <!-- Delete Button -->
-                        <DataGridTemplateColumn Width="60">
+                        <!-- 2. Price + Gros/Détail per-item toggle -->
+                        <DataGridTemplateColumn Header="السعر / النوع" Width="130" IsReadOnly="True">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
-                                    <Button Content="✕" Command="{Binding DataContext.RemoveFromCartCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                            CommandParameter="{Binding}" Foreground="#ef4444" Background="Transparent" BorderThickness="0"
-                                            FontWeight="Bold" FontSize="16" Cursor="Hand"/>
+                                    <StackPanel Margin="6,4" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding UnitPrice, StringFormat={}{0:N2}}" 
+                                                   FontWeight="Bold" FontSize="13" Foreground="#0f172a"/>
+                                        <Border CornerRadius="4" Padding="5,2" Margin="0,2,0,0" Cursor="Hand"
+                                                MouseLeftButtonDown="PriceBadge_Click">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Setter Property="Background" Value="#eff6ff"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsWholesale}" Value="True">
+                                                            <Setter Property="Background" Value="#fffbeb"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <TextBlock FontSize="10.5" FontWeight="SemiBold">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Text" Value="تجزئة ↕"/>
+                                                        <Setter Property="Foreground" Value="#1e40af"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsWholesale}" Value="True">
+                                                                <Setter Property="Text" Value="جملة ↕"/>
+                                                                <Setter Property="Foreground" Value="#b45309"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </Border>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <!-- 3. Quantity with - / + buttons -->
+                        <DataGridTemplateColumn Header="الكمية" Width="130">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <Button Content="−" Command="{Binding DataContext.DecreaseQuantityCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                                CommandParameter="{Binding}" Width="28" Height="28" FontWeight="Bold" Margin="2,0"
+                                                Background="#fee2e2" Foreground="#dc2626" BorderThickness="0" FontSize="16" Cursor="Hand"/>
+                                        <TextBox Text="{Binding Quantity, UpdateSourceTrigger=PropertyChanged}" 
+                                                 Width="50" Height="28" TextAlignment="Center" 
+                                                 VerticalContentAlignment="Center" FontWeight="Bold" FontSize="13" Margin="3,0"/>
+                                        <Button Content="+" Command="{Binding DataContext.IncreaseQuantityCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                                CommandParameter="{Binding}" Width="28" Height="28" FontWeight="Bold" Margin="2,0"
+                                                Background="#dcfce7" Foreground="#16a34a" BorderThickness="0" FontSize="16" Cursor="Hand"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <!-- 4. Total -->
+                        <DataGridTextColumn Header="المجموع" 
+                                            Binding="{Binding TotalPrice, StringFormat={}{0:N2} دج}" 
+                                            Width="110" FontWeight="Bold" IsReadOnly="True">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Foreground" Value="#1e40af"/>
+                                    <Setter Property="VerticalAlignment" Value="Center"/>
+                                    <Setter Property="Padding" Value="4,0"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+
+                        <!-- 5. Delete -->
+                        <DataGridTemplateColumn Width="50" IsReadOnly="True">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Button Content="✕" 
+                                            Command="{Binding DataContext.RemoveFromCartCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}" 
+                                            Foreground="#ef4444" Background="Transparent" BorderThickness="0"
+                                            FontWeight="Bold" FontSize="16" Cursor="Hand" VerticalAlignment="Center"/>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
@@ -96,8 +346,44 @@
                 </DataGrid>
             </Border>
 
-            <!-- Bottom Status Notification -->
-            <TextBlock Grid.Row="2" Text="{Binding StatusMessage}" Foreground="#10b981" FontWeight="SemiBold" FontSize="14"/>
+            <!-- Keyboard Shortcuts Bar -->
+            <Border Grid.Row="3" Background="#f1f5f9" CornerRadius="6" Padding="12,7" Margin="0,0,0,5">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <StackPanel Orientation="Horizontal" Margin="0,0,16,0">
+                        <Border Background="#334155" CornerRadius="4" Padding="5,2" Margin="0,0,5,0">
+                            <TextBlock Text="F1" Foreground="White" FontSize="11" FontWeight="Bold"/>
+                        </Border>
+                        <TextBlock Text="بحث" FontSize="12" Foreground="#475569" VerticalAlignment="Center"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,16,0">
+                        <Border Background="#334155" CornerRadius="4" Padding="5,2" Margin="0,0,5,0">
+                            <TextBlock Text="F2" Foreground="White" FontSize="11" FontWeight="Bold"/>
+                        </Border>
+                        <TextBlock Text="دفع نقداً" FontSize="12" Foreground="#475569" VerticalAlignment="Center"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,16,0">
+                        <Border Background="#334155" CornerRadius="4" Padding="5,2" Margin="0,0,5,0">
+                            <TextBlock Text="F3" Foreground="White" FontSize="11" FontWeight="Bold"/>
+                        </Border>
+                        <TextBlock Text="كريدي" FontSize="12" Foreground="#475569" VerticalAlignment="Center"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,16,0">
+                        <Border Background="#334155" CornerRadius="4" Padding="5,2" Margin="0,0,5,0">
+                            <TextBlock Text="F4" Foreground="White" FontSize="11" FontWeight="Bold"/>
+                        </Border>
+                        <TextBlock Text="جملة/تجزئة" FontSize="12" Foreground="#475569" VerticalAlignment="Center"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Border Background="#334155" CornerRadius="4" Padding="5,2" Margin="0,0,5,0">
+                            <TextBlock Text="F5" Foreground="White" FontSize="11" FontWeight="Bold"/>
+                        </Border>
+                        <TextBlock Text="إفراغ السلة" FontSize="12" Foreground="#475569" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- Status Message -->
+            <TextBlock Grid.Row="4" Text="{Binding StatusMessage}" Foreground="#10b981" FontWeight="SemiBold" FontSize="13"/>
         </Grid>
 
         <!-- Right Side: Totals & Checkout -->
@@ -130,7 +416,7 @@
                     </StackPanel>
                 </Border>
 
-                <!-- Financial Inputs: Discount, Paid, Change -->
+                <!-- Financial Inputs -->
                 <StackPanel Grid.Row="3" Margin="0,0,0,20">
                     <Grid Margin="0,0,0,10">
                         <Grid.ColumnDefinitions>
@@ -159,24 +445,44 @@
                         <TextBlock Grid.Column="1" Text="{Binding ChangeAmount, StringFormat={}{0:N2} دج}" VerticalAlignment="Center" TextAlignment="Right" FontSize="16" FontWeight="Bold" Foreground="#047857"/>
                     </Grid>
 
-                    <Grid Margin="0,0,0,5" Visibility="{Binding DebtAmount, Converter={x:Null}}">
+                    <Grid Margin="0,0,0,5">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="120"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0" Text="الباقي كريدي (Dette):" VerticalAlignment="Center" FontSize="14" FontWeight="SemiBold" Foreground="#dc2626"/>
-                        <TextBlock Grid.Column="1" Text="{Binding DebtAmount, StringFormat={}{0:N2} دج}" VerticalAlignment="Center" TextAlignment="Right" FontSize="16" FontWeight="Bold" Foreground="#dc2626"/>
+                        <TextBlock Grid.Column="0" Text="الباقي كريدي (Dette):" VerticalAlignment="Center" FontSize="14" FontWeight="SemiBold" Foreground="#dc2626">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding DebtAmount}" Value="0">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                        <TextBlock Grid.Column="1" Text="{Binding DebtAmount, StringFormat={}{0:N2} دج}" VerticalAlignment="Center" TextAlignment="Right" FontSize="16" FontWeight="Bold" Foreground="#dc2626">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding DebtAmount}" Value="0">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
                     </Grid>
                 </StackPanel>
 
-                <!-- Action Buttons: Cash / Credit / Clear -->
+                <!-- Action Buttons -->
                 <StackPanel Grid.Row="5">
                     <Button Content="[F2] دفع نقداً وطباعة التذكرة" Command="{Binding CheckoutCashCommand}"
                             Style="{StaticResource BtnSuccess}" Height="50" FontSize="16" Margin="0,0,0,10"/>
-
                     <Button Content="[F3] تسجيل بالكريدي (على الحساب)" Command="{Binding CheckoutCreditCommand}"
                             Style="{StaticResource BtnPrimary}" Height="45" FontSize="15" Margin="0,0,0,10"/>
-
                     <Button Content="[F5] إفراغ السلة (Vider)" Command="{Binding ClearCartCommand}"
                             Style="{StaticResource BtnDanger}" Height="38" FontSize="14"/>
                 </StackPanel>

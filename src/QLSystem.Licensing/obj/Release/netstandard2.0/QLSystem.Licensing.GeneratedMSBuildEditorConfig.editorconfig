@@ -1,0 +1,5 @@
+is_global = true
+build_property.RootNamespace = QLSystem.Licensing
+build_property.ProjectDir = /home/wsm/Desktop/Projects/logiciel quincaillerie/src/QLSystem.Licensing/
+build_property.EnableComHosting = 
+build_property.EnableGeneratedComInterfaceComImportInterop = 

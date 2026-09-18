@@ -9,6 +9,7 @@
     <RootNamespace>QLSystem.App</RootNamespace>
     <AssemblyName>QLSystem.App</AssemblyName>
     <StartupObject>QLSystem.App.App</StartupObject>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
   </PropertyGroup>
 
   <ItemGroup>

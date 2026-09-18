@@ -1,0 +1,16 @@
+/home/wsm/Desktop/Projects/logiciel quincaillerie/src/QLSystem.Licensing/bin/Release/net8.0/QLSystem.Licensing.deps.json
+/home/wsm/Desktop/Projects/logiciel quincaillerie/src/QLSystem.Licensing/bin/Release/net8.0/QLSystem.Licensing.dll
+/home/wsm/Desktop/Projects/logiciel quincaillerie/src/QLSystem.Licensing/bin/Release/net8.0/QLSystem.Licensing.pdb
+/home/wsm/Desktop/Projects/logiciel quincaillerie/src/QLSystem.Licensing/bin/Release/net8.0/QLSystem.Core.dll
+/home/wsm/Desktop/Projects/logiciel quincaillerie/src/QLSystem.Licensing/bin/Release/net8.0/QLSystem.Core.pdb
+/home/wsm/Desktop/Projects/logiciel quincaillerie/src/QLSystem.Licensing/obj/Release/net8.0/QLSystem.Licensing.csproj.AssemblyReference.cache
+/home/wsm/Desktop/Projects/logiciel quincaillerie/src/QLSystem.Licensing/obj/Release/net8.0/QLSystem.Licensing.GeneratedMSBuildEditorConfig.editorconfig
+/home/wsm/Desktop/Projects/logiciel quincaillerie/src/QLSystem.Licensing/obj/Release/net8.0/QLSystem.Licensing.AssemblyInfoInputs.cache
+/home/wsm/Desktop/Projects/logiciel quincaillerie/src/QLSystem.Licensing/obj/Release/net8.0/QLSystem.Licensing.AssemblyInfo.cs
+/home/wsm/Desktop/Projects/logiciel quincaillerie/src/QLSystem.Licensing/obj/Release/net8.0/QLSystem.Licensing.csproj.CoreCompileInputs.cache
+/home/wsm/Desktop/Projects/logiciel quincaillerie/src/QLSystem.Licensing/obj/Release/net8.0/QLSystem.Licensing.sourcelink.json
+/home/wsm/Desktop/Projects/logiciel quincaillerie/src/QLSystem.Licensing/obj/Release/net8.0/QLSystem.3312B0E0.Up2Date
+/home/wsm/Desktop/Projects/logiciel quincaillerie/src/QLSystem.Licensing/obj/Release/net8.0/QLSystem.Licensing.dll
+/home/wsm/Desktop/Projects/logiciel quincaillerie/src/QLSystem.Licensing/obj/Release/net8.0/refint/QLSystem.Licensing.dll
+/home/wsm/Desktop/Projects/logiciel quincaillerie/src/QLSystem.Licensing/obj/Release/net8.0/QLSystem.Licensing.pdb
+/home/wsm/Desktop/Projects/logiciel quincaillerie/src/QLSystem.Licensing/obj/Release/net8.0/ref/QLSystem.Licensing.dll

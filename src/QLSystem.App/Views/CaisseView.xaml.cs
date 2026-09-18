@@ -1,6 +1,8 @@
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using QLSystem.App.ViewModels;
+using QLSystem.Core.DTOs;
 
 namespace QLSystem.App.Views
 {
@@ -9,45 +11,25 @@ namespace QLSystem.App.Views
         public CaisseView()
         {
             InitializeComponent();
-            Loaded += (s, e) => SearchInput.Focus();
+            SearchInput.Focus();
         }
 
-        protected override void OnPreviewKeyDown(KeyEventArgs e)
+        // Double-click on search result → add to cart
+        private void SearchItem_DoubleClick(object sender, MouseButtonEventArgs e)
         {
-            base.OnPreviewKeyDown(e);
-
-            if (DataContext is CaisseViewModel vm)
+            if (DataContext is CaisseViewModel vm && vm.SelectedSearchProduct != null)
             {
-                if (e.Key == Key.F1)
-                {
-                    SearchInput.Focus();
-                    SearchInput.SelectAll();
-                    e.Handled = true;
-                }
-                else if (e.Key == Key.F2)
-                {
-                    if (vm.CheckoutCashCommand.CanExecute(null))
-                    {
-                        vm.CheckoutCashCommand.Execute(null);
-                    }
-                    e.Handled = true;
-                }
-                else if (e.Key == Key.F3)
-                {
-                    if (vm.CheckoutCreditCommand.CanExecute(null))
-                    {
-                        vm.CheckoutCreditCommand.Execute(null);
-                    }
-                    e.Handled = true;
-                }
-                else if (e.Key == Key.F5)
-                {
-                    if (vm.ClearCartCommand.CanExecute(null))
-                    {
-                        vm.ClearCartCommand.Execute(null);
-                    }
-                    e.Handled = true;
-                }
+                vm.AddProductToCartCommand.Execute(vm.SelectedSearchProduct);
+            }
+        }
+
+        // Click on price badge → toggle Gros/Détail for that item
+        private void PriceBadge_Click(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is FrameworkElement fe && fe.DataContext is CartItemDto item
+                && DataContext is CaisseViewModel vm)
+            {
+                vm.ToggleItemPriceModeCommand.Execute(item);
             }
         }
     }

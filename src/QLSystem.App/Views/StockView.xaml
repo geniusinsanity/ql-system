@@ -49,15 +49,13 @@
                           GridLinesVisibility="Horizontal" HeadersVisibility="Column" Background="White"
                           RowHeight="38" FontSize="13" BorderThickness="0">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="المرجع (Réf)" Binding="{Binding Reference}" Width="110" FontWeight="SemiBold"/>
-                        <DataGridTextColumn Header="الباركود" Binding="{Binding Barcode}" Width="120"/>
-                        <DataGridTextColumn Header="تسمية السلعة" Binding="{Binding Name}" Width="*"/>
+                        <DataGridTextColumn Header="تسمية السلعة (Désignation)" Binding="{Binding Name}" Width="*" FontWeight="SemiBold"/>
                         <DataGridTextColumn Header="المقاس" Binding="{Binding Dimensions}" Width="90"/>
-                        <DataGridTextColumn Header="سعر الشراء" Binding="{Binding PurchasePrice, StringFormat={}{0:N0} دج}" Width="95"/>
                         <DataGridTextColumn Header="سعر التجزئة" Binding="{Binding SalePrice, StringFormat={}{0:N0} دج}" Width="95" FontWeight="SemiBold"/>
-                        <DataGridTextColumn Header="سعر الجملة" Binding="{Binding WholesalePrice, StringFormat={}{0:N0} دج}" Width="95"/>
+                        <DataGridTextColumn Header="سعر الجملة" Binding="{Binding WholesalePrice, StringFormat={}{0:N0} دج}" Width="90"/>
+                        <DataGridTextColumn Header="سعر الشراء" Binding="{Binding PurchasePrice, StringFormat={}{0:N0} دج}" Width="90"/>
                         <DataGridTextColumn Header="المخزون" Binding="{Binding StockQuantity}" Width="80" FontWeight="Bold"/>
-                        <DataGridTextColumn Header="الوحدة" Binding="{Binding SaleUnit}" Width="80"/>
+                        <DataGridTextColumn Header="المرجع (Réf)" Binding="{Binding Reference}" Width="110"/>
                     </DataGrid.Columns>
                 </DataGrid>
             </Border>
@@ -71,23 +69,10 @@
                 <StackPanel Margin="5">
                     <TextBlock Text="تفاصيل السلعة (Fiche Article)" FontSize="18" FontWeight="Bold" Foreground="#1e293b" Margin="0,0,0,15"/>
 
-                    <TextBlock Text="رمز السلعة الداخلي (Référence):" FontSize="13" Foreground="#475569" Margin="0,0,0,4"/>
-                    <TextBox Text="{Binding SelectedProduct.Reference, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBox}" Height="36" Margin="0,0,0,10"/>
+                    <TextBlock Text="تسمية السلعة (Désignation) *:" FontSize="13" FontWeight="SemiBold" Foreground="#1e293b" Margin="0,0,0,4"/>
+                    <TextBox Text="{Binding SelectedProduct.Name, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBox}" Height="38" Margin="0,0,0,10" FontSize="14"/>
 
-                    <TextBlock Text="كود الباركود (Barcode):" FontSize="13" Foreground="#475569" Margin="0,0,0,4"/>
-                    <Grid Margin="0,0,0,10">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        <TextBox Grid.Column="0" Text="{Binding SelectedProduct.Barcode, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBox}" Height="36"/>
-                        <Button Grid.Column="1" Content="توليد 🏷️" Command="{Binding GenerateBarcodeCommand}" Style="{StaticResource BtnPrimary}" Height="36" Margin="6,0,0,0" Padding="8,0" ToolTip="توليد باركود داخلي للسلع السائبة"/>
-                    </Grid>
-
-                    <TextBlock Text="تسمية السلعة (Désignation):" FontSize="13" Foreground="#475569" Margin="0,0,0,4"/>
-                    <TextBox Text="{Binding SelectedProduct.Name, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBox}" Height="36" Margin="0,0,0,10"/>
-
-                    <TextBlock Text="تسمية بالعربية:" FontSize="13" Foreground="#475569" Margin="0,0,0,4"/>
+                    <TextBlock Text="التسمية بالعربية:" FontSize="13" Foreground="#475569" Margin="0,0,0,4"/>
                     <TextBox Text="{Binding SelectedProduct.NameAr, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBox}" Height="36" Margin="0,0,0,10"/>
 
                     <TextBlock Text="القياسات / الأبعاد (Dimensions):" FontSize="13" Foreground="#475569" Margin="0,0,0,4"/>

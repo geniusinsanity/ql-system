@@ -2,13 +2,13 @@ using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 using QLSystem.App.Helpers;
 using QLSystem.Core.DTOs;
 using QLSystem.Core.Enums;
 using QLSystem.Core.Interfaces;
 using QLSystem.Core.Models;
-using QLSystem.Hardware;
 
 namespace QLSystem.App.ViewModels
 {
@@ -23,14 +23,16 @@ namespace QLSystem.App.ViewModels
         private readonly ISettingsRepository _settingsRepository;
 
         private string _searchQuery = string.Empty;
-        private ObservableCollection<Product> _searchResults = new ObservableCollection<Product>();
+        private ObservableCollection<Product> _searchResults = new();
         private Product? _selectedSearchProduct;
-        private ObservableCollection<CartItemDto> _cartItems = new ObservableCollection<CartItemDto>();
+        private ObservableCollection<CartItemDto> _cartItems = new();
+        private bool _isWholesaleMode = false;
+        private bool _isSearchDropdownVisible = false;
 
         private decimal _discount;
         private decimal _paidAmount;
         private Customer? _selectedCustomer;
-        private ObservableCollection<Customer> _customers = new ObservableCollection<Customer>();
+        private ObservableCollection<Customer> _customers = new();
         private string _invoiceNumber = string.Empty;
         private string _statusMessage = string.Empty;
 
@@ -62,6 +64,30 @@ namespace QLSystem.App.ViewModels
         {
             get => _cartItems;
             set => SetProperty(ref _cartItems, value);
+        }
+
+        public bool IsWholesaleMode
+        {
+            get => _isWholesaleMode;
+            set
+            {
+                if (SetProperty(ref _isWholesaleMode, value))
+                {
+                    // Update all cart items when toggling global price mode
+                    foreach (var item in CartItems)
+                    {
+                        item.IsWholesale = value && item.WholesalePrice > 0;
+                        item.UnitPrice = item.IsWholesale ? item.WholesalePrice : item.RetailPrice;
+                    }
+                    RefreshCartTotals();
+                }
+            }
+        }
+
+        public bool IsSearchDropdownVisible
+        {
+            get => _isSearchDropdownVisible;
+            set => SetProperty(ref _isSearchDropdownVisible, value);
         }
 
         public decimal SubTotal => CartItems.Sum(x => x.TotalPrice);
@@ -101,23 +127,8 @@ namespace QLSystem.App.ViewModels
             }
         }
 
-        public decimal ChangeAmount
-        {
-            get
-            {
-                if (PaidAmount > TotalAmount) return PaidAmount - TotalAmount;
-                return 0;
-            }
-        }
-
-        public decimal DebtAmount
-        {
-            get
-            {
-                if (PaidAmount < TotalAmount) return TotalAmount - PaidAmount;
-                return 0;
-            }
-        }
+        public decimal ChangeAmount => PaidAmount > TotalAmount ? PaidAmount - TotalAmount : 0;
+        public decimal DebtAmount => PaidAmount < TotalAmount ? TotalAmount - PaidAmount : 0;
 
         public Customer? SelectedCustomer
         {
@@ -143,13 +154,20 @@ namespace QLSystem.App.ViewModels
             set => SetProperty(ref _statusMessage, value);
         }
 
+        // Commands
         public ICommand AddToCartCommand { get; }
+        public ICommand AddProductToCartCommand { get; }
         public ICommand RemoveFromCartCommand { get; }
         public ICommand IncreaseQuantityCommand { get; }
         public ICommand DecreaseQuantityCommand { get; }
         public ICommand CheckoutCashCommand { get; }
         public ICommand CheckoutCreditCommand { get; }
         public ICommand ClearCartCommand { get; }
+        public ICommand SetRetailModeCommand { get; }
+        public ICommand SetWholesaleModeCommand { get; }
+        public ICommand TogglePriceModeCommand { get; }
+        public ICommand ToggleItemPriceModeCommand { get; }
+        public ICommand FocusSearchCommand { get; }
 
         public CaisseViewModel(
             IProductRepository productRepository,
@@ -163,12 +181,25 @@ namespace QLSystem.App.ViewModels
             _settingsRepository = settingsRepository;
 
             AddToCartCommand = new RelayCommand(ExecuteAddToCart);
+            AddProductToCartCommand = new RelayCommand(p => { if (p is Product prod) AddProductToCart(prod); });
             RemoveFromCartCommand = new RelayCommand(p => ExecuteRemoveFromCart(p as CartItemDto));
             IncreaseQuantityCommand = new RelayCommand(p => ExecuteChangeQuantity(p as CartItemDto, 1));
             DecreaseQuantityCommand = new RelayCommand(p => ExecuteChangeQuantity(p as CartItemDto, -1));
             CheckoutCashCommand = new RelayCommand(async () => await ExecuteCheckoutAsync(PaymentType.Cash));
             CheckoutCreditCommand = new RelayCommand(async () => await ExecuteCheckoutAsync(PaymentType.Credit));
             ClearCartCommand = new RelayCommand(ExecuteClearCart);
+            SetRetailModeCommand = new RelayCommand(() => IsWholesaleMode = false);
+            SetWholesaleModeCommand = new RelayCommand(() => IsWholesaleMode = true);
+            TogglePriceModeCommand = new RelayCommand(() => IsWholesaleMode = !IsWholesaleMode);
+            ToggleItemPriceModeCommand = new RelayCommand(p => ExecuteToggleItemPriceMode(p as CartItemDto));
+            FocusSearchCommand = new RelayCommand(p =>
+            {
+                if (p is System.Windows.Controls.TextBox tb)
+                {
+                    tb.Focus();
+                    tb.SelectAll();
+                }
+            });
 
             _ = InitializeAsync();
         }
@@ -185,20 +216,23 @@ namespace QLSystem.App.ViewModels
             if (string.IsNullOrWhiteSpace(SearchQuery))
             {
                 SearchResults.Clear();
+                IsSearchDropdownVisible = false;
                 return;
             }
 
-            // فحص هل هو مسح باركود كامل
+            // Check for exact barcode scan
             var exactBarcodeProduct = await _productRepository.GetByBarcodeAsync(SearchQuery);
             if (exactBarcodeProduct != null)
             {
                 AddProductToCart(exactBarcodeProduct);
                 SearchQuery = string.Empty;
+                IsSearchDropdownVisible = false;
                 return;
             }
 
-            var results = await _productRepository.SearchAsync(SearchQuery, limit: 15);
+            var results = await _productRepository.SearchAsync(SearchQuery, limit: 12);
             SearchResults = new ObservableCollection<Product>(results);
+            IsSearchDropdownVisible = SearchResults.Count > 0;
         }
 
         public void AddProductToCart(Product p)
@@ -210,12 +244,15 @@ namespace QLSystem.App.ViewModels
             }
             else
             {
-                bool useWholesale = SelectedCustomer?.AppliesWholesalePrice ?? false;
+                bool useWholesale = IsWholesaleMode && p.WholesalePrice > 0;
                 CartItems.Add(new CartItemDto
                 {
                     ProductId = p.Id,
                     Reference = p.Reference,
                     Name = p.Name,
+                    Dimensions = p.Dimensions ?? string.Empty,
+                    RetailPrice = p.SalePrice,
+                    WholesalePrice = p.WholesalePrice,
                     UnitPrice = useWholesale ? p.WholesalePrice : p.SalePrice,
                     PurchasePrice = p.PurchasePrice,
                     Quantity = 1,
@@ -225,6 +262,7 @@ namespace QLSystem.App.ViewModels
                 });
             }
 
+            IsSearchDropdownVisible = false;
             RefreshCartTotals();
         }
 
@@ -235,6 +273,7 @@ namespace QLSystem.App.ViewModels
                 AddProductToCart(SelectedSearchProduct);
                 SearchQuery = string.Empty;
                 SearchResults.Clear();
+                IsSearchDropdownVisible = false;
             }
         }
 
@@ -260,6 +299,14 @@ namespace QLSystem.App.ViewModels
             }
         }
 
+        private void ExecuteToggleItemPriceMode(CartItemDto? item)
+        {
+            if (item == null || item.WholesalePrice <= 0) return;
+            item.IsWholesale = !item.IsWholesale;
+            item.UnitPrice = item.IsWholesale ? item.WholesalePrice : item.RetailPrice;
+            RefreshCartTotals();
+        }
+
         private void RefreshCartTotals()
         {
             OnPropertyChanged(nameof(SubTotal));
@@ -273,13 +320,13 @@ namespace QLSystem.App.ViewModels
         {
             if (!CartItems.Any())
             {
-                StatusMessage = "السلة فارغة!";
+                StatusMessage = "⚠ السلة فارغة! أضف سلعاً للمتابعة.";
                 return;
             }
 
             if (paymentType == PaymentType.Credit && SelectedCustomer == null)
             {
-                StatusMessage = "يرجى اختيار الزبون لتسجيل البيع بالكريدي!";
+                StatusMessage = "⚠ يرجى اختيار الزبون من القائمة لتسجيل البيع بالكريدي!";
                 return;
             }
 
@@ -316,7 +363,7 @@ namespace QLSystem.App.ViewModels
 
             await _saleRepository.CreateSaleAsync(sale);
 
-            StatusMessage = $"تم حفظ العملية بنجاح! الوصل: {sale.InvoiceNumber}";
+            StatusMessage = $"✅ تم حفظ العملية بنجاح! الوصل: {sale.InvoiceNumber}";
             ExecuteClearCart();
             InvoiceNumber = await _saleRepository.GenerateNextInvoiceNumberAsync();
         }
@@ -327,6 +374,8 @@ namespace QLSystem.App.ViewModels
             Discount = 0;
             PaidAmount = 0;
             SelectedCustomer = null;
+            IsWholesaleMode = false;
+            IsSearchDropdownVisible = false;
             RefreshCartTotals();
         }
     }

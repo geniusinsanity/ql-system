@@ -43,7 +43,7 @@
 
     <Grid>
         <Grid.ColumnDefinitions>
-            <!-- Navigation Sidebar (Hidden if locked) -->
+            <!-- Sidebar hidden when locked -->
             <ColumnDefinition Width="240">
                 <ColumnDefinition.Style>
                     <Style TargetType="ColumnDefinition">
@@ -56,7 +56,6 @@
                     </Style>
                 </ColumnDefinition.Style>
             </ColumnDefinition>
-            <!-- Main Content Area -->
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
@@ -69,7 +68,7 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <!-- Brand Logo & Title -->
+                <!-- Brand -->
                 <StackPanel Grid.Row="0" Margin="5,10,0,30">
                     <StackPanel Orientation="Horizontal">
                         <Border Background="#1e40af" CornerRadius="6" Width="34" Height="34" VerticalAlignment="Center" Margin="0,0,10,0">
@@ -80,16 +79,41 @@
                     <TextBlock Text="Quincaillerie Management" FontSize="11" Foreground="#64748b" Margin="44,2,0,0"/>
                 </StackPanel>
 
-                <!-- Navigation Menu Buttons -->
+                <!-- Navigation -->
                 <StackPanel Grid.Row="1">
-                    <Button Content="الكاسة والبيع (Caisse)" Command="{Binding NavigateCaisseCommand}" Style="{StaticResource BtnNav}"/>
-                    <Button Content="المخزون والسلع (Stock)" Command="{Binding NavigateStockCommand}" Style="{StaticResource BtnNav}"/>
-                    <Button Content="ديون الزبائن (Crédit)" Command="{Binding NavigateCreditCommand}" Style="{StaticResource BtnNav}"/>
-                    <Button Content="التقارير والأرباح (Rapports)" Command="{Binding NavigateReportsCommand}" Style="{StaticResource BtnNav}"/>
-                    <Button Content="الإعدادات (Paramètres)" Command="{Binding NavigateSettingsCommand}" Style="{StaticResource BtnNav}"/>
+                    <Button Command="{Binding NavigateCaisseCommand}" Style="{StaticResource BtnNav}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="🛒" FontSize="15" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="الكاسة والبيع (Caisse)" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Command="{Binding NavigateStockCommand}" Style="{StaticResource BtnNav}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="📦" FontSize="15" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="المخزون والسلع (Stock)" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Command="{Binding NavigateCreditCommand}" Style="{StaticResource BtnNav}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="💳" FontSize="15" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="ديون الزبائن (Crédit)" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Command="{Binding NavigateReportsCommand}" Style="{StaticResource BtnNav}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="📊" FontSize="15" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="التقارير والأرباح (Rapports)" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Command="{Binding NavigateSettingsCommand}" Style="{StaticResource BtnNav}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="⚙" FontSize="15" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="الإعدادات (Paramètres)" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
                 </StackPanel>
 
-                <!-- Footer: Version & Machine ID -->
+                <!-- Footer -->
                 <StackPanel Grid.Row="2" Margin="5,0,0,10">
                     <TextBlock Text="نسخة حاسوب واحد (Monoposte)" FontSize="11" Foreground="#475569"/>
                     <TextBlock Text="{Binding LicenseInfo.MachineId}" FontSize="10" Foreground="#334155" TextTrimming="CharacterEllipsis"/>
@@ -98,31 +122,62 @@
             </Grid>
         </Border>
 
-        <!-- Main Body -->
+        <!-- Main Content -->
         <Grid Grid.Column="1" Background="#f8fafc">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <!-- Top Header Bar -->
-            <Border Grid.Row="0" Background="White" BorderBrush="#e2e8f0" BorderThickness="0,0,0,1" Padding="25,12">
+            <!-- Top Header — compact license icon -->
+            <Border Grid.Row="0" Background="White" BorderBrush="#e2e8f0" BorderThickness="0,0,0,1" Padding="25,10">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
-                    <TextBlock Grid.Column="0" Text="نظام تسيير محلات الكانكري والعتاد" FontSize="15" FontWeight="SemiBold" Foreground="#334155" VerticalAlignment="Center"/>
+                    <TextBlock Grid.Column="0" Text="نظام تسيير محلات الكانكري والعتاد" 
+                               FontSize="15" FontWeight="SemiBold" Foreground="#334155" VerticalAlignment="Center"/>
 
-                    <!-- License Status Badge -->
-                    <Border Grid.Column="1" Background="{Binding LicenseBadgeColor}" CornerRadius="20" Padding="14,6">
-                        <TextBlock Text="{Binding LicenseBadgeText}" Foreground="White" FontSize="13" FontWeight="Bold"/>
-                    </Border>
+                    <!-- Small License Status Button -->
+                    <Button Grid.Column="1" Command="{Binding OpenLicenseModalCommand}"
+                            Padding="10,6" Cursor="Hand" VerticalAlignment="Center"
+                            ToolTip="{Binding LicenseBadgeText}">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Background" Value="Transparent"/>
+                                <Setter Property="BorderBrush" Value="#e2e8f0"/>
+                                <Setter Property="BorderThickness" Value="1"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="{TemplateBinding Background}" 
+                                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                                    CornerRadius="6" Padding="{TemplateBinding Padding}">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Background" Value="#f1f5f9"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </Button.Style>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{Binding LicenseIcon}" FontSize="16" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding LicenseShortText}" FontSize="12" FontWeight="SemiBold"
+                                       Foreground="{Binding LicenseBadgeColor}" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
                 </Grid>
             </Border>
 
-            <!-- Active View Content -->
+            <!-- Active View -->
             <ContentControl Grid.Row="1" Content="{Binding CurrentViewModel}"/>
         </Grid>
     </Grid>

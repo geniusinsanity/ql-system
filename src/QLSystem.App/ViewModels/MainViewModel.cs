@@ -1,4 +1,5 @@
 using System;
+using System.Windows;
 using System.Windows.Input;
 using QLSystem.App.Helpers;
 using QLSystem.Core.Enums;
@@ -29,7 +30,9 @@ namespace QLSystem.App.ViewModels
         private object _currentViewModel;
         private LicenseInfo _licenseInfo;
         private string _licenseBadgeText = string.Empty;
-        private string _licenseBadgeColor = "#10b981"; // Green by default
+        private string _licenseBadgeColor = "#10b981";
+        private string _licenseIcon = "✅";
+        private string _licenseShortText = "مفعل";
         private bool _isLocked;
 
         public object CurrentViewModel
@@ -56,6 +59,18 @@ namespace QLSystem.App.ViewModels
             set => SetProperty(ref _licenseBadgeColor, value);
         }
 
+        public string LicenseIcon
+        {
+            get => _licenseIcon;
+            set => SetProperty(ref _licenseIcon, value);
+        }
+
+        public string LicenseShortText
+        {
+            get => _licenseShortText;
+            set => SetProperty(ref _licenseShortText, value);
+        }
+
         public bool IsLocked
         {
             get => _isLocked;
@@ -67,6 +82,7 @@ namespace QLSystem.App.ViewModels
         public ICommand NavigateCreditCommand { get; }
         public ICommand NavigateReportsCommand { get; }
         public ICommand NavigateSettingsCommand { get; }
+        public ICommand OpenLicenseModalCommand { get; }
 
         public MainViewModel(DatabaseContext dbContext, TrialManager trialManager)
         {
@@ -85,6 +101,7 @@ namespace QLSystem.App.ViewModels
             NavigateCreditCommand = new RelayCommand(() => SwitchView(new CreditViewModel(_customerRepository)));
             NavigateReportsCommand = new RelayCommand(() => SwitchView(new ReportsViewModel(_saleRepository)));
             NavigateSettingsCommand = new RelayCommand(() => SwitchView(new SettingsViewModel(_settingsRepository, _backupService)));
+            OpenLicenseModalCommand = new RelayCommand(ExecuteOpenLicenseModal);
 
             // تقييم حالة الترخيص
             _licenseInfo = _trialManager.EvaluateLicense();
@@ -93,8 +110,7 @@ namespace QLSystem.App.ViewModels
             {
                 IsLocked = true;
                 _currentViewModel = new TrialLockViewModel(_trialManager, OnActivated);
-                LicenseBadgeText = "انتهت فترة التجربة";
-                LicenseBadgeColor = "#ef4444"; // Red
+                UpdateLicenseBadge();
             }
             else
             {
@@ -120,17 +136,57 @@ namespace QLSystem.App.ViewModels
             CurrentViewModel = new CaisseViewModel(_productRepository, _saleRepository, _customerRepository, _settingsRepository);
         }
 
-        private void UpdateLicenseBadge()
+        private void ExecuteOpenLicenseModal()
         {
-            if (LicenseInfo.Status == LicenseStatus.Activated)
+            // Show a simple message box with license details
+            var info = _trialManager.EvaluateLicense();
+            if (info.Status == LicenseStatus.Activated)
             {
-                LicenseBadgeText = "نسخة مفعلة رسمياً (Licence Permanente)";
-                LicenseBadgeColor = "#10b981"; // Green
+                MessageBox.Show(
+                    $"✅ البرنامج مفعل رسمياً ومدى الحياة\n\n" +
+                    $"معرف الجهاز: {info.MachineId}\n" +
+                    $"مفتاح التفعيل: {info.ActivationKey ?? "—"}\n" +
+                    $"نوع الرخصة: دائمة (Illimitée)",
+                    "حالة الترخيص — QL System",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.None);
             }
             else
             {
-                LicenseBadgeText = $"فترة تجريبية: باقي {LicenseInfo.RemainingDays} أيام";
-                LicenseBadgeColor = LicenseInfo.RemainingDays <= 2 ? "#ef4444" : "#f59e0b"; // Orange or Red
+                var days = info.RemainingDays;
+                MessageBox.Show(
+                    $"⏳ الفترة التجريبية — باقي {days} أيام\n\n" +
+                    $"معرف جهازك (Machine ID):\n{info.MachineId}\n\n" +
+                    $"للحصول على مفتاح التفعيل اتصل بالمطور.",
+                    "حالة الترخيص — QL System",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+            }
+        }
+
+        private void UpdateLicenseBadge()
+        {
+            if (LicenseInfo?.Status == LicenseStatus.Activated)
+            {
+                LicenseBadgeText = "نسخة مفعلة رسمياً (Licence Permanente)";
+                LicenseBadgeColor = "#10b981";
+                LicenseIcon = "✅";
+                LicenseShortText = "مفعل";
+            }
+            else if (LicenseInfo == null || !LicenseInfo.IsUsable)
+            {
+                LicenseBadgeText = "انتهت فترة التجربة — اتصل بالمطور للتفعيل";
+                LicenseBadgeColor = "#ef4444";
+                LicenseIcon = "🔒";
+                LicenseShortText = "انتهت التجربة";
+            }
+            else
+            {
+                var days = LicenseInfo.RemainingDays;
+                LicenseBadgeText = $"فترة تجريبية: باقي {days} أيام";
+                LicenseBadgeColor = days <= 2 ? "#ef4444" : "#f59e0b";
+                LicenseIcon = "⏳";
+                LicenseShortText = $"تجريبي • {days}ي";
             }
         }
     }

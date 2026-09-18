@@ -1,0 +1,4 @@
+/home/wsm/Desktop/Projects/logiciel quincaillerie/release/windows-portable/keygen/QLSystem.KeyGen.pdb
+/home/wsm/Desktop/Projects/logiciel quincaillerie/release/windows-portable/keygen/QLSystem.Licensing.pdb
+/home/wsm/Desktop/Projects/logiciel quincaillerie/release/windows-portable/keygen/QLSystem.Core.pdb
+/home/wsm/Desktop/Projects/logiciel quincaillerie/release/windows-portable/keygen/QLSystem.KeyGen.exe
