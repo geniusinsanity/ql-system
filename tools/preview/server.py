@@ -8,6 +8,8 @@ import hmac
 import hashlib
 from datetime import datetime, timedelta
 import urllib.parse
+import csv
+import io
 
 PORT = 5050
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -163,6 +165,44 @@ class QLRequestHandler(http.server.SimpleHTTPRequestHandler):
             rows = [dict(r) for r in cur.fetchall()]
             conn.close()
             self.send_json(rows)
+            return
+
+        if parsed.path == "/api/customers/sales":
+            cust_id = params.get('customerId', [None])[0]
+            if not cust_id:
+                self.send_json([])
+                return
+            conn = get_db()
+            cur = conn.cursor()
+            cur.execute("SELECT * FROM Sales WHERE CustomerId = ? ORDER BY CreatedAt DESC", (cust_id,))
+            sales = [dict(r) for r in cur.fetchall()]
+            for s in sales:
+                cur.execute("SELECT * FROM SaleItems WHERE SaleId = ?", (s["Id"],))
+                s["Items"] = [dict(it) for it in cur.fetchall()]
+            conn.close()
+            self.send_json(sales)
+            return
+
+        if parsed.path == "/api/products/export":
+            conn = get_db()
+            cur = conn.cursor()
+            cur.execute("SELECT Reference, Barcode, Name, Dimensions, PurchasePrice, SalePrice, WholesalePrice, StockQuantity, MinStockAlert, ConversionFactor FROM Products WHERE IsActive = 1 ORDER BY Name ASC")
+            prods = cur.fetchall()
+            conn.close()
+
+            output = io.StringIO()
+            writer = csv.writer(output)
+            writer.writerow(["Reference", "Barcode", "Name", "Dimensions", "PurchasePrice", "SalePrice", "WholesalePrice", "StockQuantity", "MinStockAlert", "ConversionFactor"])
+            for p in prods:
+                writer.writerow([p["Reference"], p["Barcode"] or "", p["Name"], p["Dimensions"] or "", p["PurchasePrice"], p["SalePrice"], p["WholesalePrice"], p["StockQuantity"], p["MinStockAlert"], p["ConversionFactor"]])
+
+            csv_data = output.getvalue().encode('utf-8-sig')
+            self.send_response(200)
+            self.send_header("Content-Type", "text/csv; charset=utf-8")
+            self.send_header("Content-Disposition", "attachment; filename=produits_stock.csv")
+            self.send_header("Content-Length", str(len(csv_data)))
+            self.end_headers()
+            self.wfile.write(csv_data)
             return
 
         if parsed.path == "/api/sales/history":
@@ -398,13 +438,17 @@ class QLRequestHandler(http.server.SimpleHTTPRequestHandler):
                 sale_id = cur.lastrowid
 
                 for it in items:
+                    p_id = it.get("productId")
+                    if p_id == 0:
+                        p_id = None
                     cur.execute("""
                         INSERT INTO SaleItems (SaleId, ProductId, ProductReference, ProductName, Quantity, UnitPrice, PurchasePrice, TotalPrice)
                         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                    """, (sale_id, it["productId"], it["reference"], it["name"], it["quantity"], it["unitPrice"], it.get("purchasePrice", 0), it["totalPrice"]))
+                    """, (sale_id, p_id, it.get("reference", "DIV"), it["name"], it["quantity"], it["unitPrice"], it.get("purchasePrice", 0), it["totalPrice"]))
 
-                    cur.execute("UPDATE Products SET StockQuantity = StockQuantity - ?, UpdatedAt = ? WHERE Id = ?",
-                                (it["quantity"], created, it["productId"]))
+                    if p_id:
+                        cur.execute("UPDATE Products SET StockQuantity = StockQuantity - ?, UpdatedAt = ? WHERE Id = ?",
+                                    (it["quantity"], created, p_id))
 
                 if cust_id and debt > 0:
                     cur.execute("UPDATE Customers SET CurrentDebt = CurrentDebt + ?, UpdatedAt = ? WHERE Id = ?",
@@ -462,20 +506,23 @@ class QLRequestHandler(http.server.SimpleHTTPRequestHandler):
                 wholesale = float(data.get("wholesalePrice", 0))
                 stock = float(data.get("stockQuantity", 0))
                 alert = float(data.get("minStockAlert", 5))
+                conversion = float(data.get("conversionFactor", 1))
+                if conversion <= 0:
+                    conversion = 1.0
                 now = datetime.now().isoformat()
 
                 if p_id:
                     cur.execute("""
                         UPDATE Products SET Reference=?, Barcode=?, Name=?, NameAr=?, Dimensions=?,
-                                           PurchasePrice=?, SalePrice=?, WholesalePrice=?, StockQuantity=?, MinStockAlert=?, UpdatedAt=?
+                                           PurchasePrice=?, SalePrice=?, WholesalePrice=?, StockQuantity=?, MinStockAlert=?, ConversionFactor=?, UpdatedAt=?
                         WHERE Id=?
-                    """, (ref, barcode, name, name_ar, dim, cost, price, wholesale, stock, alert, now, p_id))
+                    """, (ref, barcode, name, name_ar, dim, cost, price, wholesale, stock, alert, conversion, now, p_id))
                 else:
                     cur.execute("""
                         INSERT INTO Products (Reference, Barcode, Name, NameAr, CategoryId, Dimensions,
-                                             PurchasePrice, SalePrice, WholesalePrice, StockQuantity, MinStockAlert, CreatedAt, UpdatedAt)
-                        VALUES (?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?)
-                    """, (ref, barcode, name, name_ar, dim, cost, price, wholesale, stock, alert, now, now))
+                                             PurchasePrice, SalePrice, WholesalePrice, StockQuantity, MinStockAlert, ConversionFactor, CreatedAt, UpdatedAt)
+                        VALUES (?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """, (ref, barcode, name, name_ar, dim, cost, price, wholesale, stock, alert, conversion, now, now))
 
                 conn.commit()
                 self.send_json({"success": True})
@@ -501,12 +548,139 @@ class QLRequestHandler(http.server.SimpleHTTPRequestHandler):
                 conn.close()
             return
 
+        if parsed.path == "/api/customers/add":
+            conn = get_db()
+            cur = conn.cursor()
+            try:
+                name = data["fullName"].strip()
+                phone = data.get("phone", "").strip()
+                activity = data.get("activity", "").strip()
+                limit_val = float(data.get("maxCreditLimit", 50000))
+                notes = data.get("notes", "").strip()
+                now = datetime.now().isoformat()
+
+                cur.execute("""
+                    INSERT INTO Customers (FullName, Phone, Activity, CurrentDebt, MaxCreditLimit, AppliesWholesalePrice, Notes, CreatedAt, UpdatedAt)
+                    VALUES (?, ?, ?, 0, ?, 0, ?, ?, ?)
+                """, (name, phone, activity, limit_val, notes, now, now))
+                conn.commit()
+                self.send_json({"success": True, "id": cur.lastrowid})
+            except Exception as e:
+                conn.rollback()
+                self.send_json({"success": False, "error": str(e)})
+            finally:
+                conn.close()
+            return
+
+        if parsed.path == "/api/customers/update":
+            conn = get_db()
+            cur = conn.cursor()
+            try:
+                c_id = data["id"]
+                name = data["fullName"].strip()
+                phone = data.get("phone", "").strip()
+                activity = data.get("activity", "").strip()
+                limit_val = float(data.get("maxCreditLimit", 50000))
+                notes = data.get("notes", "").strip()
+                now = datetime.now().isoformat()
+
+                cur.execute("""
+                    UPDATE Customers 
+                    SET FullName = ?, Phone = ?, Activity = ?, MaxCreditLimit = ?, Notes = ?, UpdatedAt = ?
+                    WHERE Id = ?
+                """, (name, phone, activity, limit_val, notes, now, c_id))
+                conn.commit()
+                self.send_json({"success": True})
+            except Exception as e:
+                conn.rollback()
+                self.send_json({"success": False, "error": str(e)})
+            finally:
+                conn.close()
+            return
+
+        if parsed.path == "/api/customers/delete":
+            conn = get_db()
+            cur = conn.cursor()
+            try:
+                c_id = data["id"]
+                cur.execute("SELECT CurrentDebt FROM Customers WHERE Id = ?", (c_id,))
+                row = cur.fetchone()
+                if not row:
+                    self.send_json({"success": False, "error": "الزبون غير موجود"})
+                    return
+                if row["CurrentDebt"] > 0:
+                    self.send_json({"success": False, "error": f"لا يمكن حذف الزبون! لديه دين حالي قدره {row['CurrentDebt']} دج. يجب تسديد الدين أولاً."})
+                    return
+
+                cur.execute("DELETE FROM Customers WHERE Id = ?", (c_id,))
+                conn.commit()
+                self.send_json({"success": True})
+            except Exception as e:
+                conn.rollback()
+                self.send_json({"success": False, "error": str(e)})
+            finally:
+                conn.close()
+            return
+
+        if parsed.path == "/api/products/import":
+            conn = get_db()
+            cur = conn.cursor()
+            try:
+                csv_text = data.get("csv", "")
+                f = io.StringIO(csv_text.strip())
+                reader = csv.DictReader(f)
+                count = 0
+                now = datetime.now().isoformat()
+                for row in reader:
+                    name = row.get("Name") or row.get("name") or row.get("Désignation") or row.get("designation")
+                    if not name:
+                        continue
+                    ref = row.get("Reference") or row.get("reference") or f"REF-{int(datetime.now().timestamp()) % 100000}-{count}"
+                    barcode = row.get("Barcode") or row.get("barcode") or ""
+                    dim = row.get("Dimensions") or row.get("dimensions") or ""
+                    cost = float(row.get("PurchasePrice") or row.get("purchasePrice") or row.get("achat") or 0)
+                    price = float(row.get("SalePrice") or row.get("salePrice") or row.get("prix") or 0)
+                    wholesale = float(row.get("WholesalePrice") or row.get("wholesalePrice") or row.get("gros") or 0)
+                    stock = float(row.get("StockQuantity") or row.get("stockQuantity") or row.get("stock") or 0)
+                    alert = float(row.get("MinStockAlert") or row.get("minStockAlert") or row.get("alert") or 5)
+                    factor = float(row.get("ConversionFactor") or row.get("conversionFactor") or 1)
+
+                    # Update if reference exists, else insert
+                    cur.execute("SELECT Id FROM Products WHERE Reference = ? AND IsActive = 1", (ref,))
+                    existing = cur.fetchone()
+                    if existing:
+                        cur.execute("""
+                            UPDATE Products 
+                            SET Name=?, Barcode=?, Dimensions=?, PurchasePrice=?, SalePrice=?, WholesalePrice=?, StockQuantity=StockQuantity+?, MinStockAlert=?, ConversionFactor=?, UpdatedAt=?
+                            WHERE Id=?
+                        """, (name, barcode, dim, cost, price, wholesale, stock, alert, factor, now, existing["Id"]))
+                    else:
+                        cur.execute("""
+                            INSERT INTO Products (Reference, Barcode, Name, CategoryId, Dimensions, PurchasePrice, SalePrice, WholesalePrice, StockQuantity, MinStockAlert, ConversionFactor, CreatedAt, UpdatedAt)
+                            VALUES (?, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        """, (ref, barcode, name, dim, cost, price, wholesale, stock, alert, factor, now, now))
+                    count += 1
+                conn.commit()
+                self.send_json({"success": True, "count": count})
+            except Exception as e:
+                conn.rollback()
+                self.send_json({"success": False, "error": str(e)})
+            finally:
+                conn.close()
+            return
+
         if parsed.path == "/api/sales/clear":
             conn = get_db()
             cur = conn.cursor()
             try:
-                cur.execute("DELETE FROM SaleItems")
-                cur.execute("DELETE FROM Sales")
+                # IMPORTANT: Protect sales that still have unpaid credit!
+                # Only delete sales that are fully paid (DebtAmount <= 0) OR where the customer has paid off their debt
+                cur.execute("""
+                    DELETE FROM SaleItems WHERE SaleId IN (
+                        SELECT Id FROM Sales WHERE DebtAmount <= 0
+                    )
+                """)
+                cur.execute("DELETE FROM Sales WHERE DebtAmount <= 0")
                 conn.commit()
                 self.send_json({"success": True})
             except Exception as e:

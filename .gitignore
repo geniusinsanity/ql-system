@@ -1,0 +1,8 @@
+bin/
+obj/
+*.user
+*.suo
+release/
+*.db
+__pycache__/
+

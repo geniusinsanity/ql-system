@@ -1,6 +1,0 @@
-/home/wsm/Desktop/Projects/logiciel quincaillerie/release/windows-portable/QLSystem.App.pdb
-/home/wsm/Desktop/Projects/logiciel quincaillerie/release/windows-portable/QLSystem.Core.pdb
-/home/wsm/Desktop/Projects/logiciel quincaillerie/release/windows-portable/QLSystem.Data.pdb
-/home/wsm/Desktop/Projects/logiciel quincaillerie/release/windows-portable/QLSystem.Licensing.pdb
-/home/wsm/Desktop/Projects/logiciel quincaillerie/release/windows-portable/QLSystem.Hardware.pdb
-/home/wsm/Desktop/Projects/logiciel quincaillerie/release/windows-portable/QLSystem.App.exe

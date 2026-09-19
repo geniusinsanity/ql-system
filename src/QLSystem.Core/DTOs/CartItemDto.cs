@@ -40,6 +40,7 @@ namespace QLSystem.Core.DTOs
         }
 
         public UnitType Unit { get; set; } = UnitType.Piece;
+        public decimal ConversionFactor { get; set; } = 1;
         public decimal AvailableStock { get; set; }
 
         /// <summary>هل السعر المطبق هو سعر الجملة؟</summary>

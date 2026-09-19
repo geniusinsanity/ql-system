@@ -148,11 +148,14 @@
         .btn-price-badge { border: 1px solid var(--border); border-radius: 4px; padding: 2px 7px; font-size: 11px; font-weight: 700; cursor: pointer; transition: 0.15s; background: #fff; display: inline-flex; align-items: center; gap: 4px; }
         .btn-price-badge.retail { color: var(--primary); border-color: #93c5fd; background: #eff6ff; }
         .btn-price-badge.wholesale { color: #b45309; border-color: #fde68a; background: #fffbeb; }
+        .btn-unit-badge { border: 1px solid var(--border); border-radius: 4px; padding: 2px 6px; font-size: 11px; font-weight: 700; cursor: pointer; transition: 0.15s; background: #f0fdf4; color: #166534; border-color: #bbf7d0; }
         .shortcuts-bar { display: flex; gap: 10px; font-size: 11.5px; color: #64748b; padding: 7px 12px; background: #f8fafc; border-radius: 6px; border: 1px solid var(--border); margin-top: 8px; flex-wrap: wrap; align-items: center; }
         .kbd-key { display: inline-block; background: #e2e8f0; border-radius: 3px; padding: 1px 6px; font-family: monospace; font-size: 11px; font-weight: 800; color: #1e293b; border: 1px solid #cbd5e1; }
 
-        /* Simple License Modal */
+        /* Simple License Modal & Cust Modal */
         .license-modal { background: #fff; width: 440px; border-radius: 10px; padding: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.25); border: 1px solid var(--border); position: relative; }
+        .cust-modal { background: #fff; width: 480px; border-radius: 10px; padding: 22px; box-shadow: 0 20px 40px rgba(0,0,0,0.25); border: 1px solid var(--border); position: relative; }
+        .barcode-modal { background: #fff; width: 500px; border-radius: 10px; padding: 22px; box-shadow: 0 20px 40px rgba(0,0,0,0.25); border: 1px solid var(--border); position: relative; max-height: 90vh; overflow-y: auto; }
         .license-feature-list { list-style: none; display: flex; flex-direction: column; gap: 8px; margin: 16px 0; }
         .license-feature-list li { display: flex; align-items: center; gap: 9px; font-size: 12.5px; color: #334155; }
         .license-feature-list li i { color: var(--success); font-size: 14px; }
@@ -242,6 +245,9 @@
                                 <button class="btn btn-secondary active" id="btnPriceRetail" style="padding: 5px 10px; font-size: 12px;" onclick="setPriceMode('retail')">تجزئة (Détail)</button>
                                 <button class="btn btn-secondary" id="btnPriceWholesale" style="padding: 5px 10px; font-size: 12px;" onclick="setPriceMode('wholesale')">جملة (Gros) [F4]</button>
                             </div>
+                            <button class="btn btn-secondary" style="padding: 5px 10px; font-size: 12px; white-space: nowrap;" onclick="addManualItem()">
+                                <i class="fa-solid fa-plus"></i> <span id="btnAddManualItem">مادة حرة +</span>
+                            </button>
                         </div>
 
                         <div class="card" style="padding: 0; overflow: hidden; min-height: 400px;">
@@ -329,15 +335,24 @@
             <div id="tab-stock" class="tab-content">
                 <div style="display: grid; grid-template-columns: 2fr 1.1fr; gap: 16px;">
                     <div>
-                        <div class="card" style="display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 14px;">
-                            <input type="text" id="stockSearchInput" class="input-text" placeholder="تصفية السلع بالاسم، المقاس، المرجع..." style="max-width: 320px;">
+                        <div class="card" style="display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 10px 14px; flex-wrap: wrap;">
+                            <input type="text" id="stockSearchInput" class="input-text" placeholder="تصفية السلع بالاسم، المقاس، المرجع..." style="max-width: 260px;">
                             <label style="font-size: 12.5px; font-weight: 700; color: #b45309; display: flex; align-items: center; gap: 6px; cursor: pointer;">
                                 <input type="checkbox" id="stockLowFilter"> <span id="lblLowStockFilter">المخزون الضعيف فقط</span>
                             </label>
-                            <button class="btn btn-secondary" onclick="loadStock()">
-                                <i class="fa-solid fa-rotate"></i>
-                                <span id="btnRefresh">تحديث</span>
-                            </button>
+                            <div style="display: flex; gap: 5px;">
+                                <button class="btn btn-secondary" onclick="loadStock()" style="padding: 5px 10px; font-size: 12px;">
+                                    <i class="fa-solid fa-rotate"></i>
+                                    <span id="btnRefresh">تحديث</span>
+                                </button>
+                                <a href="/api/products/export" class="btn btn-secondary" style="padding: 5px 10px; font-size: 12px; text-decoration: none;" id="btnExportCsv" title="تصدير إلى ملف إكسل CSV">
+                                    <i class="fa-solid fa-file-excel" style="color: var(--success);"></i> <span>Export</span>
+                                </a>
+                                <label class="btn btn-secondary" style="padding: 5px 10px; font-size: 12px; cursor: pointer; margin: 0;" id="lblImportCsv" title="استيراد من ملف إكسل CSV">
+                                    <i class="fa-solid fa-file-import" style="color: var(--primary);"></i> <span>Import</span>
+                                    <input type="file" id="importCsvInput" accept=".csv,.txt" style="display: none;" onchange="importProductsCsv(this)">
+                                </label>
+                            </div>
                         </div>
 
                         <div class="card" style="padding: 0; overflow-x: auto; max-height: 560px;">
@@ -401,9 +416,15 @@
                                     <input type="number" id="prodStock" class="input-text" value="10">
                                 </div>
                             </div>
-                            <div>
-                                <label style="font-size: 12px; font-weight: 600;" id="fLblAlert">تنبيه الحد الأدنى للمخزون:</label>
-                                <input type="number" id="prodAlert" class="input-text" value="5">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                                <div>
+                                    <label style="font-size: 12px; font-weight: 600;" id="fLblAlert">تنبيه الحد الأدنى للمخزون:</label>
+                                    <input type="number" id="prodAlert" class="input-text" value="5">
+                                </div>
+                                <div>
+                                    <label style="font-size: 12px; font-weight: 600;" id="fLblConvFactor">عدد الحبات في العلبة/الباكي:</label>
+                                    <input type="number" id="prodConvFactor" class="input-text" value="1" min="1" placeholder="1 = بيع بالحبة فقط">
+                                </div>
                             </div>
                             <!-- 4. REFERENCE & BARCODE SECONDARY -->
                             <div style="display: grid; grid-template-columns: 1fr 1.2fr; gap: 8px; border-top: 1px solid var(--border); padding-top: 8px;">
@@ -417,6 +438,9 @@
                                         <input type="text" id="prodBarcode" class="input-text">
                                         <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="generateRandomBarcode()" id="btnGenBarcode" title="توليد باركود تلقائي">
                                             <i class="fa-solid fa-barcode"></i>
+                                        </button>
+                                        <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="openBarcodeModal()" id="btnPrintLabels" title="طباعة ملصقات الباركود">
+                                            <i class="fa-solid fa-print"></i>
                                         </button>
                                     </div>
                                 </div>
@@ -479,24 +503,31 @@
                 </div>
             </div>
 
-            <!-- TAB 4: CREDIT -->
+            <!-- TAB 4: CREDIT & CUSTOMERS -->
             <div id="tab-credit" class="tab-content">
-                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px;">
+                <div style="display: grid; grid-template-columns: 1.5fr 1.3fr 1.2fr; gap: 14px;">
+                    <!-- Column 1: Customer List & Management -->
                     <div>
-                        <div class="card" style="background: #b91c1c; color: #fff; padding: 18px;">
-                            <div style="font-size: 12.5px; opacity: 0.9;" id="lblTotalCredit">المجموع الكلي لديون الزبائن والمقاولين في المحل:</div>
-                            <div style="font-size: 28px; font-weight: 800; margin-top: 3px;" id="totalCreditDisplay">0.00 DZD</div>
+                        <div class="card" style="background: #b91c1c; color: #fff; padding: 14px; margin-bottom: 12px;">
+                            <div style="font-size: 11.5px; opacity: 0.9;" id="lblTotalCredit">المجموع الكلي لديون الزبائن في المحل:</div>
+                            <div style="font-size: 24px; font-weight: 800; margin-top: 2px;" id="totalCreditDisplay">0.00 DZD</div>
                         </div>
 
-                        <div class="card" style="padding: 0; overflow: hidden;">
+                        <div class="card" style="padding: 10px 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; gap: 8px;">
+                            <input type="text" id="custSearchInput" class="input-text" placeholder="بحث عن زبون..." style="font-size: 12px; padding: 5px 8px;" oninput="filterCreditCustomers()">
+                            <button class="btn btn-primary" style="padding: 5px 10px; font-size: 12px; white-space: nowrap;" onclick="showCustomerModal(null)">
+                                <i class="fa-solid fa-user-plus"></i> <span id="btnAddCustText">زبون جديد +</span>
+                            </button>
+                        </div>
+
+                        <div class="card" style="padding: 0; overflow-y: auto; max-height: 480px;">
                             <table id="custTable">
                                 <thead>
                                     <tr>
                                         <th id="crClient">الزبون</th>
-                                        <th id="crActivity">النشاط / الورشة</th>
                                         <th id="crPhone">الهاتف</th>
                                         <th id="crDebt">الدين الحالي</th>
-                                        <th></th>
+                                        <th style="width: 85px; text-align: center;"></th>
                                     </tr>
                                 </thead>
                                 <tbody id="custTbody"></tbody>
@@ -504,20 +535,50 @@
                         </div>
                     </div>
 
-                    <!-- Payment Repayment form -->
-                    <div class="card">
-                        <h3 style="margin-bottom: 12px; font-size: 15px;" id="lblVersementTitle">تسديد دفعة دين (Versement)</h3>
-                        <div id="creditSelectedCustomerName" style="font-weight: bold; color: var(--primary); margin-bottom: 12px; font-size: 13.5px;">اختر زبوناً من القائمة أولاً</div>
+                    <!-- Column 2: Selected Customer Details & Purchase History -->
+                    <div>
+                        <div class="card" style="margin-bottom: 12px; padding: 12px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <h3 style="font-size: 14px; color: var(--primary); font-weight: 700;" id="lblCustDetailsTitle">بيانات الزبون المختار</h3>
+                                <div id="custActionBtns" style="display: none; gap: 5px;">
+                                    <button class="btn btn-secondary" style="padding: 3px 8px; font-size: 11px;" onclick="editSelectedCustomer()" title="تعديل بيانات الزبون">
+                                        <i class="fa-solid fa-pen-to-square"></i>
+                                    </button>
+                                    <button class="btn btn-danger" style="padding: 3px 8px; font-size: 11px;" onclick="deleteSelectedCustomer()" title="حذف الزبون">
+                                        <i class="fa-solid fa-trash-can"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="custInfoPanel" style="font-size: 12px; color: #475569; line-height: 1.6;">
+                                <div style="color: var(--text-muted); text-align: center; padding: 10px;">اختر زبوناً من القائمة لعرض مشترياته وتفاصيله</div>
+                            </div>
+                        </div>
+
+                        <div class="card" style="padding: 0; overflow-y: auto; max-height: 380px;">
+                            <div style="padding: 10px 12px; font-weight: 700; font-size: 13px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+                                <span id="lblCustPurchases">سجل مشتريات الزبون</span>
+                                <span id="custSalesCount" style="font-size: 11px; color: var(--text-muted);">0 وصل</span>
+                            </div>
+                            <div id="custSalesList" style="padding: 8px; font-size: 12px;">
+                                <div style="text-align: center; color: var(--text-muted); padding: 25px;">لا توجد مشتريات معروضة</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Column 3: Versement Form -->
+                    <div class="card" style="height: fit-content;">
+                        <h3 style="margin-bottom: 12px; font-size: 14px; color: var(--primary); font-weight: 700;" id="lblVersementTitle">تسديد دفعة دين (Versement)</h3>
+                        <div id="creditSelectedCustomerName" style="font-weight: bold; color: var(--primary); margin-bottom: 12px; font-size: 13px; background: #eff6ff; padding: 8px 10px; border-radius: 6px;">اختر زبوناً من القائمة أولاً</div>
                         <div style="display: flex; flex-direction: column; gap: 12px;">
                             <div>
-                                <label style="font-size: 12.5px; font-weight: 600;" id="lblPayAmount">المبلغ المسدد دج:</label>
+                                <label style="font-size: 12px; font-weight: 600;" id="lblPayAmount">المبلغ المسدد دج:</label>
                                 <input type="number" id="paymentAmountInput" class="input-text" placeholder="0.00">
                             </div>
                             <div>
-                                <label style="font-size: 12.5px; font-weight: 600;" id="lblPayNotes">ملاحظات (شيك، وصل...):</label>
-                                <input type="text" id="paymentNotesInput" class="input-text">
+                                <label style="font-size: 12px; font-weight: 600;" id="lblPayNotes">ملاحظات (شيك، وصل...):</label>
+                                <input type="text" id="paymentNotesInput" class="input-text" placeholder="مثال: تسديد نقدي / شيك">
                             </div>
-                            <button class="btn btn-success" onclick="recordCustomerPayment()">
+                            <button class="btn btn-success" onclick="recordCustomerPayment()" style="height: 38px;">
                                 <i class="fa-solid fa-check"></i>
                                 <span id="btnConfirmPayment">تسجيل الدفعة وتحديث الحساب</span>
                             </button>
@@ -807,6 +868,69 @@
         </div>
         <div class="notif-list" id="notifList">
             <div class="notif-empty" id="notifLoading">جاري فحص حالة المخزون والديون...</div>
+    <!-- Customer Add/Edit Modal -->
+    <div id="custModal" class="modal-overlay">
+        <div class="cust-modal">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid var(--border);">
+                <h3 style="font-size: 15px; color: var(--primary); font-weight: 700;" id="custModalTitle">إضافة زبون جديد</h3>
+                <button class="btn btn-secondary" style="padding: 2px 8px; border: none; font-size: 16px;" onclick="closeCustomerModal()">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <input type="hidden" id="modalCustId">
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <div>
+                    <label style="font-size: 12px; font-weight: 700; color: #1e293b;" id="lblCustModalName">الاسم واللقب (Nom Complet) * :</label>
+                    <input type="text" id="modalCustName" class="input-text" placeholder="مثال: محمد بن علي / مؤسسة البناء">
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                    <div>
+                        <label style="font-size: 12px; font-weight: 600;" id="lblCustModalPhone">الهاتف:</label>
+                        <input type="text" id="modalCustPhone" class="input-text" placeholder="0550 12 34 56">
+                    </div>
+                    <div>
+                        <label style="font-size: 12px; font-weight: 600;" id="lblCustModalActivity">النشاط / الورشة:</label>
+                        <input type="text" id="modalCustActivity" class="input-text" placeholder="مثال: مقاول، بلومبي، صباغ...">
+                    </div>
+                </div>
+                <div>
+                    <label style="font-size: 12px; font-weight: 600; color: var(--danger);" id="lblCustModalLimit">سقف الدين الأقصى (Plafond Crédit DZD):</label>
+                    <input type="number" id="modalCustLimit" class="input-text" value="50000">
+                </div>
+                <div>
+                    <label style="font-size: 12px; font-weight: 600;" id="lblCustModalNotes">ملاحظات إضافية:</label>
+                    <input type="text" id="modalCustNotes" class="input-text" placeholder="ملاحظات حول الزبون...">
+                </div>
+                <div style="display: flex; gap: 8px; margin-top: 8px;">
+                    <button class="btn btn-success" style="flex: 1;" onclick="saveCustomerFromModal()">
+                        <i class="fa-solid fa-floppy-disk"></i> <span id="btnSaveCustModal">حفظ الزبون</span>
+                    </button>
+                    <button class="btn btn-secondary" onclick="closeCustomerModal()">
+                        <span id="btnCancelCustModal">إلغاء</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Barcode Label Print Modal -->
+    <div id="barcodeModal" class="modal-overlay">
+        <div class="barcode-modal">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border);">
+                <h3 style="font-size: 15px; color: var(--primary); font-weight: 700;">طباعة ملصقات الباركود</h3>
+                <button class="btn btn-secondary" style="padding: 2px 8px; border: none; font-size: 16px;" onclick="closeBarcodeModal()">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+                <label style="font-size: 12px; font-weight: 700;">عدد الملصقات:</label>
+                <input type="number" id="barcodeLabelQty" class="input-text" style="width: 80px;" value="12" min="1" max="100" onchange="renderBarcodeLabelsPreview()">
+                <button class="btn btn-primary" onclick="printBarcodeLabels()" style="margin-inline-start: auto;">
+                    <i class="fa-solid fa-print"></i> <span>طباعة الآن</span>
+                </button>
+            </div>
+            <div id="barcodeLabelsPreview" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; background: #f8fafc; padding: 12px; border-radius: 6px; border: 1px solid var(--border); max-height: 420px; overflow-y: auto;">
+            </div>
         </div>
     </div>
 
@@ -825,7 +949,7 @@
                 navCaisse: "الكاسة والبيع (Caisse)",
                 navStock: "المخزون والسلع (Stock)",
                 navHistory: "سجل المبيعات (Historique)",
-                navCredit: "ديون الزبائن (Crédits)",
+                navCredit: "الزبائن والديون (Clients & Crédits)",
                 navReports: "التقارير والأرباح (Rapports)",
                 navSettings: "الإعدادات (Paramètres)",
                 navLock: "شاشة القفل (Verrouillage)",
@@ -833,7 +957,7 @@
                 caisseTitle: "نقطة البيع والكاسة (Caisse / Comptoir)",
                 stockTitle: "إدارة السلع والمخزون (Stock & Produits)",
                 historyTitle: "سجل المبيعات والوصولات السابقة (Historique)",
-                creditTitle: "ديون الزبائن والتسديدات (Crédit Clients)",
+                creditTitle: "إدارة الزبائن والديون والتسديدات (Clients & Crédits)",
                 reportsTitle: "التقارير والأرباح اليومية (Rapports)",
                 settingsTitle: "إعدادات المحل والطباعة (Paramètres)",
                 lockNavTitle: "محاكاة شاشة القفل بعد 7 أيام (Verrouillage)",
@@ -843,6 +967,7 @@
                 thQty: "الكمية",
                 thTotal: "المجموع",
                 cartEmptyMsg: "السلة فارغة. ابحث عن سلعة لإضافتها",
+                btnAddManualItem: "مادة حرة +",
                 lblCustomer: "الزبون (Client):",
                 lblNetToPay: "المجموع الصافي الواجب دفعه:",
                 lblDiscount: "تخفيض (Remise DZD):",
@@ -871,6 +996,7 @@
                 fLblCost: "سعر الشراء دج:",
                 fLblStock: "الكمية بالمخزن:",
                 fLblAlert: "تنبيه الحد الأدنى للمخزون:",
+                fLblConvFactor: "عدد الحبات في العلبة/الباكي:",
                 fLblRef: "المرجع (Réf / اختياري):",
                 fLblBarcode: "كود الباركود:",
                 btnSaveProd: "حفظ السلعة",
@@ -884,11 +1010,13 @@
                 htDebt: "الكريدي",
                 htActions: "الإجراء",
                 btnRefreshHistory: "تحديث السجل",
-                lblTotalCredit: "المجموع الكلي لديون الزبائن والمقاولين في المحل:",
+                lblTotalCredit: "المجموع الكلي لديون الزبائن في المحل:",
+                btnAddCustText: "زبون جديد +",
                 crClient: "الزبون",
-                crActivity: "النشاط / الورشة",
                 crPhone: "الهاتف",
                 crDebt: "الدين الحالي",
+                lblCustDetailsTitle: "بيانات الزبون المختار",
+                lblCustPurchases: "سجل مشتريات الزبون",
                 lblVersementTitle: "تسديد دفعة دين (Versement)",
                 lblPayAmount: "المبلغ المسدد دج:",
                 lblPayNotes: "ملاحظات (شيك، وصل...):",
@@ -903,12 +1031,50 @@
                 setStoreInfoTitle: "معلومات المحل والطباعة",
                 setLblName: "اسم المحل:",
                 setLblPhone: "رقم الهاتف:",
-                     searchPlaceholder: "[F1] Rechercher par nom (vis, pvc, câble...) ou scanner code-barres...",
+                setLblAddress: "العنوان:",
+                setLblLang: "اللغة الافتراضية:",
+                setBtnSave: "حفظ الإعدادات",
+                btnTicClose: "إغلاق الوصل",
+                btnClearHistoryText: "مسح السجل",
+                repPeriodTitle: "تحليلات الأرباح والمبيعات",
+                btnRepToday: "اليوم",
+                btnRepWeek: "هذا الأسبوع",
+                btnRepMonth: "هذا الشهر",
+                btnRepAll: "كل المبيعات",
+                repTopTitle: "السلع الأكثر مبيعاً وطلباً في المحل",
+                notifPanelTitle: "مركز التنبيهات الذكية",
+                btnNotifRefresh: "تحديث",
+                scF1: "بحث",
+                scF2: "دفع نقداً",
+                scF3: "كريدي",
+                scF4: "جملة / تجزئة",
+                scF5: "إفراغ السلة",
+                scEsc: "إلغاء / إغلاق"
+            },
+            fr: {
+                brandSub: "Quincaillerie Algérie",
+                navCaisse: "Caisse & Vente",
+                navStock: "Stock & Produits",
+                navHistory: "Historique Ventes",
+                navCredit: "Clients & Crédits",
+                navReports: "Rapports & Bénéfices",
+                navSettings: "Paramètres",
+                navLock: "Verrouillage",
+                lblMonoposte: "Version Monoposte",
+                caisseTitle: "Point de Vente & Caisse (Comptoir)",
+                stockTitle: "Gestion du Stock & Produits",
+                historyTitle: "Historique des Ventes & Tickets",
+                creditTitle: "Gestion des Clients & Crédits",
+                reportsTitle: "Rapports & Analyses des Ventes",
+                settingsTitle: "Paramètres du Magasin",
+                lockNavTitle: "Simulation Écran de Verrouillage",
+                searchPlaceholder: "[F1] Rechercher par nom (vis, pvc, câble...) ou scanner code-barres...",
                 thName: "Désignation Produit",
                 thPrice: "Prix (Détail/Gros)",
                 thQty: "Quantité",
                 thTotal: "Total",
                 cartEmptyMsg: "Panier vide. Recherchez un article pour l'ajouter",
+                btnAddManualItem: "Article Libre +",
                 lblCustomer: "Client :",
                 lblNetToPay: "Total Net à Payer :",
                 lblDiscount: "Remise (DZD) :",
@@ -937,6 +1103,7 @@
                 fLblCost: "Prix d'Achat DZD :",
                 fLblStock: "Quantité en Stock :",
                 fLblAlert: "Alerte Stock Min :",
+                fLblConvFactor: "Quantité par Paquet/Boîte :",
                 fLblRef: "Référence (optionnel) :",
                 fLblBarcode: "Code-barres :",
                 btnSaveProd: "Enregistrer Produit",
@@ -950,11 +1117,13 @@
                 htDebt: "Crédit",
                 htActions: "Action",
                 btnRefreshHistory: "Actualiser",
-                lblTotalCredit: "Total des Créances & Dettes Clients :",
+                lblTotalCredit: "Total des Créances Clients :",
+                btnAddCustText: "Nouveau Client +",
                 crClient: "Client",
-                crActivity: "Activité / Chantier",
                 crPhone: "Téléphone",
                 crDebt: "Dette Actuelle",
+                lblCustDetailsTitle: "Détails du Client Sélectionné",
+                lblCustPurchases: "Historique des Achats",
                 lblVersementTitle: "Enregistrer un Versement",
                 lblPayAmount: "Montant Versé DZD :",
                 lblPayNotes: "Notes (Chèque, Reçu...) :",
@@ -972,7 +1141,7 @@
                 setLblAddress: "Adresse :",
                 setLblLang: "Langue par Défaut :",
                 setBtnSave: "Enregistrer",
-                btnTicClose: "Fermer le Ticket & Nouvelle Vente",
+                btnTicClose: "Fermer le Ticket",
                 btnClearHistoryText: "Effacer l'historique",
                 repPeriodTitle: "Analyses & Ventes",
                 btnRepToday: "Aujourd'hui",
@@ -980,9 +1149,6 @@
                 btnRepMonth: "Ce Mois",
                 btnRepAll: "Tout",
                 repTopTitle: "Top 5 Articles les Plus Vendus",
-                repTopSub: "Top 5",
-                repHourTitle: "Heures de Pointe & Activité",
-                repHourSub: "Distribution Horaire",
                 notifPanelTitle: "Centre d'Alertes Intelligentes",
                 btnNotifRefresh: "Actualiser",
                 scF1: "Rechercher",
@@ -990,25 +1156,7 @@
                 scF3: "Crédit",
                 scF4: "Gros/Détail",
                 scF5: "Vider Panier",
-                scEsc: "Fermer",
-                licModalTitle: "Licence & Activation",
-                licActiveHeading: "Licence Officielle Activée à Vie",
-                licActiveSub: "Version illimitée pour quincaillerie",
-                licLblStore: "Magasin :",
-                licLblMid: "ID Machine :",
-                licLblKey: "Clé d'activation :",
-                licLblType: "Type de licence :",
-                licActiveType: "Perpétuelle (Illimitée)",
-                btnLicCloseActive: "Fermer",
-                licTrialStatusTitle: "Version d'évaluation en cours",
-                licTrialStatusSub: "Activez pour une licence permanente sans interruption",
-                licF1: "Licence permanente à vie sans abonnement",
-                licF2: "Stockage illimité et sécurisé des données",
-                licF3: "Support technique et mises à jour gratuites",
-                licLblMidTrial: "Identifiant Machine (Machine ID) :",
-                licLblInputKey: "Saisir la clé d'activation reçue :",
-                btnActText: "Activer la Licence",
-                licContactFooter: "Pour commander la clé : 0550 12 34 56"
+                scEsc: "Fermer"
             }
         };
 
@@ -1149,10 +1297,13 @@
                         ${wholesaleBadge}
                     </div>
                 `;
-                div.onclick = () => {
+                // onmousedown ensures click is registered BEFORE input blur closes the dropdown!
+                div.onmousedown = (ev) => {
+                    ev.preventDefault();
                     addToCart(p);
                     searchInput.value = '';
                     dropdown.style.display = 'none';
+                    searchInput.focus();
                 };
                 dropdown.appendChild(div);
             });
@@ -1162,14 +1313,17 @@
         searchInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
                 const first = dropdown.querySelector('.search-item');
-                if (first) first.click();
+                if (first) {
+                    first.dispatchEvent(new MouseEvent('mousedown'));
+                }
             }
         });
 
         function addToCart(prod) {
-            const existing = currentCart.find(x => x.productId === prod.Id);
+            const existing = currentCart.find(x => x.productId === prod.Id && x.productId > 0);
             const isWholesale = priceMode === 'wholesale' && prod.WholesalePrice > 0;
             const activePrice = isWholesale ? prod.WholesalePrice : prod.SalePrice;
+            const conv = prod.ConversionFactor || 1;
 
             if (existing) {
                 existing.quantity += 1;
@@ -1177,18 +1331,64 @@
             } else {
                 currentCart.push({
                     productId: prod.Id,
-                    reference: prod.Reference,
+                    reference: prod.Reference || 'ART',
                     name: prod.Name,
                     dimensions: prod.Dimensions || '',
                     retailPrice: prod.SalePrice,
-                    wholesalePrice: prod.WholesalePrice,
+                    wholesalePrice: prod.WholesalePrice || 0,
                     isWholesale: isWholesale,
                     unitPrice: activePrice,
-                    purchasePrice: prod.PurchasePrice,
+                    purchasePrice: prod.PurchasePrice || 0,
                     quantity: 1,
-                    totalPrice: activePrice
+                    totalPrice: activePrice,
+                    conversionFactor: conv,
+                    unit: 'piece' // 'piece' or 'paquet'
                 });
             }
+            renderCart();
+        }
+
+        function addManualItem() {
+            const name = prompt(currentLang === 'ar' ? 'أدخل اسم أو وصف المادة الحرة:' : 'Désignation de l\'article libre :', currentLang === 'ar' ? 'سلعة متنوعة / خدمة' : 'Article Divers');
+            if (!name || !name.trim()) return;
+
+            const priceStr = prompt(currentLang === 'ar' ? 'أدخل سعر البيع بالدينار (DZD):' : 'Prix de vente (DZD) :', '100');
+            const price = parseFloat(priceStr);
+            if (isNaN(price) || price < 0) {
+                alert(currentLang === 'ar' ? 'سعر غير صالح!' : 'Prix invalide !');
+                return;
+            }
+
+            currentCart.push({
+                productId: 0,
+                reference: 'DIV',
+                name: name.trim(),
+                dimensions: '',
+                retailPrice: price,
+                wholesalePrice: price,
+                isWholesale: false,
+                unitPrice: price,
+                purchasePrice: 0,
+                quantity: 1,
+                totalPrice: price,
+                conversionFactor: 1,
+                unit: 'piece'
+            });
+            renderCart();
+        }
+
+        function toggleItemUnit(index) {
+            const it = currentCart[index];
+            if (!it || it.conversionFactor <= 1) return;
+
+            if (it.unit === 'piece') {
+                it.unit = 'paquet';
+                it.quantity = it.quantity * it.conversionFactor;
+            } else {
+                it.unit = 'piece';
+                it.quantity = Math.max(1, Math.round(it.quantity / it.conversionFactor));
+            }
+            it.totalPrice = it.quantity * it.unitPrice;
             renderCart();
         }
 
@@ -1247,6 +1447,15 @@
                     }
                 }
 
+                // Paquet / Pièce toggle badge
+                let unitBadgeHtml = '';
+                if (item.conversionFactor > 1) {
+                    const unitLabel = item.unit === 'paquet' 
+                        ? (currentLang === 'ar' ? `باكي (x${item.conversionFactor})` : `Paquet (x${item.conversionFactor})`)
+                        : (currentLang === 'ar' ? 'حبة' : 'Pièce');
+                    unitBadgeHtml = `<button class="btn-unit-badge" onclick="toggleItemUnit(${idx})" title="${currentLang === 'ar' ? 'تحويل بين البيع بالحبة والباكي' : 'Basculer Pièce/Paquet'}">${unitLabel}</button>`;
+                }
+
                 tbody.innerHTML += `
                     <tr>
                         <td>
@@ -1257,9 +1466,10 @@
                             </div>
                         </td>
                         <td>
-                            <div style="display: flex; align-items: center; gap: 5px;">
+                            <div style="display: flex; align-items: center; gap: 5px; flex-wrap: wrap;">
                                 <span style="font-weight: 600;">${item.unitPrice.toFixed(2)}</span>
                                 ${priceBadgeHtml}
+                                ${unitBadgeHtml}
                             </div>
                         </td>
                         <td style="text-align: center;">
@@ -1320,6 +1530,20 @@
             let debt = isCredit ? Math.max(0, net - paid) : 0;
             let change = isCredit ? 0 : Math.max(0, paid - net);
             let profit = currentCart.reduce((sum, x) => sum + ((x.unitPrice - x.purchasePrice) * x.quantity), 0);
+
+            // Plafond de crédit check
+            if (isCredit && custId && debt > 0) {
+                const cust = customersList.find(c => c.Id === custId);
+                if (cust && cust.MaxCreditLimit > 0) {
+                    const projectedDebt = cust.CurrentDebt + debt;
+                    if (projectedDebt > cust.MaxCreditLimit) {
+                        const warnMsg = currentLang === 'ar'
+                            ? `⚠️ تنبيه سقف الكريدي:\nدين الزبون الحالي: ${cust.CurrentDebt.toFixed(2)} دج\nالمبلغ الجديد: ${debt.toFixed(2)} دج\nالمجموع سيصبح: ${projectedDebt.toFixed(2)} دج\n(يتجاوز السقف المحدد: ${cust.MaxCreditLimit.toFixed(2)} دج)\n\nهل تريد المتابعة وتأكيد البيع بالكريدي رغم تجاوز السقف؟`
+                            : `⚠️ Alerte Plafond de Crédit :\nDette actuelle : ${cust.CurrentDebt.toFixed(2)} DZD\nNouveau montant : ${debt.toFixed(2)} DZD\nTotal projeté : ${projectedDebt.toFixed(2)} DZD\n(Dépasse le plafond : ${cust.MaxCreditLimit.toFixed(2)} DZD)\n\nVoulez-vous quand même autoriser cette vente à crédit ?`;
+                        if (!confirm(warnMsg)) return;
+                    }
+                }
+            }
 
             const payload = {
                 subtotal, discount, total: net, paid, change, debt, profit,
@@ -1471,6 +1695,7 @@
             document.getElementById('prodWholesale').value = p.WholesalePrice;
             document.getElementById('prodStock').value = p.StockQuantity;
             document.getElementById('prodAlert').value = p.MinStockAlert;
+            document.getElementById('prodConvFactor').value = p.ConversionFactor || 1;
 
             document.getElementById('btnDeleteProd').style.display = 'inline-flex';
         }
@@ -1488,6 +1713,7 @@
             document.getElementById('prodWholesale').value = '0';
             document.getElementById('prodStock').value = '10';
             document.getElementById('prodAlert').value = '5';
+            document.getElementById('prodConvFactor').value = '1';
             document.getElementById('btnDeleteProd').style.display = 'none';
         }
 
@@ -1499,8 +1725,8 @@
             const pId = document.getElementById('editProductId').value;
             const ref = document.getElementById('prodRef').value.trim();
             const name = document.getElementById('prodName').value.trim();
-            if (!ref || !name) {
-                alert(currentLang === 'ar' ? 'يرجى ملء المرجع واسم السلعة!' : 'Veuillez renseigner la référence et le nom !');
+            if (!name) {
+                alert(currentLang === 'ar' ? 'يرجى ملء اسم السلعة!' : 'Veuillez renseigner la désignation de l\'article !');
                 return;
             }
 
@@ -1514,7 +1740,8 @@
                 salePrice: parseFloat(document.getElementById('prodPrice').value) || 0,
                 wholesalePrice: parseFloat(document.getElementById('prodWholesale').value) || 0,
                 stockQuantity: parseFloat(document.getElementById('prodStock').value) || 0,
-                minStockAlert: parseFloat(document.getElementById('prodAlert').value) || 5
+                minStockAlert: parseFloat(document.getElementById('prodAlert').value) || 5,
+                conversionFactor: parseFloat(document.getElementById('prodConvFactor').value) || 1
             };
 
             const res = await fetch('/api/products/save', {
@@ -1548,6 +1775,101 @@
                 resetProductForm();
                 loadStock();
             }
+        }
+
+        // CSV Import
+        async function importProductsCsv(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                const text = e.target.result;
+                try {
+                    const res = await fetch('/api/products/import', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+                        body: text
+                    }).then(r => r.json());
+
+                    if (res.success) {
+                        alert(currentLang === 'ar' 
+                            ? `تم استيراد الملف بنجاح!\nالسلع المضافة/المحدثة: ${res.count}` 
+                            : `Import réussi !\nArticles ajoutés/mis à jour : ${res.count}`);
+                        loadStock();
+                    } else {
+                        alert('Erreur d\'import : ' + (res.error || 'Format invalide'));
+                    }
+                } catch (err) {
+                    alert('Erreur lors de l\'envoi du fichier : ' + err.message);
+                }
+                input.value = '';
+            };
+            reader.readAsText(file, 'utf-8');
+        }
+
+        // Barcode Labels Modal & Print
+        function openBarcodeModal() {
+            const name = document.getElementById('prodName').value.trim() || 'Produit';
+            const price = parseFloat(document.getElementById('prodPrice').value) || 0;
+            const barcode = document.getElementById('prodBarcode').value.trim() || '200000000000';
+            
+            renderBarcodeLabelsPreview();
+            document.getElementById('barcodeModal').classList.add('active');
+        }
+
+        function closeBarcodeModal() {
+            document.getElementById('barcodeModal').classList.remove('active');
+        }
+
+        function renderBarcodeLabelsPreview() {
+            const qty = parseInt(document.getElementById('barcodeLabelQty').value) || 12;
+            const name = document.getElementById('prodName').value.trim() || 'Produit';
+            const price = parseFloat(document.getElementById('prodPrice').value) || 0;
+            const barcode = document.getElementById('prodBarcode').value.trim() || '200000000000';
+            const storeName = (document.getElementById('settStoreName') ? document.getElementById('settStoreName').value.trim() : '') || 'QUINCAILLERIE';
+
+            const container = document.getElementById('barcodeLabelsPreview');
+            container.innerHTML = '';
+
+            for (let i = 0; i < qty; i++) {
+                const label = document.createElement('div');
+                label.style.cssText = 'background: #fff; border: 1px dashed #cbd5e1; border-radius: 4px; padding: 6px; text-align: center; font-family: monospace; font-size: 10px; line-height: 1.2;';
+                label.innerHTML = `
+                    <div style="font-size: 8.5px; color: #64748b; font-weight: bold; text-transform: uppercase;">${storeName}</div>
+                    <div style="font-weight: 800; font-size: 11px; margin: 2px 0; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${name}</div>
+                    <div style="font-size: 14px; font-weight: 900; letter-spacing: 2px; margin: 2px 0;">||| | |||| |||</div>
+                    <div style="font-size: 9px; color: #475569;">${barcode}</div>
+                    <div style="font-weight: 800; font-size: 12px; color: var(--primary); margin-top: 2px;">${price.toFixed(2)} DZD</div>
+                `;
+                container.appendChild(label);
+            }
+        }
+
+        function printBarcodeLabels() {
+            const content = document.getElementById('barcodeLabelsPreview').innerHTML;
+            const printWin = window.open('', '', 'width=650,height=600');
+            printWin.document.write(`
+                <html>
+                <head>
+                    <title>Étiquettes Code-barres</title>
+                    <style>
+                        body { font-family: monospace; padding: 10px; }
+                        .labels-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+                        @media print {
+                            body { margin: 0; padding: 0; }
+                            .labels-grid { gap: 4px; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="labels-grid">${content}</div>
+                </body>
+                </html>
+            `);
+            printWin.document.close();
+            printWin.focus();
+            setTimeout(() => { printWin.print(); printWin.close(); }, 300);
         }
 
         // SALES HISTORY
@@ -1598,25 +1920,151 @@
             displayTicket(sale.InvoiceNumber, sale.CreatedAt.replace('T', ' ').substring(0, 16), sale.CustomerName, sale.TotalAmount, sale.PaidAmount, sale.ChangeAmount, sale.Items || [], sale.Discount || 0, sale.DebtAmount || 0);
         }
 
-        // Credit
+        // Integrated Customers & Credit Management
         async function loadCredit() {
             const custs = await fetch('/api/customers').then(r => r.json());
+            customersList = custs;
+            renderCreditCustomerTable(custs);
+
+            // Also update caisse customer select dropdown
+            const select = document.getElementById('caisseCustomerSelect');
+            if (select) {
+                const currentVal = select.value;
+                select.innerHTML = `<option value="">${currentLang === 'ar' ? 'زبون عادي (Comptoir)' : 'Client Comptoir'}</option>`;
+                custs.forEach(c => {
+                    select.innerHTML += `<option value="${c.Id}">${c.FullName} (${c.CurrentDebt.toFixed(0)} DZD)</option>`;
+                });
+                if (currentVal) select.value = currentVal;
+            }
+
+            let totalCredit = custs.reduce((sum, c) => sum + (c.CurrentDebt || 0), 0);
+            document.getElementById('totalCreditDisplay').innerText = `${totalCredit.toFixed(2)} DZD`;
+        }
+
+        function filterCreditCustomers() {
+            const q = (document.getElementById('custSearchInput').value || '').trim().toLowerCase();
+            const filtered = customersList.filter(c => 
+                c.FullName.toLowerCase().includes(q) || 
+                (c.Phone && c.Phone.toLowerCase().includes(q)) ||
+                (c.Activity && c.Activity.toLowerCase().includes(q))
+            );
+            renderCreditCustomerTable(filtered);
+        }
+
+        function renderCreditCustomerTable(custs) {
             const tbody = document.getElementById('custTbody');
             tbody.innerHTML = '';
-            let totalCredit = 0;
+
+            if (custs.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted); padding: 30px;">${currentLang === 'ar' ? 'لا يوجد زبائن' : 'Aucun client'}</td></tr>`;
+                return;
+            }
+
             custs.forEach(c => {
-                totalCredit += c.CurrentDebt;
-                tbody.innerHTML += `
-                    <tr>
-                        <td style="font-weight: 700;">${c.FullName}</td>
-                        <td>${c.Activity || '-'}</td>
-                        <td>${c.Phone || '-'}</td>
-                        <td style="font-weight: 800; color: var(--danger);">${c.CurrentDebt.toFixed(2)} DZD</td>
-                        <td><button class="btn btn-secondary" style="padding: 3px 8px; font-size: 11px;" onclick="selectCustForPayment(${c.Id}, '${c.FullName}', ${c.CurrentDebt})">تسديد</button></td>
-                    </tr>
+                const isSelected = selectedCustomerIdForCredit === c.Id;
+                const tr = document.createElement('tr');
+                tr.id = `cust-row-${c.Id}`;
+                tr.style.cursor = 'pointer';
+                if (isSelected) tr.classList.add('selected-row');
+                tr.onclick = () => selectCust(c.Id);
+
+                const debtColor = c.CurrentDebt > 0 ? 'color: var(--danger); font-weight: 800;' : 'color: var(--success); font-weight: 600;';
+                tr.innerHTML = `
+                    <td>
+                        <strong style="font-size: 13px;">${c.FullName}</strong>
+                        ${c.Activity ? `<div style="font-size: 11px; color: var(--text-muted);">${c.Activity}</div>` : ''}
+                    </td>
+                    <td style="font-size: 12px; color: #475569;">${c.Phone || '-'}</td>
+                    <td style="${debtColor}">${c.CurrentDebt.toFixed(2)} DZD</td>
+                    <td style="text-align: center;">
+                        <button class="btn btn-secondary" style="padding: 2px 7px; font-size: 11px;" onclick="event.stopPropagation(); selectCustForPayment(${c.Id}, '${c.FullName.replace(/'/g, "\\'")}', ${c.CurrentDebt})">
+                            ${currentLang === 'ar' ? 'تسديد' : 'Payer'}
+                        </button>
+                    </td>
                 `;
+                tbody.appendChild(tr);
             });
-            document.getElementById('totalCreditDisplay').innerText = `${totalCredit.toFixed(2)} DZD`;
+        }
+
+        async function selectCust(id) {
+            selectedCustomerIdForCredit = id;
+            document.querySelectorAll('#custTbody tr').forEach(r => r.classList.remove('selected-row'));
+            const row = document.getElementById(`cust-row-${id}`);
+            if (row) row.classList.add('selected-row');
+
+            const c = customersList.find(x => x.Id === id);
+            if (!c) return;
+
+            selectCustForPayment(c.Id, c.FullName, c.CurrentDebt);
+
+            // Show Customer Info
+            document.getElementById('custActionBtns').style.display = 'flex';
+            document.getElementById('custInfoPanel').innerHTML = `
+                <div style="font-size: 13.5px; font-weight: 800; color: #0f172a; margin-bottom: 4px;">${c.FullName}</div>
+                <div><strong>${currentLang === 'ar' ? 'الهاتف:' : 'Tél :'}</strong> ${c.Phone || '-'}</div>
+                <div><strong>${currentLang === 'ar' ? 'النشاط / الورشة:' : 'Activité :'}</strong> ${c.Activity || '-'}</div>
+                <div><strong>${currentLang === 'ar' ? 'سقف الكريدي:' : 'Plafond :'}</strong> <span style="font-weight: 700; color: var(--danger);">${(c.MaxCreditLimit || 50000).toFixed(2)} DZD</span></div>
+                ${c.Notes ? `<div><strong>${currentLang === 'ar' ? 'ملاحظات:' : 'Notes :'}</strong> ${c.Notes}</div>` : ''}
+                <div style="margin-top: 4px; padding-top: 4px; border-top: 1px dashed var(--border);">
+                    <strong>${currentLang === 'ar' ? 'الدين الحالي المستحق:' : 'Dette Actuelle :'}</strong> 
+                    <span style="font-size: 14px; font-weight: 800; color: ${c.CurrentDebt > 0 ? 'var(--danger)' : 'var(--success)'};">${c.CurrentDebt.toFixed(2)} DZD</span>
+                </div>
+            `;
+
+            // Load Customer Purchase History
+            loadCustomerSalesHistory(id);
+        }
+
+        async function loadCustomerSalesHistory(customerId) {
+            const listContainer = document.getElementById('custSalesList');
+            const countLabel = document.getElementById('custSalesCount');
+            listContainer.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 20px;">${currentLang === 'ar' ? 'جاري تحميل المشتريات...' : 'Chargement...'}</div>`;
+
+            try {
+                const sales = await fetch(`/api/customers/sales?customerId=${customerId}`).then(r => r.json());
+                countLabel.innerText = `${sales.length} ${currentLang === 'ar' ? 'وصل' : 'tickets'}`;
+
+                if (sales.length === 0) {
+                    listContainer.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 25px;">${currentLang === 'ar' ? 'لا توجد مشتريات سابقة لهذا الزبون' : 'Aucun achat enregistré'}</div>`;
+                    return;
+                }
+
+                listContainer.innerHTML = '';
+                sales.forEach(s => {
+                    const dateStr = s.CreatedAt ? s.CreatedAt.replace('T', ' ').substring(0, 16) : '-';
+                    const isCredit = s.DebtAmount > 0;
+                    const items = s.Items || [];
+
+                    let itemsHtml = items.map(it => `
+                        <div style="display: flex; justify-content: space-between; font-size: 11px; color: #475569; padding: 1px 0;">
+                            <span>• ${it.ProductName} (x${it.Quantity})</span>
+                            <span style="font-weight: 600;">${it.TotalPrice.toFixed(2)} DZD</span>
+                        </div>
+                    `).join('');
+
+                    const div = document.createElement('div');
+                    div.style.cssText = 'background: #f8fafc; border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px; margin-bottom: 8px;';
+                    div.innerHTML = `
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; border-bottom: 1px dashed var(--border); padding-bottom: 4px;">
+                            <div>
+                                <strong style="color: var(--primary); font-size: 12px;">${s.InvoiceNumber}</strong>
+                                <span style="font-size: 10.5px; color: var(--text-muted); margin-inline-start: 6px;">${dateStr}</span>
+                            </div>
+                            <span class="badge-pill ${isCredit ? 'badge-danger' : 'badge-success'}" style="font-size: 10px;">
+                                ${isCredit ? (currentLang === 'ar' ? 'كريدي' : 'Crédit') : (currentLang === 'ar' ? 'كاش' : 'Comptant')}
+                            </span>
+                        </div>
+                        <div style="margin-bottom: 6px;">${itemsHtml}</div>
+                        <div style="display: flex; justify-content: space-between; font-size: 11.5px; font-weight: 700; border-top: 1px solid #e2e8f0; padding-top: 4px;">
+                            <span>${currentLang === 'ar' ? 'المجموع:' : 'Total :'} ${s.TotalAmount.toFixed(2)} DZD</span>
+                            ${isCredit ? `<span style="color: var(--danger);">${currentLang === 'ar' ? 'باقي دين:' : 'Dette :'} ${s.DebtAmount.toFixed(2)}</span>` : '<span style="color: var(--success);">Payé</span>'}
+                        </div>
+                    `;
+                    listContainer.appendChild(div);
+                });
+            } catch (err) {
+                listContainer.innerHTML = `<div style="color: var(--danger); text-align: center; padding: 10px;">Erreur : ${err.message}</div>`;
+            }
         }
 
         function selectCustForPayment(id, name, debt) {
@@ -1648,8 +2096,114 @@
             if (res.success) {
                 alert(currentLang === 'ar' ? `تم تسجيل الدفعة بنجاح! الرصيد المتبقي: ${res.remainingDebt} دج` : `Versement validé ! Reste : ${res.remainingDebt} DZD`);
                 document.getElementById('paymentAmountInput').value = '';
-                loadCredit();
+                document.getElementById('paymentNotesInput').value = '';
+                await loadCredit();
+                selectCust(selectedCustomerIdForCredit);
                 loadReports();
+            }
+        }
+
+        // Customer Modal Add/Edit
+        function showCustomerModal(custId = null) {
+            const modal = document.getElementById('custModal');
+            if (!custId) {
+                document.getElementById('custModalTitle').innerText = currentLang === 'ar' ? 'إضافة زبون جديد' : 'Nouveau Client';
+                document.getElementById('modalCustId').value = '';
+                document.getElementById('modalCustName').value = '';
+                document.getElementById('modalCustPhone').value = '';
+                document.getElementById('modalCustActivity').value = '';
+                document.getElementById('modalCustLimit').value = '50000';
+                document.getElementById('modalCustNotes').value = '';
+            } else {
+                const c = customersList.find(x => x.Id === custId);
+                if (!c) return;
+                document.getElementById('custModalTitle').innerText = currentLang === 'ar' ? `تعديل بيانات: ${c.FullName}` : `Modifier : ${c.FullName}`;
+                document.getElementById('modalCustId').value = c.Id;
+                document.getElementById('modalCustName').value = c.FullName;
+                document.getElementById('modalCustPhone').value = c.Phone || '';
+                document.getElementById('modalCustActivity').value = c.Activity || '';
+                document.getElementById('modalCustLimit').value = c.MaxCreditLimit || 50000;
+                document.getElementById('modalCustNotes').value = c.Notes || '';
+            }
+            modal.classList.add('active');
+        }
+
+        function closeCustomerModal() {
+            document.getElementById('custModal').classList.remove('active');
+        }
+
+        function editSelectedCustomer() {
+            if (!selectedCustomerIdForCredit) return;
+            showCustomerModal(selectedCustomerIdForCredit);
+        }
+
+        async function saveCustomerFromModal() {
+            const id = document.getElementById('modalCustId').value;
+            const name = document.getElementById('modalCustName').value.trim();
+            if (!name) {
+                alert(currentLang === 'ar' ? 'يرجى إدخال اسم الزبون!' : 'Veuillez saisir le nom du client !');
+                return;
+            }
+
+            const payload = {
+                id: id ? parseInt(id) : null,
+                fullName: name,
+                phone: document.getElementById('modalCustPhone').value.trim(),
+                activity: document.getElementById('modalCustActivity').value.trim(),
+                maxCreditLimit: parseFloat(document.getElementById('modalCustLimit').value) || 50000,
+                notes: document.getElementById('modalCustNotes').value.trim()
+            };
+
+            const endpoint = id ? '/api/customers/update' : '/api/customers/add';
+            const res = await fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            }).then(r => r.json());
+
+            if (res.success) {
+                alert(currentLang === 'ar' ? 'تم حفظ بيانات الزبون بنجاح!' : 'Client enregistré avec succès !');
+                closeCustomerModal();
+                await loadCredit();
+                if (id) selectCust(parseInt(id));
+            } else {
+                alert('Erreur : ' + (res.error || 'Failed to save customer'));
+            }
+        }
+
+        async function deleteSelectedCustomer() {
+            if (!selectedCustomerIdForCredit) return;
+            const c = customersList.find(x => x.Id === selectedCustomerIdForCredit);
+            if (!c) return;
+
+            if (c.CurrentDebt > 0) {
+                alert(currentLang === 'ar' 
+                    ? `لا يمكن حذف الزبون "${c.FullName}" لأن لديه دين حالي غير مسدد بقيمة ${c.CurrentDebt.toFixed(2)} دج!\nيجب تسديد دينه أولاً قبل الحذف.`
+                    : `Impossible de supprimer "${c.FullName}" car il a une dette en cours de ${c.CurrentDebt.toFixed(2)} DZD !`);
+                return;
+            }
+
+            const confirmMsg = currentLang === 'ar' 
+                ? `هل أنت متأكد من حذف الزبون "${c.FullName}" نهائياً من قاعدة البيانات؟` 
+                : `Confirmez-vous la suppression du client "${c.FullName}" ?`;
+            if (!confirm(confirmMsg)) return;
+
+            const res = await fetch('/api/customers/delete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: c.Id })
+            }).then(r => r.json());
+
+            if (res.success) {
+                alert(currentLang === 'ar' ? 'تم حذف الزبون بنجاح!' : 'Client supprimé !');
+                selectedCustomerIdForCredit = null;
+                document.getElementById('custActionBtns').style.display = 'none';
+                document.getElementById('custInfoPanel').innerHTML = `<div style="color: var(--text-muted); text-align: center; padding: 10px;">${currentLang === 'ar' ? 'اختر زبوناً من القائمة' : 'Sélectionnez un client'}</div>`;
+                document.getElementById('custSalesList').innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 25px;">${currentLang === 'ar' ? 'لا توجد مشتريات معروضة' : 'Aucun achat'}</div>`;
+                document.getElementById('custSalesCount').innerText = '0';
+                loadCredit();
+            } else {
+                alert('Erreur : ' + (res.error || 'Erreur de suppression'));
             }
         }
 
@@ -2002,6 +2556,8 @@
             if (e.key === 'Escape') {
                 closeReceiptModal();
                 closeLicenseModal();
+                closeCustomerModal();
+                closeBarcodeModal();
                 toggleNotificationPanel(false);
                 const dd = document.getElementById('searchDropdown');
                 if (dd) dd.style.display = 'none';
@@ -2011,7 +2567,9 @@
             // If a modal is open, don't execute POS action shortcuts
             const receiptOpen = document.getElementById('receiptModal').classList.contains('active');
             const licenseOpen = document.getElementById('licenseModal').classList.contains('active');
-            if (receiptOpen || licenseOpen) return;
+            const custOpen = document.getElementById('custModal') && document.getElementById('custModal').classList.contains('active');
+            const barcodeOpen = document.getElementById('barcodeModal') && document.getElementById('barcodeModal').classList.contains('active');
+            if (receiptOpen || licenseOpen || custOpen || barcodeOpen) return;
 
             // F1: Focus Search
             if (e.key === 'F1') {

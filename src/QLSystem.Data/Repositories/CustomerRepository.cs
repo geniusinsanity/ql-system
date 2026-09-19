@@ -167,7 +167,7 @@ namespace QLSystem.Data.Repositories
                 await conn.OpenAsync();
                 using (var cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = "DELETE FROM Customers WHERE Id = @id;";
+                    cmd.CommandText = "DELETE FROM Customers WHERE Id = @id AND (CurrentDebt <= 0 OR CurrentDebt IS NULL);";
                     cmd.Parameters.AddWithValue("@id", id);
                     return await cmd.ExecuteNonQueryAsync() > 0;
                 }
