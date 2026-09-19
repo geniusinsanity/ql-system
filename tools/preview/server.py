@@ -132,17 +132,37 @@ class QLRequestHandler(http.server.SimpleHTTPRequestHandler):
             if low:
                 cur.execute("SELECT p.*, c.Name as CategoryName FROM Products p LEFT JOIN Categories c ON p.CategoryId = c.Id WHERE p.StockQuantity <= p.MinStockAlert AND p.IsActive = 1 ORDER BY p.StockQuantity ASC")
             elif q:
-                like_q = f"%{q}%"
-                cur.execute("""
-                    SELECT p.*, c.Name as CategoryName FROM Products p 
-                    LEFT JOIN Categories c ON p.CategoryId = c.Id 
-                    WHERE p.IsActive = 1 AND (p.Barcode = ? OR p.Reference LIKE ? OR p.Name LIKE ? OR p.Dimensions LIKE ?)
-                    ORDER BY CASE WHEN p.Barcode = ? THEN 1 WHEN p.Reference LIKE ? THEN 2 ELSE 3 END, p.Name ASC LIMIT 30
-                """, (q, like_q, like_q, like_q, q, f"{q}%"))
+                import unicodedata
+                def norm(s):
+                    if not s: return ""
+                    return "".join(c for c in unicodedata.normalize('NFD', str(s)) if unicodedata.category(c) != 'Mn').lower()
+
+                nq = norm(q.strip())
+                cur.execute("SELECT p.*, c.Name as CategoryName FROM Products p LEFT JOIN Categories c ON p.CategoryId = c.Id WHERE p.IsActive = 1")
+                all_p = [dict(r) for r in cur.fetchall()]
+                
+                filtered = []
+                for p in all_p:
+                    b_code = p.get("Barcode") or ""
+                    p_ref = norm(p.get("Reference") or "")
+                    p_name = norm(p.get("Name") or "")
+                    p_dim = norm(p.get("Dimensions") or "")
+                    if q in b_code or nq in p_ref or nq in p_name or nq in p_dim:
+                        filtered.append(p)
+
+                filtered.sort(key=lambda x: (
+                    0 if (x.get("Barcode") or "") == q else (
+                        1 if norm(x.get("Reference") or "").startswith(nq) else (
+                            2 if norm(x.get("Name") or "").startswith(nq) else 3
+                        )
+                    ),
+                    x.get("Name", "")
+                ))
+                rows = filtered[:30]
             else:
                 cur.execute("SELECT p.*, c.Name as CategoryName FROM Products p LEFT JOIN Categories c ON p.CategoryId = c.Id WHERE p.IsActive = 1 ORDER BY p.Name ASC")
+                rows = [dict(r) for r in cur.fetchall()]
 
-            rows = [dict(r) for r in cur.fetchall()]
             conn.close()
             self.send_json(rows)
             return
