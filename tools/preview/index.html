@@ -151,6 +151,10 @@
         .btn-unit-badge { border: 1px solid var(--border); border-radius: 4px; padding: 2px 6px; font-size: 11px; font-weight: 700; cursor: pointer; transition: 0.15s; background: #f0fdf4; color: #166534; border-color: #bbf7d0; }
         .shortcuts-bar { display: flex; gap: 10px; font-size: 11.5px; color: #64748b; padding: 7px 12px; background: #f8fafc; border-radius: 6px; border: 1px solid var(--border); margin-top: 8px; flex-wrap: wrap; align-items: center; }
         .kbd-key { display: inline-block; background: #e2e8f0; border-radius: 3px; padding: 1px 6px; font-family: monospace; font-size: 11px; font-weight: 800; color: #1e293b; border: 1px solid #cbd5e1; }
+        .btn-micro-chip { padding: 1px 5px; font-size: 10px; font-weight: 700; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 3px; cursor: pointer; color: #334155; transition: 0.1s; }
+        .btn-micro-chip:hover { background: var(--primary); color: #fff; border-color: var(--primary); }
+        .fast-chip-btn { padding: 4px 10px; font-size: 11.5px; background: #fff; border: 1px solid var(--border); border-radius: 15px; white-space: nowrap; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; cursor: pointer; transition: all 0.15s; }
+        .fast-chip-btn:hover { background: #eff6ff; border-color: #93c5fd; color: var(--primary); }
 
         /* Simple License Modal & Cust Modal */
         .license-modal { background: #fff; width: 440px; border-radius: 10px; padding: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.25); border: 1px solid var(--border); position: relative; }
@@ -249,24 +253,13 @@
                                 <i class="fa-solid fa-plus"></i> <span id="btnAddManualItem">مادة حرة +</span>
                             </button>
                             <button class="btn btn-secondary" style="padding: 5px 9px; font-size: 11.5px; white-space: nowrap;" onclick="openCalcModal()" title="حاسبة الأطوال والمتر والكيلو">
-                                <i class="fa-solid fa-calculator" style="color: var(--primary);"></i> <span id="btnCalcM">حاسبة القياس</span>
+                                <i class="fa-solid fa-ruler-combined" style="color: var(--primary);"></i> <span id="btnCalcM">حاسبة القياس</span>
                             </button>
                         </div>
 
-                        <!-- Fast Quick Items Bar -->
-                        <div style="display: flex; gap: 6px; margin-bottom: 10px; overflow-x: auto; padding-bottom: 2px;">
-                            <button class="btn btn-secondary" style="padding: 4px 9px; font-size: 11px; background: #fff; border-radius: 15px; white-space: nowrap;" onclick="addFastItem('Sachet Plastique (Grand)', 20)">
-                                🛍️ <span id="fItem1">ساشي كبير (20 دج)</span>
-                            </button>
-                            <button class="btn btn-secondary" style="padding: 4px 9px; font-size: 11px; background: #fff; border-radius: 15px; white-space: nowrap;" onclick="addFastItem('Ruban Adhésif Noir / Chaterton', 80)">
-                                ⬛ <span id="fItem2">شاترتون (80 دج)</span>
-                            </button>
-                            <button class="btn btn-secondary" style="padding: 4px 9px; font-size: 11px; background: #fff; border-radius: 15px; white-space: nowrap;" onclick="addFastItem('Téflon Ruban Plomberie', 50)">
-                                🚰 <span id="fItem3">تيفلون (50 دج)</span>
-                            </button>
-                            <button class="btn btn-secondary" style="padding: 4px 9px; font-size: 11px; background: #fff; border-radius: 15px; white-space: nowrap;" onclick="addFastItem('Ciment Blanc (1 kg)', 70)">
-                                🧱 <span id="fItem4">سيما بيضاء 1كغ (70 دج)</span>
-                            </button>
+                        <!-- Real Fast / Top Sold Items Bar from Database -->
+                        <div id="fastItemsBar" style="display: flex; gap: 6px; margin-bottom: 10px; overflow-x: auto; padding-bottom: 2px;">
+                            <!-- Dynamically loaded from real products -->
                         </div>
 
                         <div class="card" style="padding: 0; overflow: hidden; min-height: 400px;">
@@ -1383,6 +1376,31 @@
             loadCredit();
             loadHistory();
             loadNotifications();
+            loadFastItems();
+        }
+
+        async function loadFastItems() {
+            const bar = document.getElementById('fastItemsBar');
+            if (!bar) return;
+            try {
+                const items = await fetch('/api/products/fast-items').then(r => r.json());
+                if (!items || items.length === 0) {
+                    bar.style.display = 'none';
+                    return;
+                }
+                bar.style.display = 'flex';
+                bar.innerHTML = '';
+                items.forEach(p => {
+                    const btn = document.createElement('button');
+                    btn.className = 'fast-chip-btn';
+                    const price = priceMode === 'wholesale' && p.WholesalePrice > 0 ? p.WholesalePrice : p.SalePrice;
+                    btn.innerHTML = `<span>⚡ ${p.Name}</span> <strong style="color: var(--primary);">(${price.toFixed(0)} دج)</strong>`;
+                    btn.onclick = () => addToCart(p);
+                    bar.appendChild(btn);
+                });
+            } catch (e) {
+                console.error("Failed to load fast items:", e);
+            }
         }
 
         let currentAnalyticsPeriod = 'today';
@@ -1412,17 +1430,26 @@
             if (tabId === 'reports') loadAnalytics(currentAnalyticsPeriod);
         }
 
-        // Caisse Search
+        // Caisse Search with Automatic Measurement & Quantity Parsing
         const searchInput = document.getElementById('caisseSearchInput');
         const dropdown = document.getElementById('searchDropdown');
 
         searchInput.addEventListener('input', async (e) => {
-            const q = e.target.value.trim();
-            if (q.length < 1) {
+            const rawQ = e.target.value.trim();
+            if (rawQ.length < 1) {
                 dropdown.style.display = 'none';
                 return;
             }
-            const prods = await fetch(`/api/products?q=${encodeURIComponent(q)}`).then(r => r.json());
+
+            let parsedQty = null;
+            let searchWord = rawQ;
+            const match = rawQ.match(/^(.+?)\s+([0-9]+(?:[\.,][0-9]+)?)(m|kg)?$/i);
+            if (match) {
+                searchWord = match[1].trim();
+                parsedQty = parseFloat(match[2].replace(',', '.'));
+            }
+
+            const prods = await fetch(`/api/products?q=${encodeURIComponent(searchWord)}`).then(r => r.json());
             if (prods.length === 0) {
                 dropdown.style.display = 'none';
                 return;
@@ -1439,20 +1466,22 @@
                     ? `<span style="font-size: 10.5px; color: #b91c1c; background: #fee2e2; padding: 1px 4px; border-radius: 4px; margin-inline-start: 6px;">${currentLang === 'ar' ? 'نفد' : 'Épuisé'}</span>` 
                     : `<span style="font-size: 10.5px; color: #475569; margin-inline-start: 6px;">(${p.StockQuantity} en stock)</span>`;
 
+                const qtyHint = parsedQty ? `<div style="font-size: 11.5px; color: #16a34a; font-weight: bold; margin-top: 2px;">⚡ ${parsedQty} × ${pPrice.toFixed(2)} = ${(parsedQty * pPrice).toFixed(2)} DZD</div>` : '';
+
                 div.innerHTML = `
                     <div>
                         <strong style="font-size: 13.5px;">${p.Name}</strong> ${stockBadge}
                         <div style="color: var(--text-muted); font-size: 11.5px; margin-top: 2px;">${p.Dimensions ? p.Dimensions + ' • ' : ''}${p.Reference}</div>
+                        ${qtyHint}
                     </div>
                     <div style="text-align: end;">
                         <div style="font-weight: 800; color: var(--primary); font-size: 14px;">${pPrice.toFixed(2)} DZD</div>
                         ${wholesaleBadge}
                     </div>
                 `;
-                // onmousedown ensures click is registered BEFORE input blur closes the dropdown!
                 div.onmousedown = (ev) => {
                     ev.preventDefault();
-                    addToCart(p);
+                    addToCart(p, parsedQty || 1);
                     searchInput.value = '';
                     dropdown.style.display = 'none';
                     searchInput.focus();
@@ -1471,14 +1500,15 @@
             }
         });
 
-        function addToCart(prod) {
+        function addToCart(prod, defaultQty = 1) {
+            const qtyToAdd = parseFloat(defaultQty) || 1;
             const existing = currentCart.find(x => x.productId === prod.Id && x.productId > 0);
             const isWholesale = priceMode === 'wholesale' && prod.WholesalePrice > 0;
             const activePrice = isWholesale ? prod.WholesalePrice : prod.SalePrice;
             const conv = prod.ConversionFactor || 1;
 
             if (existing) {
-                existing.quantity += 1;
+                existing.quantity += qtyToAdd;
                 existing.totalPrice = existing.quantity * existing.unitPrice;
             } else {
                 currentCart.push({
@@ -1491,10 +1521,10 @@
                     isWholesale: isWholesale,
                     unitPrice: activePrice,
                     purchasePrice: prod.PurchasePrice || 0,
-                    quantity: 1,
-                    totalPrice: activePrice,
+                    quantity: qtyToAdd,
+                    totalPrice: activePrice * qtyToAdd,
                     conversionFactor: conv,
-                    unit: 'piece' // 'piece' or 'paquet'
+                    unit: 'piece'
                 });
             }
             renderCart();
@@ -1544,15 +1574,55 @@
             renderCart();
         }
 
-        function setQtyDirect(index, value) {
-            const qty = parseFloat(value) || 0;
-            if (qty <= 0) {
-                currentCart.splice(index, 1);
-            } else {
-                currentCart[index].quantity = qty;
-                currentCart[index].totalPrice = qty * currentCart[index].unitPrice;
+        function setQtyDirect(index, value, isInputEvent = false) {
+            if (!currentCart[index]) return;
+            if (value === '' || value === '.') {
+                currentCart[index].quantity = 0;
+                currentCart[index].totalPrice = 0;
+                updateCartTotalsOnly();
+                return;
             }
-            renderCart();
+            const qty = parseFloat(value);
+            if (isNaN(qty) || qty < 0) return;
+
+            if (qty === 0 && !isInputEvent) {
+                currentCart.splice(index, 1);
+                renderCart();
+                return;
+            }
+
+            currentCart[index].quantity = qty;
+            currentCart[index].totalPrice = qty * currentCart[index].unitPrice;
+
+            if (isInputEvent) {
+                updateCartRowTotal(index);
+                updateCartTotalsOnly();
+            } else {
+                renderCart();
+            }
+        }
+
+        function updateCartRowTotal(idx) {
+            const it = currentCart[idx];
+            if (!it) return;
+            const el = document.getElementById(`cart-row-total-${idx}`);
+            if (el) el.innerText = it.totalPrice.toFixed(2);
+        }
+
+        function updateCartTotalsOnly() {
+            let subtotal = currentCart.reduce((sum, x) => sum + x.totalPrice, 0);
+            const discount = parseFloat(document.getElementById('discountInput').value) || 0;
+            const net = Math.max(0, subtotal - discount);
+            document.getElementById('totalAmountDisplay').innerText = `${net.toFixed(2)} DZD`;
+
+            const paid = parseFloat(document.getElementById('paidInput').value) || net;
+            if (paid >= net) {
+                document.getElementById('changeDisplay').innerText = `${(paid - net).toFixed(2)} DZD`;
+                document.getElementById('debtDisplay').innerText = '0.00 DZD';
+            } else {
+                document.getElementById('changeDisplay').innerText = '0.00 DZD';
+                document.getElementById('debtDisplay').innerText = `${(net - paid).toFixed(2)} DZD`;
+            }
         }
 
         function changeQtyDelta(index, delta) {
@@ -1608,6 +1678,22 @@
                     unitBadgeHtml = `<button class="btn-unit-badge" onclick="toggleItemUnit(${idx})" title="${currentLang === 'ar' ? 'تحويل بين البيع بالحبة والباكي' : 'Basculer Pièce/Paquet'}">${unitLabel}</button>`;
                 }
 
+                // Automatic measurement micro chips for length/weight commodities
+                const isMeasured = /(m|kg|câble|cable|tuyau|tube|fil|corde|pvc|plinthe|fer)/i.test((item.name || '') + ' ' + (item.dimensions || ''));
+                let microChipsHtml = '';
+                if (isMeasured) {
+                    microChipsHtml = `
+                        <div style="display: flex; gap: 3px; justify-content: center; margin-top: 4px; flex-wrap: wrap;">
+                            <button type="button" class="btn-micro-chip" onclick="setQtyDirect(${idx}, 0.5)" title="نصف متر">0.5m</button>
+                            <button type="button" class="btn-micro-chip" onclick="setQtyDirect(${idx}, 1)" title="متر واحد">1m</button>
+                            <button type="button" class="btn-micro-chip" onclick="setQtyDirect(${idx}, 2)" title="مترين">2m</button>
+                            <button type="button" class="btn-micro-chip" onclick="setQtyDirect(${idx}, 5)" title="5 أمتار">5m</button>
+                            <button type="button" class="btn-micro-chip" onclick="setQtyDirect(${idx}, 10)" title="10 أمتار">10m</button>
+                            <button type="button" class="btn-micro-chip" onclick="setQtyDirect(${idx}, 15)" title="15 متر">15m</button>
+                        </div>
+                    `;
+                }
+
                 tbody.innerHTML += `
                     <tr>
                         <td>
@@ -1627,11 +1713,12 @@
                         <td style="text-align: center;">
                             <div class="qty-control">
                                 <button class="qty-btn" onclick="changeQtyDelta(${idx}, -1)">-</button>
-                                <input type="number" step="any" min="0" class="qty-input" value="${item.quantity}" onchange="setQtyDirect(${idx}, this.value)">
+                                <input type="number" step="any" min="0" class="qty-input" value="${item.quantity}" oninput="setQtyDirect(${idx}, this.value, true)" onchange="setQtyDirect(${idx}, this.value, false)">
                                 <button class="qty-btn" onclick="changeQtyDelta(${idx}, 1)">+</button>
                             </div>
+                            ${microChipsHtml}
                         </td>
-                        <td style="font-weight: 800; color: var(--primary); font-size: 13.5px;">${item.totalPrice.toFixed(2)}</td>
+                        <td id="cart-row-total-${idx}" style="font-weight: 800; color: var(--primary); font-size: 13.5px;">${item.totalPrice.toFixed(2)}</td>
                         <td>
                             <button class="btn btn-secondary" style="padding: 3px 6px; color: var(--danger); border: none;" onclick="removeCartItem(${idx})" title="${currentLang === 'ar' ? 'حذف من السلة' : 'Supprimer'}">
                                 <i class="fa-solid fa-xmark"></i>

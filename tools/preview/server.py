@@ -147,6 +147,24 @@ class QLRequestHandler(http.server.SimpleHTTPRequestHandler):
             self.send_json(rows)
             return
 
+        if parsed.path == "/api/products/fast-items":
+            conn = get_db()
+            cur = conn.cursor()
+            cur.execute("""
+                SELECT p.Id, p.Reference, p.Name, p.Dimensions, p.SalePrice, p.WholesalePrice, p.StockQuantity, p.ConversionFactor,
+                       COALESCE(SUM(si.Quantity), 0) as SoldQty
+                FROM Products p
+                LEFT JOIN SaleItems si ON p.Id = si.ProductId
+                WHERE p.IsActive = 1
+                GROUP BY p.Id
+                ORDER BY SoldQty DESC, p.Id ASC
+                LIMIT 8
+            """)
+            rows = [dict(r) for r in cur.fetchall()]
+            conn.close()
+            self.send_json(rows)
+            return
+
         if parsed.path == "/api/customers":
             conn = get_db()
             cur = conn.cursor()
