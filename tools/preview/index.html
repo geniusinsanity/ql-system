@@ -236,17 +236,36 @@
                 <div class="caisse-grid">
                     <!-- Left: Search & Cart -->
                     <div>
-                        <div class="card" style="padding: 10px 14px; margin-bottom: 12px; display: flex; gap: 10px; align-items: center;">
-                            <div class="search-container" style="flex: 1;">
+                        <div class="card" style="padding: 10px 14px; margin-bottom: 8px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                            <div class="search-container" style="flex: 1; min-width: 200px;">
                                 <input type="text" id="caisseSearchInput" class="input-text" placeholder="[F1] ابحث بالاسم (vis, pvc, cable...) أو امسح الباركود..." autocomplete="off">
                                 <div id="searchDropdown" class="search-dropdown"></div>
                             </div>
                             <div style="display: flex; gap: 4px; border: 1px solid var(--border); border-radius: 6px; padding: 2px;">
-                                <button class="btn btn-secondary active" id="btnPriceRetail" style="padding: 5px 10px; font-size: 12px;" onclick="setPriceMode('retail')">تجزئة (Détail)</button>
-                                <button class="btn btn-secondary" id="btnPriceWholesale" style="padding: 5px 10px; font-size: 12px;" onclick="setPriceMode('wholesale')">جملة (Gros) [F4]</button>
+                                <button class="btn btn-secondary active" id="btnPriceRetail" style="padding: 5px 8px; font-size: 11.5px;" onclick="setPriceMode('retail')">تجزئة (Détail)</button>
+                                <button class="btn btn-secondary" id="btnPriceWholesale" style="padding: 5px 8px; font-size: 11.5px;" onclick="setPriceMode('wholesale')">جملة (Gros) [F4]</button>
                             </div>
-                            <button class="btn btn-secondary" style="padding: 5px 10px; font-size: 12px; white-space: nowrap;" onclick="addManualItem()">
+                            <button class="btn btn-secondary" style="padding: 5px 9px; font-size: 11.5px; white-space: nowrap;" onclick="addManualItem()" title="إضافة مادة حرة بالسعر">
                                 <i class="fa-solid fa-plus"></i> <span id="btnAddManualItem">مادة حرة +</span>
+                            </button>
+                            <button class="btn btn-secondary" style="padding: 5px 9px; font-size: 11.5px; white-space: nowrap;" onclick="openCalcModal()" title="حاسبة الأطوال والمتر والكيلو">
+                                <i class="fa-solid fa-calculator" style="color: var(--primary);"></i> <span id="btnCalcM">حاسبة القياس</span>
+                            </button>
+                        </div>
+
+                        <!-- Fast Quick Items Bar -->
+                        <div style="display: flex; gap: 6px; margin-bottom: 10px; overflow-x: auto; padding-bottom: 2px;">
+                            <button class="btn btn-secondary" style="padding: 4px 9px; font-size: 11px; background: #fff; border-radius: 15px; white-space: nowrap;" onclick="addFastItem('Sachet Plastique (Grand)', 20)">
+                                🛍️ <span id="fItem1">ساشي كبير (20 دج)</span>
+                            </button>
+                            <button class="btn btn-secondary" style="padding: 4px 9px; font-size: 11px; background: #fff; border-radius: 15px; white-space: nowrap;" onclick="addFastItem('Ruban Adhésif Noir / Chaterton', 80)">
+                                ⬛ <span id="fItem2">شاترتون (80 دج)</span>
+                            </button>
+                            <button class="btn btn-secondary" style="padding: 4px 9px; font-size: 11px; background: #fff; border-radius: 15px; white-space: nowrap;" onclick="addFastItem('Téflon Ruban Plomberie', 50)">
+                                🚰 <span id="fItem3">تيفلون (50 دج)</span>
+                            </button>
+                            <button class="btn btn-secondary" style="padding: 4px 9px; font-size: 11px; background: #fff; border-radius: 15px; white-space: nowrap;" onclick="addFastItem('Ciment Blanc (1 kg)', 70)">
+                                🧱 <span id="fItem4">سيما بيضاء 1كغ (70 دج)</span>
                             </button>
                         </div>
 
@@ -345,6 +364,9 @@
                                     <i class="fa-solid fa-rotate"></i>
                                     <span id="btnRefresh">تحديث</span>
                                 </button>
+                                <a href="/api/products/lowstock-export" class="btn btn-secondary" style="padding: 5px 10px; font-size: 12px; text-decoration: none;" id="btnBonCommande" title="توليد ورقة طلبيات النواقص للمورد (Bon de Commande)">
+                                    <i class="fa-solid fa-clipboard-list" style="color: #b45309;"></i> <span id="lblBonCmd">ورقة النواقص</span>
+                                </a>
                                 <a href="/api/products/export" class="btn btn-secondary" style="padding: 5px 10px; font-size: 12px; text-decoration: none;" id="btnExportCsv" title="تصدير إلى ملف إكسل CSV">
                                     <i class="fa-solid fa-file-excel" style="color: var(--success);"></i> <span>Export</span>
                                 </a>
@@ -541,6 +563,9 @@
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                                 <h3 style="font-size: 14px; color: var(--primary); font-weight: 700;" id="lblCustDetailsTitle">بيانات الزبون المختار</h3>
                                 <div id="custActionBtns" style="display: none; gap: 5px;">
+                                    <button class="btn btn-secondary" style="padding: 3px 8px; font-size: 11px;" onclick="printCustomerStatement()" title="طباعة كشف حساب الزبون (Extrait de Compte)">
+                                        <i class="fa-solid fa-file-invoice" style="color: var(--primary);"></i> <span id="lblPrintStatement">كشف الحساب</span>
+                                    </button>
                                     <button class="btn btn-secondary" style="padding: 3px 8px; font-size: 11px;" onclick="editSelectedCustomer()" title="تعديل بيانات الزبون">
                                         <i class="fa-solid fa-pen-to-square"></i>
                                     </button>
@@ -690,6 +715,26 @@
                             <i class="fa-solid fa-floppy-disk"></i>
                             <span id="setBtnSave">حفظ الإعدادات</span>
                         </button>
+                    </div>
+                </div>
+
+                <!-- Database Backup & Security Card -->
+                <div class="card" style="max-width: 580px; margin-top: 14px;">
+                    <h3 style="margin-bottom: 12px; color: var(--primary); font-size: 15px; display: flex; align-items: center; gap: 8px;" id="lblBackupTitle">
+                        <i class="fa-solid fa-database" style="color: #059669;"></i>
+                        <span>النسخ الاحتياطي والأمان (Sauvegarde & Backup)</span>
+                    </h3>
+                    <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 14px; line-height: 1.5;" id="lblBackupDesc">
+                        لحماية بيانات محلك من الضياع، يمكنك حفظ نسخة احتياطية من قاعدة البيانات في فلاش ديسك USB أو أي مجلد خارجي واسترجاعها عند الحاجة.
+                    </p>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <a href="/api/backup/download" class="btn btn-success" style="text-decoration: none; font-size: 13px;" id="btnDownloadBackup" title="تحميل ملف قاعدة البيانات الآن">
+                            <i class="fa-solid fa-download"></i> <span id="lblDownloadBackup">حفظ نسخة احتياطية (Backup)</span>
+                        </a>
+                        <label class="btn btn-secondary" style="font-size: 13px; cursor: pointer; margin: 0;" id="lblRestoreBackup" title="استرجاع قاعدة البيانات من ملف نسخة سابقة">
+                            <i class="fa-solid fa-upload" style="color: var(--warning);"></i> <span id="lblRestoreBackupText">استرجاع نسخة (Restaurer)</span>
+                            <input type="file" id="restoreDbInput" accept=".db,.sqlite" style="display: none;" onchange="restoreDatabase(this)">
+                        </label>
                     </div>
                 </div>
             </div>
@@ -929,7 +974,100 @@
                     <i class="fa-solid fa-print"></i> <span>طباعة الآن</span>
                 </button>
             </div>
-            <div id="barcodeLabelsPreview" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; background: #f8fafc; padding: 12px; border-radius: 6px; border: 1px solid var(--border); max-height: 420px; overflow-y: auto;">
+    <!-- Measurement Calculator Modal -->
+    <div id="calcModal" class="modal-overlay">
+        <div class="cust-modal" style="width: 440px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid var(--border);">
+                <h3 style="font-size: 15px; color: var(--primary); font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-calculator"></i>
+                    <span id="calcModalTitle">حاسبة القياس السريع (Mètre / Poids)</span>
+                </h3>
+                <button class="btn btn-secondary" style="padding: 2px 8px; border: none; font-size: 16px;" onclick="closeCalcModal()">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 11px;">
+                <div>
+                    <label style="font-size: 12px; font-weight: 700;" id="lblCalcName">اسم المادة / السلعة:</label>
+                    <input type="text" id="calcItemName" class="input-text" placeholder="مثال: Câble 2.5mm Souple, Tuyau PEHD...">
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                    <div>
+                        <label style="font-size: 12px; font-weight: 600;" id="lblCalcUnit">وحدة القياس:</label>
+                        <select id="calcUnitType" class="input-text">
+                            <option value="m">متر طولي (Mètre - m)</option>
+                            <option value="m²">متر مربع (Mètre carré - m²)</option>
+                            <option value="kg">كيلوغرام (Kilogramme - kg)</option>
+                            <option value="L">لتر (Litre - L)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="font-size: 12px; font-weight: 600;" id="lblCalcLength">الكمية المقاسة:</label>
+                        <input type="number" step="any" id="calcLengthInput" class="input-text" placeholder="مثال: 15.5" oninput="updateCalcTotal()">
+                    </div>
+                </div>
+                <div>
+                    <label style="font-size: 12px; font-weight: 700; color: var(--primary);" id="lblCalcPricePerUnit">سعر الوحدة الواحدة بالدينار (DZD):</label>
+                    <input type="number" step="any" id="calcPricePerUnit" class="input-text" placeholder="مثال: 45.00" oninput="updateCalcTotal()">
+                </div>
+                <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 10px; display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 13px; font-weight: 700; color: #1e40af;" id="lblCalcResultTitle">المجموع المحسوب:</span>
+                    <span id="calcTotalDisplay" style="font-size: 18px; font-weight: 900; color: var(--primary);">0.00 DZD</span>
+                </div>
+                <div style="display: flex; gap: 8px; margin-top: 4px;">
+                    <button class="btn btn-success" style="flex: 1;" onclick="addCalculatedItemToCart()">
+                        <i class="fa-solid fa-cart-plus"></i> <span id="btnAddCalcToCart">إضافة فورية للسلة</span>
+                    </button>
+                    <button class="btn btn-secondary" onclick="closeCalcModal()">
+                        <span id="btnCancelCalc">إلغاء</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Extrait de Compte Client Printable Modal -->
+    <div id="statementModal" class="modal-overlay">
+        <div class="cust-modal" style="width: 580px; max-height: 90vh; overflow-y: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 12px;">
+                <h3 style="font-size: 15px; color: var(--primary); font-weight: 700;">كشف حساب الزبون (Extrait de Compte)</h3>
+                <button class="btn btn-secondary" style="padding: 2px 8px; border: none; font-size: 16px;" onclick="closeStatementModal()">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div id="statementPrintableArea" style="background: #fff; padding: 12px; font-family: monospace; font-size: 12px; color: #000;">
+                <div style="text-align: center; border-bottom: 1px solid #000; padding-bottom: 8px; margin-bottom: 10px;">
+                    <div style="font-size: 16px; font-weight: 900;" id="stModalStoreName">QUINCAILLERIE</div>
+                    <div style="font-size: 11px; color: #475569;" id="stModalStorePhone">Tél: 0550 12 34 56</div>
+                    <div style="font-size: 14px; font-weight: 800; margin-top: 6px; text-decoration: underline;">EXTRAIT DE COMPTE CLIENT</div>
+                    <div style="font-size: 11px; margin-top: 2px;" id="stModalDate">Date: 19/09/2026</div>
+                </div>
+
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px; padding: 8px; margin-bottom: 10px;">
+                    <div><strong>Client : </strong><span id="stModalCustName">-</span></div>
+                    <div><strong>Téléphone : </strong><span id="stModalCustPhone">-</span></div>
+                    <div><strong>Activité : </strong><span id="stModalCustActivity">-</span></div>
+                </div>
+
+                <div style="font-weight: bold; margin-bottom: 4px; font-size: 12px;">1. Achats & Ventes (Mouvements) :</div>
+                <div id="stModalSalesList" style="margin-bottom: 10px;"></div>
+
+                <div style="font-weight: bold; margin-bottom: 4px; font-size: 12px;">2. Versements & Paiements :</div>
+                <div id="stModalPaymentsList" style="margin-bottom: 10px;"></div>
+
+                <div style="border-top: 2px solid #000; border-bottom: 2px solid #000; padding: 8px 0; margin-top: 10px; font-size: 13.5px; font-weight: 900; display: flex; justify-content: space-between;">
+                    <span>RESTE DÛ (SOLDE ACTUEL) :</span>
+                    <span id="stModalFinalDebt" style="color: #dc2626;">0.00 DZD</span>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 8px; margin-top: 14px;">
+                <button class="btn btn-primary" style="flex: 1;" onclick="printStatementDirect()">
+                    <i class="fa-solid fa-print"></i> <span>طباعة كشف الحساب</span>
+                </button>
+                <button class="btn btn-secondary" onclick="closeStatementModal()">
+                    <span>إغلاق</span>
+                </button>
             </div>
         </div>
     </div>
@@ -1049,7 +1187,14 @@
                 scF3: "كريدي",
                 scF4: "جملة / تجزئة",
                 scF5: "إفراغ السلة",
-                scEsc: "إلغاء / إغلاق"
+                scEsc: "إلغاء / إغلاق",
+                btnCalcM: "حاسبة القياس",
+                lblPrintStatement: "كشف الحساب",
+                lblBonCmd: "ورقة النواقص للمورد (Bon de Commande)",
+                lblBackupTitle: "النسخ الاحتياطي والأمان (Backup & Restore USB)",
+                lblBackupDesc: "حفظ نسخة احتياطية من قاعدة البيانات على فلاش ديسك USB لضمان عدم ضياع المعطيات",
+                btnDownloadBackup: "تحميل نسخة احتياطية (Sauvegarder .db)",
+                btnRestoreBackup: "استرجاع نسخة سابقة (Restaurer)"
             },
             fr: {
                 brandSub: "Quincaillerie Algérie",
@@ -1156,7 +1301,14 @@
                 scF3: "Crédit",
                 scF4: "Gros/Détail",
                 scF5: "Vider Panier",
-                scEsc: "Fermer"
+                scEsc: "Fermer",
+                btnCalcM: "Calculateur",
+                lblPrintStatement: "Extrait Compte",
+                lblBonCmd: "Bon de Commande Fournisseur",
+                lblBackupTitle: "Sauvegarde & Restauration USB",
+                lblBackupDesc: "Sauvegardez votre base de données sur clé USB en toute sécurité",
+                btnDownloadBackup: "Télécharger la Sauvegarde (.db)",
+                btnRestoreBackup: "Restaurer une Sauvegarde"
             }
         };
 
@@ -2550,6 +2702,235 @@
             }
         }
 
+        // Fast Commodities Items
+        function addFastItem(name, price) {
+            const existing = currentCart.find(x => x.name === name && x.productId === 0);
+            if (existing) {
+                existing.quantity += 1;
+                existing.totalPrice = existing.quantity * existing.unitPrice;
+            } else {
+                currentCart.push({
+                    productId: 0,
+                    reference: 'FAST',
+                    name: name,
+                    dimensions: '',
+                    retailPrice: price,
+                    wholesalePrice: price,
+                    isWholesale: false,
+                    unitPrice: price,
+                    purchasePrice: 0,
+                    quantity: 1,
+                    totalPrice: price,
+                    conversionFactor: 1,
+                    unit: 'piece'
+                });
+            }
+            renderCart();
+        }
+
+        // Measurement Calculator Modal
+        function openCalcModal() {
+            document.getElementById('calcItemName').value = '';
+            document.getElementById('calcLengthInput').value = '';
+            document.getElementById('calcPricePerUnit').value = '';
+            document.getElementById('calcTotalDisplay').innerText = '0.00 DZD';
+            document.getElementById('calcModal').classList.add('active');
+            setTimeout(() => {
+                const el = document.getElementById('calcItemName');
+                if (el) el.focus();
+            }, 50);
+        }
+
+        function closeCalcModal() {
+            document.getElementById('calcModal').classList.remove('active');
+        }
+
+        function updateCalcTotal() {
+            const qty = parseFloat(document.getElementById('calcLengthInput').value) || 0;
+            const unitPrice = parseFloat(document.getElementById('calcPricePerUnit').value) || 0;
+            const total = qty * unitPrice;
+            document.getElementById('calcTotalDisplay').innerText = `${total.toFixed(2)} DZD`;
+        }
+
+        function addCalculatedItemToCart() {
+            const rawName = document.getElementById('calcItemName').value.trim();
+            const unit = document.getElementById('calcUnitType').value;
+            const qty = parseFloat(document.getElementById('calcLengthInput').value) || 0;
+            const unitPrice = parseFloat(document.getElementById('calcPricePerUnit').value) || 0;
+
+            if (!rawName) {
+                alert(currentLang === 'ar' ? 'يرجى إدخال اسم المادة أو السلعة!' : 'Veuillez saisir le nom de l\'article !');
+                return;
+            }
+            if (qty <= 0 || unitPrice <= 0) {
+                alert(currentLang === 'ar' ? 'يرجى إدخال كمية وسعر صحيحين!' : 'Veuillez saisir une quantité et un prix valides !');
+                return;
+            }
+
+            const displayName = `${rawName} (${qty}${unit})`;
+            const totalPrice = qty * unitPrice;
+
+            currentCart.push({
+                productId: 0,
+                reference: `CALC-${unit.toUpperCase()}`,
+                name: displayName,
+                dimensions: `${qty} ${unit}`,
+                retailPrice: totalPrice,
+                wholesalePrice: totalPrice,
+                isWholesale: false,
+                unitPrice: totalPrice,
+                purchasePrice: 0,
+                quantity: 1,
+                totalPrice: totalPrice,
+                conversionFactor: 1,
+                unit: 'piece'
+            });
+
+            closeCalcModal();
+            renderCart();
+        }
+
+        // Customer Statement (Extrait de Compte)
+        async function printCustomerStatement() {
+            if (!selectedCustomerIdForCredit) {
+                alert(currentLang === 'ar' ? 'اختر زبوناً من القائمة أولاً!' : 'Veuillez sélectionner un client d\'abord !');
+                return;
+            }
+
+            try {
+                const res = await fetch(`/api/customers/statement?customerId=${selectedCustomerIdForCredit}`).then(r => r.json());
+                if (!res.customer) {
+                    alert('Données introuvables');
+                    return;
+                }
+
+                const store = res.store || {};
+                const cust = res.customer;
+                const sales = res.sales || [];
+                const payments = res.payments || [];
+
+                document.getElementById('stModalStoreName').innerText = (store.StoreName || 'QUINCAILLERIE').toUpperCase();
+                document.getElementById('stModalStorePhone').innerText = `Tél: ${store.Phone1 || '-'}`;
+                document.getElementById('stModalDate').innerText = `Date: ${new Date().toLocaleDateString('fr-FR')}`;
+
+                document.getElementById('stModalCustName').innerText = cust.FullName || '-';
+                document.getElementById('stModalCustPhone').innerText = cust.Phone || '-';
+                document.getElementById('stModalCustActivity').innerText = cust.Activity || '-';
+                document.getElementById('stModalFinalDebt').innerText = `${cust.CurrentDebt.toFixed(2)} DZD`;
+
+                // Sales list
+                const salesContainer = document.getElementById('stModalSalesList');
+                if (sales.length === 0) {
+                    salesContainer.innerHTML = `<div style="color: #64748b; font-style: italic;">Aucun achat enregistré.</div>`;
+                } else {
+                    let sHtml = '<table style="width: 100%; border-collapse: collapse; font-size: 11px;">';
+                    sHtml += '<tr style="border-bottom: 1px solid #cbd5e1; font-weight: bold; background: #f1f5f9;"><td style="padding: 4px;">Date/Réf</td><td style="padding: 4px;">Articles</td><td style="text-align: right; padding: 4px;">Total DZD</td><td style="text-align: right; padding: 4px;">Dette DZD</td></tr>';
+                    sales.forEach(s => {
+                        const sDate = s.CreatedAt ? s.CreatedAt.replace('T', ' ').substring(0, 10) : '-';
+                        const itemsSummary = (s.Items || []).map(it => `${it.ProductName} (x${it.Quantity})`).join(', ');
+                        sHtml += `<tr style="border-bottom: 1px dashed #e2e8f0;">
+                            <td style="padding: 4px 0;"><strong>${s.InvoiceNumber}</strong><br><span style="color: #64748b; font-size: 10px;">${sDate}</span></td>
+                            <td style="padding: 4px; font-size: 10.5px;">${itemsSummary || '-'}</td>
+                            <td style="text-align: right; padding: 4px 0; font-weight: 600;">${s.TotalAmount.toFixed(2)}</td>
+                            <td style="text-align: right; padding: 4px 0; color: ${s.DebtAmount > 0 ? '#dc2626' : '#16a34a'}; font-weight: bold;">${s.DebtAmount.toFixed(2)}</td>
+                        </tr>`;
+                    });
+                    sHtml += '</table>';
+                    salesContainer.innerHTML = sHtml;
+                }
+
+                // Payments list
+                const payContainer = document.getElementById('stModalPaymentsList');
+                if (payments.length === 0) {
+                    payContainer.innerHTML = `<div style="color: #64748b; font-style: italic;">Aucun versement enregistré.</div>`;
+                } else {
+                    let pHtml = '<table style="width: 100%; border-collapse: collapse; font-size: 11px;">';
+                    pHtml += '<tr style="border-bottom: 1px solid #cbd5e1; font-weight: bold; background: #f1f5f9;"><td style="padding: 4px;">Date</td><td style="padding: 4px;">Notes</td><td style="text-align: right; padding: 4px;">Montant Versé DZD</td></tr>';
+                    payments.forEach(p => {
+                        const pDate = p.CreatedAt ? p.CreatedAt.replace('T', ' ').substring(0, 10) : '-';
+                        pHtml += `<tr style="border-bottom: 1px dashed #e2e8f0;">
+                            <td style="padding: 4px 0;">${pDate}</td>
+                            <td style="padding: 4px; color: #64748b;">${p.Notes || 'Versement espèces'}</td>
+                            <td style="text-align: right; padding: 4px 0; font-weight: bold; color: #16a34a;">-${p.Amount.toFixed(2)}</td>
+                        </tr>`;
+                    });
+                    pHtml += '</table>';
+                    payContainer.innerHTML = pHtml;
+                }
+
+                document.getElementById('statementModal').classList.add('active');
+            } catch (err) {
+                alert('Erreur: ' + err.message);
+            }
+        }
+
+        function closeStatementModal() {
+            document.getElementById('statementModal').classList.remove('active');
+        }
+
+        function printStatementDirect() {
+            const content = document.getElementById('statementPrintableArea').innerHTML;
+            const printWin = window.open('', '', 'width=700,height=800');
+            printWin.document.write(`
+                <html>
+                <head>
+                    <title>Extrait de Compte Client</title>
+                    <style>
+                        body { font-family: monospace; font-size: 12px; color: #000; padding: 15px; margin: 0; }
+                        table { width: 100%; border-collapse: collapse; }
+                        @media print {
+                            body { padding: 5px; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    ${content}
+                </body>
+                </html>
+            `);
+            printWin.document.close();
+            printWin.focus();
+            setTimeout(() => { printWin.print(); printWin.close(); }, 300);
+        }
+
+        // Restore Database Backup
+        async function restoreDatabase(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            const confirmMsg = currentLang === 'ar'
+                ? 'تحذير هام: استرجاع نسخة احتياطية سيقوم باستبدال قاعدة البيانات الحالية بالكامل!\n(سيتم حفظ نسخة احتياطية تلقائية من الحالة الحالية كإجراء أمان).\n\nهل تريد المتابعة بالتأكيد؟'
+                : 'ATTENTION : La restauration écrasera la base de données actuelle !\n(Une copie de sécurité automatique sera créée).\n\nVoulez-vous continuer ?';
+
+            if (!confirm(confirmMsg)) {
+                input.value = '';
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                const base64Data = e.target.result.split(',')[1];
+                try {
+                    const res = await fetch('/api/backup/restore', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ fileData: base64Data })
+                    }).then(r => r.json());
+
+                    if (res.success) {
+                        alert(currentLang === 'ar' ? 'تم استرجاع قاعدة البيانات بنجاح!' : 'Base de données restaurée avec succès !');
+                        window.location.reload();
+                    } else {
+                        alert('Erreur: ' + (res.error || 'Restauration échouée'));
+                    }
+                } catch (err) {
+                    alert('Erreur réseau: ' + err.message);
+                }
+                input.value = '';
+            };
+            reader.readAsDataURL(file);
+        }
+
         // Global Keyboard Shortcuts (F1, F2, F3, F4, F5, Escape)
         window.addEventListener('keydown', (e) => {
             // Escape: Close any open modal or dropdown
@@ -2558,6 +2939,8 @@
                 closeLicenseModal();
                 closeCustomerModal();
                 closeBarcodeModal();
+                closeCalcModal();
+                closeStatementModal();
                 toggleNotificationPanel(false);
                 const dd = document.getElementById('searchDropdown');
                 if (dd) dd.style.display = 'none';
@@ -2569,7 +2952,9 @@
             const licenseOpen = document.getElementById('licenseModal').classList.contains('active');
             const custOpen = document.getElementById('custModal') && document.getElementById('custModal').classList.contains('active');
             const barcodeOpen = document.getElementById('barcodeModal') && document.getElementById('barcodeModal').classList.contains('active');
-            if (receiptOpen || licenseOpen || custOpen || barcodeOpen) return;
+            const calcOpen = document.getElementById('calcModal') && document.getElementById('calcModal').classList.contains('active');
+            const stmtOpen = document.getElementById('statementModal') && document.getElementById('statementModal').classList.contains('active');
+            if (receiptOpen || licenseOpen || custOpen || barcodeOpen || calcOpen || stmtOpen) return;
 
             // F1: Focus Search
             if (e.key === 'F1') {

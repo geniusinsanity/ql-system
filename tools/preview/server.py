@@ -10,6 +10,8 @@ from datetime import datetime, timedelta
 import urllib.parse
 import csv
 import io
+import shutil
+import base64
 
 PORT = 5050
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -182,6 +184,85 @@ class QLRequestHandler(http.server.SimpleHTTPRequestHandler):
             conn.close()
             self.send_json(sales)
             return
+
+        if parsed.path == "/api/customers/statement":
+            cust_id = params.get('customerId', [None])[0]
+            if not cust_id:
+                self.send_json({"error": "Missing customerId"})
+                return
+            conn = get_db()
+            cur = conn.cursor()
+            cur.execute("SELECT * FROM Customers WHERE Id = ?", (cust_id,))
+            cust = cur.fetchone()
+            if not cust:
+                conn.close()
+                self.send_json({"error": "Customer not found"})
+                return
+
+            cust_dict = dict(cust)
+
+            # Get sales
+            cur.execute("SELECT * FROM Sales WHERE CustomerId = ? ORDER BY CreatedAt DESC", (cust_id,))
+            sales = [dict(r) for r in cur.fetchall()]
+            for s in sales:
+                cur.execute("SELECT * FROM SaleItems WHERE SaleId = ?", (s["Id"],))
+                s["Items"] = [dict(it) for it in cur.fetchall()]
+
+            # Get payments
+            cur.execute("SELECT * FROM CustomerPayments WHERE CustomerId = ? ORDER BY PaymentDate DESC", (cust_id,))
+            payments = [dict(p) for r in [cur.fetchall()] for p in r]
+
+            # Store info
+            cur.execute("SELECT * FROM StoreSettings WHERE Id = 1")
+            store = dict(cur.fetchone() or {})
+
+            conn.close()
+            self.send_json({
+                "customer": cust_dict,
+                "sales": sales,
+                "payments": payments,
+                "store": store
+            })
+            return
+
+        if parsed.path == "/api/products/lowstock-export":
+            conn = get_db()
+            cur = conn.cursor()
+            cur.execute("SELECT Reference, Barcode, Name, Dimensions, PurchasePrice, SalePrice, StockQuantity, MinStockAlert FROM Products WHERE IsActive = 1 AND StockQuantity <= MinStockAlert ORDER BY StockQuantity ASC")
+            prods = cur.fetchall()
+            conn.close()
+
+            output = io.StringIO()
+            writer = csv.writer(output)
+            writer.writerow(["Reference", "Barcode", "Name", "Dimensions", "PurchasePrice", "SalePrice", "StockQuantity", "MinStockAlert", "QuantiteACommander"])
+            for p in prods:
+                order_qty = max(10, (p["MinStockAlert"] * 2) - p["StockQuantity"])
+                writer.writerow([p["Reference"], p["Barcode"] or "", p["Name"], p["Dimensions"] or "", p["PurchasePrice"], p["SalePrice"], p["StockQuantity"], p["MinStockAlert"], order_qty])
+
+            csv_data = output.getvalue().encode('utf-8-sig')
+            self.send_response(200)
+            self.send_header("Content-Type", "text/csv; charset=utf-8")
+            self.send_header("Content-Disposition", "attachment; filename=bon_de_commande_fournisseur.csv")
+            self.send_header("Content-Length", str(len(csv_data)))
+            self.end_headers()
+            self.wfile.write(csv_data)
+            return
+
+        if parsed.path == "/api/backup/download":
+            if os.path.exists(DB_PATH):
+                with open(DB_PATH, "rb") as f:
+                    db_bytes = f.read()
+                filename = f"backup_quincaillerie_{datetime.now().strftime('%Y%m%d_%H%M%S')}.db"
+                self.send_response(200)
+                self.send_header("Content-Type", "application/octet-stream")
+                self.send_header("Content-Disposition", f"attachment; filename={filename}")
+                self.send_header("Content-Length", str(len(db_bytes)))
+                self.end_headers()
+                self.wfile.write(db_bytes)
+                return
+            else:
+                self.send_error(404, "Database not found")
+                return
 
         if parsed.path == "/api/products/export":
             conn = get_db()
@@ -688,6 +769,26 @@ class QLRequestHandler(http.server.SimpleHTTPRequestHandler):
                 self.send_json({"success": False, "error": str(e)})
             finally:
                 conn.close()
+            return
+
+        if parsed.path == "/api/backup/restore":
+            try:
+                backup_b64 = data.get("databaseBase64", "")
+                if not backup_b64:
+                    self.send_json({"success": False, "error": "No data provided"})
+                    return
+
+                # Create backup of current DB first just in case
+                if os.path.exists(DB_PATH):
+                    shutil.copy2(DB_PATH, DB_PATH + ".bak")
+
+                db_bytes = base64.b64decode(backup_b64)
+                with open(DB_PATH, "wb") as f:
+                    f.write(db_bytes)
+
+                self.send_json({"success": True, "message": "Base de données restaurée avec succès"})
+            except Exception as e:
+                self.send_json({"success": False, "error": str(e)})
             return
 
         if parsed.path == "/api/settings":
