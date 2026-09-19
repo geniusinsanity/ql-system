@@ -402,13 +402,24 @@
                         <div style="display: flex; flex-direction: column; gap: 9px;">
                             <!-- 1. NAME FIRST -->
                             <div>
-                                <label style="font-size: 12.5px; font-weight: 700; color: #1e293b;" id="fLblName">اسم السلعة (Désignation) * :</label>
-                                <input type="text" id="prodName" class="input-text" placeholder="مثال: Vis Placo Noire, Câble 2.5, Tuyau PVC...">
+                                <label style="font-size: 12.5px; font-weight: 700; color: #1e293b;" id="fLblName">اسم وتسمية السلعة (Désignation) * :</label>
+                                <input type="text" id="prodName" class="input-text" placeholder="مثال: Vis Placo Noire, Câble Souple 2.5, Tuyau PVC...">
                             </div>
-                            <!-- 2. DIMENSIONS -->
-                            <div>
-                                <label style="font-size: 12px; font-weight: 600;" id="fLblDim">القياسات / المقاس (Dimensions):</label>
-                                <input type="text" id="prodDim" class="input-text" placeholder="مثال: 4x40, Ø32, M8, 100m">
+                            <!-- 2. UNIT & DIMENSIONS -->
+                            <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 8px;">
+                                <div>
+                                    <label style="font-size: 12px; font-weight: 700; color: #1e293b;" id="fLblUnit">طريقة ووحدة البيع (Unité de vente) * :</label>
+                                    <select id="prodSaleUnit" class="input-text" style="font-weight: 600;" onchange="onProductUnitChange()">
+                                        <option value="0" id="optUnitPiece">🛒 بالقطعة / حبة (Pièce)</option>
+                                        <option value="2" id="optUnitMeter">📏 بالمتر الطولي (Mètre - m)</option>
+                                        <option value="4" id="optUnitKg">⚖️ بالكيلوغرام (Kilogramme - kg)</option>
+                                        <option value="5" id="optUnitLiter">🛢️ باللتر (Litre - L)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label style="font-size: 12px; font-weight: 600;" id="fLblDim">القياسات / المقاس (Dimensions):</label>
+                                    <input type="text" id="prodDim" class="input-text" placeholder="مثال: 4x40, Ø32, M8, 2.5mm²">
+                                </div>
                             </div>
                             <!-- 3. PRICES -->
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
@@ -1187,7 +1198,12 @@
                 lblBackupTitle: "النسخ الاحتياطي والأمان (Backup & Restore USB)",
                 lblBackupDesc: "حفظ نسخة احتياطية من قاعدة البيانات على فلاش ديسك USB لضمان عدم ضياع المعطيات",
                 btnDownloadBackup: "تحميل نسخة احتياطية (Sauvegarder .db)",
-                btnRestoreBackup: "استرجاع نسخة سابقة (Restaurer)"
+                btnRestoreBackup: "استرجاع نسخة سابقة (Restaurer)",
+                fLblUnit: "طريقة ووحدة البيع (Unité de vente) * :",
+                optUnitPiece: "🛒 بالقطعة / حبة (Pièce) [براغي، أقفال، أدوات]",
+                optUnitMeter: "📏 بالمتر الطولي (Mètre - m) [كوابل، أنابيب، أسلاك]",
+                optUnitKg: "⚖️ بالكيلوغرام (Kilogramme - kg) [مسامير بالوزن]",
+                optUnitLiter: "🛢️ باللتر (Litre - L) [دهان، ديلوان، زيوت]"
             },
             fr: {
                 brandSub: "Quincaillerie Algérie",
@@ -1209,7 +1225,7 @@
                 searchPlaceholder: "[F1] Rechercher par nom (vis, pvc, câble...) ou scanner code-barres...",
                 thName: "Désignation Produit",
                 thPrice: "Prix (Détail/Gros)",
-                thQty: "Quantité",
+                thQty: "Quantité / Longueur",
                 thTotal: "Total",
                 cartEmptyMsg: "Panier vide. Recherchez un article pour l'ajouter",
                 btnAddManualItem: "Article Libre +",
@@ -1301,7 +1317,12 @@
                 lblBackupTitle: "Sauvegarde & Restauration USB",
                 lblBackupDesc: "Sauvegardez votre base de données sur clé USB en toute sécurité",
                 btnDownloadBackup: "Télécharger la Sauvegarde (.db)",
-                btnRestoreBackup: "Restaurer une Sauvegarde"
+                btnRestoreBackup: "Restaurer une Sauvegarde",
+                fLblUnit: "Unité & Mode de Vente * :",
+                optUnitPiece: "🛒 À la Pièce (Pièce) [Vis, serrures, outillage]",
+                optUnitMeter: "📏 Au Mètre Linéaire (Mètre - m) [Câbles, tuyaux, fils]",
+                optUnitKg: "⚖️ Au Kilogramme (Kg) [Clous, vis au poids]",
+                optUnitLiter: "🛢️ Au Litre (Litre - L) [Peinture, diluant, huiles]"
             }
         };
 
@@ -1330,6 +1351,7 @@
             loadHistory();
             loadAnalytics(currentAnalyticsPeriod);
             loadNotifications();
+            if (typeof onProductUnitChange === 'function') onProductUnitChange();
         }
 
         function setPriceMode(mode) {
@@ -1462,20 +1484,24 @@
                 const wholesaleBadge = p.WholesalePrice > 0 
                     ? `<span style="font-size: 11px; color: #0284c7; background: #e0f2fe; padding: 1px 5px; border-radius: 4px; margin-inline-start: 4px;">${currentLang === 'ar' ? 'جملة:' : 'Gros:'} ${p.WholesalePrice.toFixed(0)}</span>` 
                     : '';
+                const unitBadge = (p.SaleUnit === 2) 
+                    ? `<span style="font-size: 10.5px; color: #0369a1; background: #e0f2fe; padding: 1px 5px; border-radius: 4px; margin-inline-start: 4px; font-weight: bold;">${currentLang === 'ar' ? 'بالمتر' : 'Mètre'}</span>` 
+                    : '';
                 const stockBadge = p.StockQuantity <= 0 
                     ? `<span style="font-size: 10.5px; color: #b91c1c; background: #fee2e2; padding: 1px 4px; border-radius: 4px; margin-inline-start: 6px;">${currentLang === 'ar' ? 'نفد' : 'Épuisé'}</span>` 
-                    : `<span style="font-size: 10.5px; color: #475569; margin-inline-start: 6px;">(${p.StockQuantity} en stock)</span>`;
+                    : `<span style="font-size: 10.5px; color: #475569; margin-inline-start: 6px;">(${p.StockQuantity} ${p.SaleUnit === 2 ? 'm' : 'en stock'})</span>`;
 
-                const qtyHint = parsedQty ? `<div style="font-size: 11.5px; color: #16a34a; font-weight: bold; margin-top: 2px;">⚡ ${parsedQty} × ${pPrice.toFixed(2)} = ${(parsedQty * pPrice).toFixed(2)} DZD</div>` : '';
+                const qtyUnitText = p.SaleUnit === 2 ? `${parsedQty} m` : `${parsedQty} pcs`;
+                const qtyHint = parsedQty ? `<div style="font-size: 11.5px; color: #16a34a; font-weight: bold; margin-top: 2px;">⚡ ${qtyUnitText} × ${pPrice.toFixed(2)} = ${(parsedQty * pPrice).toFixed(2)} DZD</div>` : '';
 
                 div.innerHTML = `
                     <div>
-                        <strong style="font-size: 13.5px;">${p.Name}</strong> ${stockBadge}
+                        <strong style="font-size: 13.5px;">${p.Name}</strong> ${unitBadge} ${stockBadge}
                         <div style="color: var(--text-muted); font-size: 11.5px; margin-top: 2px;">${p.Dimensions ? p.Dimensions + ' • ' : ''}${p.Reference}</div>
                         ${qtyHint}
                     </div>
                     <div style="text-align: end;">
-                        <div style="font-weight: 800; color: var(--primary); font-size: 14px;">${pPrice.toFixed(2)} DZD</div>
+                        <div style="font-weight: 800; color: var(--primary); font-size: 14px;">${pPrice.toFixed(2)} DZD${p.SaleUnit === 2 ? ' / m' : ''}</div>
                         ${wholesaleBadge}
                     </div>
                 `;
@@ -1506,6 +1532,7 @@
             const isWholesale = priceMode === 'wholesale' && prod.WholesalePrice > 0;
             const activePrice = isWholesale ? prod.WholesalePrice : prod.SalePrice;
             const conv = prod.ConversionFactor || 1;
+            const sUnit = prod.SaleUnit !== undefined ? prod.SaleUnit : (prod.saleUnit !== undefined ? prod.saleUnit : 0);
 
             if (existing) {
                 existing.quantity += qtyToAdd;
@@ -1524,7 +1551,8 @@
                     quantity: qtyToAdd,
                     totalPrice: activePrice * qtyToAdd,
                     conversionFactor: conv,
-                    unit: 'piece'
+                    saleUnit: sUnit,
+                    unit: sUnit === 2 ? 'm' : (sUnit === 4 ? 'kg' : (sUnit === 5 ? 'L' : 'piece'))
                 });
             }
             renderCart();
@@ -1669,27 +1697,47 @@
                     }
                 }
 
-                // Paquet / Pièce toggle badge
+                // Paquet / Pièce toggle badge (only for piece products)
                 let unitBadgeHtml = '';
-                if (item.conversionFactor > 1) {
+                if (item.conversionFactor > 1 && item.saleUnit !== 2) {
                     const unitLabel = item.unit === 'paquet' 
                         ? (currentLang === 'ar' ? `باكي (x${item.conversionFactor})` : `Paquet (x${item.conversionFactor})`)
                         : (currentLang === 'ar' ? 'حبة' : 'Pièce');
                     unitBadgeHtml = `<button class="btn-unit-badge" onclick="toggleItemUnit(${idx})" title="${currentLang === 'ar' ? 'تحويل بين البيع بالحبة والباكي' : 'Basculer Pièce/Paquet'}">${unitLabel}</button>`;
                 }
 
-                // Automatic measurement micro chips for length/weight commodities
-                const isMeasured = /(m|kg|câble|cable|tuyau|tube|fil|corde|pvc|plinthe|fer)/i.test((item.name || '') + ' ' + (item.dimensions || ''));
-                let microChipsHtml = '';
-                if (isMeasured) {
-                    microChipsHtml = `
-                        <div style="display: flex; gap: 3px; justify-content: center; margin-top: 4px; flex-wrap: wrap;">
-                            <button type="button" class="btn-micro-chip" onclick="setQtyDirect(${idx}, 0.5)" title="نصف متر">0.5m</button>
-                            <button type="button" class="btn-micro-chip" onclick="setQtyDirect(${idx}, 1)" title="متر واحد">1m</button>
-                            <button type="button" class="btn-micro-chip" onclick="setQtyDirect(${idx}, 2)" title="مترين">2m</button>
-                            <button type="button" class="btn-micro-chip" onclick="setQtyDirect(${idx}, 5)" title="5 أمتار">5m</button>
-                            <button type="button" class="btn-micro-chip" onclick="setQtyDirect(${idx}, 10)" title="10 أمتار">10m</button>
-                            <button type="button" class="btn-micro-chip" onclick="setQtyDirect(${idx}, 15)" title="15 متر">15m</button>
+                // STRICT: Meter products ONLY!
+                const isMeterProduct = (item.saleUnit === 2 || item.unit === 'm');
+
+                let qtyColHtml = '';
+                let priceUnitSuffix = '';
+
+                if (isMeterProduct) {
+                    priceUnitSuffix = currentLang === 'ar' ? ' <span style="font-size:10.5px; color:var(--text-muted);">/ م</span>' : ' <span style="font-size:10.5px; color:var(--text-muted);">/ m</span>';
+                    qtyColHtml = `
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 3px;">
+                            <div style="display: inline-flex; align-items: center; background: #eff6ff; border: 1.5px solid #93c5fd; border-radius: 6px; padding: 2px 6px;">
+                                <input type="number" step="any" min="0" class="qty-input" style="font-weight: 800; color: #1e40af; width: 60px; border: none; background: transparent; text-align: center; font-size: 13.5px;" value="${item.quantity}" oninput="setQtyDirect(${idx}, this.value, true)" onchange="setQtyDirect(${idx}, this.value, false)">
+                                <span style="font-size: 11.5px; font-weight: 800; color: #1e40af; margin-inline-start: 2px;">متر</span>
+                            </div>
+                            <div style="display: flex; gap: 3px; justify-content: center; flex-wrap: wrap; max-width: 140px;">
+                                <button type="button" class="btn-micro-chip" onclick="setQtyDirect(${idx}, 0.5)" title="نصف متر">0.5m</button>
+                                <button type="button" class="btn-micro-chip" onclick="setQtyDirect(${idx}, 1)" title="1 متر">1m</button>
+                                <button type="button" class="btn-micro-chip" onclick="setQtyDirect(${idx}, 2)" title="2 متر">2m</button>
+                                <button type="button" class="btn-micro-chip" onclick="setQtyDirect(${idx}, 5)" title="5 أمتار">5m</button>
+                                <button type="button" class="btn-micro-chip" onclick="setQtyDirect(${idx}, 10)" title="10 أمتار">10m</button>
+                                <button type="button" class="btn-micro-chip" onclick="setQtyDirect(${idx}, 15)" title="15 متر">15m</button>
+                                <button type="button" class="btn-micro-chip" onclick="setQtyDirect(${idx}, 25)" title="25 متر">25m</button>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    // Normal piece / other item (Vis, Cadenas, Marteau, etc.) -> NO meter chips!
+                    qtyColHtml = `
+                        <div class="qty-control">
+                            <button class="qty-btn" onclick="changeQtyDelta(${idx}, -1)">-</button>
+                            <input type="number" step="any" min="0" class="qty-input" value="${item.quantity}" oninput="setQtyDirect(${idx}, this.value, true)" onchange="setQtyDirect(${idx}, this.value, false)">
+                            <button class="qty-btn" onclick="changeQtyDelta(${idx}, 1)">+</button>
                         </div>
                     `;
                 }
@@ -1701,22 +1749,18 @@
                             <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 1px;">
                                 ${item.dimensions ? `<span style="font-weight: 500;">${item.dimensions}</span> • ` : ''}
                                 <span>${item.reference}</span>
+                                ${isMeterProduct ? `<span class="badge-pill" style="background:#e0f2fe; color:#0369a1; font-size:10px; margin-inline-start:4px;">📏 ${currentLang === 'ar' ? 'متر طولي' : 'Mètre'}</span>` : ''}
                             </div>
                         </td>
                         <td>
                             <div style="display: flex; align-items: center; gap: 5px; flex-wrap: wrap;">
-                                <span style="font-weight: 600;">${item.unitPrice.toFixed(2)}</span>
+                                <span style="font-weight: 600;">${item.unitPrice.toFixed(2)}${priceUnitSuffix}</span>
                                 ${priceBadgeHtml}
                                 ${unitBadgeHtml}
                             </div>
                         </td>
                         <td style="text-align: center;">
-                            <div class="qty-control">
-                                <button class="qty-btn" onclick="changeQtyDelta(${idx}, -1)">-</button>
-                                <input type="number" step="any" min="0" class="qty-input" value="${item.quantity}" oninput="setQtyDirect(${idx}, this.value, true)" onchange="setQtyDirect(${idx}, this.value, false)">
-                                <button class="qty-btn" onclick="changeQtyDelta(${idx}, 1)">+</button>
-                            </div>
-                            ${microChipsHtml}
+                            ${qtyColHtml}
                         </td>
                         <td id="cart-row-total-${idx}" style="font-weight: 800; color: var(--primary); font-size: 13.5px;">${item.totalPrice.toFixed(2)}</td>
                         <td>
@@ -1835,13 +1879,17 @@
                 const qty = parseFloat(it.quantity || it.Quantity || 1);
                 const unitP = parseFloat(it.unitPrice || it.UnitPrice || 0);
                 const tot = parseFloat(it.totalPrice || it.TotalPrice || (qty * unitP));
-                totalPieces += qty;
+                const sUnit = it.saleUnit !== undefined ? it.saleUnit : (it.SaleUnit !== undefined ? it.SaleUnit : 0);
+                const isMeter = sUnit === 2 || it.unit === 'm';
 
+                totalPieces += isMeter ? 1 : qty;
+
+                const qtyStr = isMeter ? `${qty.toFixed(2)} m` : `${qty} pcs`;
                 const itemDiv = document.createElement('div');
                 itemDiv.innerHTML = `
                     <div style="font-weight: bold; font-size: 11.5px;">${name}</div>
                     <div style="display: flex; justify-content: space-between; font-size: 11px; color: #475569; padding-inline-start: 4px;">
-                        <span>${qty} x ${unitP.toFixed(2)} DZD</span>
+                        <span>${qtyStr} x ${unitP.toFixed(2)} DZD</span>
                         <span style="font-weight: bold; color: #000;">${tot.toFixed(2)}</span>
                     </div>
                 `;
@@ -1884,6 +1932,34 @@
         }
 
         // STOCK MANAGEMENT
+        function onProductUnitChange() {
+            const unitEl = document.getElementById('prodSaleUnit');
+            if (!unitEl) return;
+            const unit = parseInt(unitEl.value) || 0;
+            const isAr = currentLang === 'ar';
+            const priceLbl = document.getElementById('fLblPrice');
+            const wsLbl = document.getElementById('fLblWholesale');
+            const stockLbl = document.getElementById('fLblStock');
+
+            if (unit === 2) { // Meter
+                if (priceLbl) priceLbl.innerText = isAr ? "سعر بيع المتر تجزئة دج * :" : "Prix de Vente / Mètre DZD * :";
+                if (wsLbl) wsLbl.innerText = isAr ? "سعر بيع المتر جملة دج:" : "Prix de Vente / Mètre Gros DZD :";
+                if (stockLbl) stockLbl.innerText = isAr ? "الأمتار المتوفرة بالمخزن (m):" : "Mètres en Stock (m) :";
+            } else if (unit === 4) { // Kg
+                if (priceLbl) priceLbl.innerText = isAr ? "سعر الكيلوغرام تجزئة دج * :" : "Prix de Vente / Kg DZD * :";
+                if (wsLbl) wsLbl.innerText = isAr ? "سعر الكيلوغرام جملة دج:" : "Prix de Vente / Kg Gros DZD :";
+                if (stockLbl) stockLbl.innerText = isAr ? "الكيلوغرامات بالمخزن (kg):" : "Kg en Stock (kg) :";
+            } else if (unit === 5) { // Liter
+                if (priceLbl) priceLbl.innerText = isAr ? "سعر اللتر تجزئة دج * :" : "Prix de Vente / Litre DZD * :";
+                if (wsLbl) wsLbl.innerText = isAr ? "سعر اللتر جملة دج:" : "Prix de Vente / Litre Gros DZD :";
+                if (stockLbl) stockLbl.innerText = isAr ? "اللترات بالمخزن (L):" : "Litres en Stock (L) :";
+            } else { // Piece
+                if (priceLbl) priceLbl.innerText = isAr ? "سعر البيع تجزئة دج:" : "Prix de Vente Détail DZD :";
+                if (wsLbl) wsLbl.innerText = isAr ? "سعر البيع جملة دج:" : "Prix de Vente Gros DZD :";
+                if (stockLbl) stockLbl.innerText = isAr ? "الكمية بالمخزن (حبة):" : "Quantité en Stock (pcs) :";
+            }
+        }
+
         async function loadStock() {
             const isLow = document.getElementById('stockLowFilter').checked;
             const q = document.getElementById('stockSearchInput').value;
@@ -1898,13 +1974,17 @@
                 tr.id = `stock-row-${p.Id}`;
                 tr.style.cursor = 'pointer';
                 tr.onclick = () => selectProductForEdit(p.Id);
+                const unitLabel = p.SaleUnit === 2 ? ' (m)' : (p.SaleUnit === 4 ? ' (kg)' : '');
                 tr.innerHTML = `
-                    <td style="font-weight: 700; font-size: 13.5px; color: #0f172a;">${p.Name}</td>
+                    <td style="font-weight: 700; font-size: 13.5px; color: #0f172a;">
+                        ${p.Name}
+                        ${p.SaleUnit === 2 ? `<span class="badge-pill" style="background:#e0f2fe; color:#0369a1; font-size:10px; margin-inline-start:4px;">متر / m</span>` : ''}
+                    </td>
                     <td>${p.Dimensions || '-'}</td>
                     <td style="font-weight: 700; color: var(--primary);">${p.SalePrice.toFixed(2)}</td>
                     <td style="color: #0284c7; font-weight: 600;">${p.WholesalePrice > 0 ? p.WholesalePrice.toFixed(2) : '-'}</td>
                     <td style="color: var(--text-muted);">${p.PurchasePrice.toFixed(2)}</td>
-                    <td style="${stockColor}">${p.StockQuantity}</td>
+                    <td style="${stockColor}">${p.StockQuantity}${unitLabel}</td>
                     <td style="font-size: 12px; color: var(--text-muted);">${p.Reference}</td>
                     <td><button class="btn btn-secondary" style="padding: 3px 8px; font-size: 11px;"><i class="fa-solid fa-pen-to-square"></i></button></td>
                 `;
@@ -1928,6 +2008,7 @@
             document.getElementById('prodRef').value = p.Reference;
             document.getElementById('prodBarcode').value = p.Barcode || '';
             document.getElementById('prodName').value = p.Name;
+            document.getElementById('prodSaleUnit').value = p.SaleUnit !== undefined ? p.SaleUnit : 0;
             document.getElementById('prodDim').value = p.Dimensions || '';
             document.getElementById('prodCost').value = p.PurchasePrice;
             document.getElementById('prodPrice').value = p.SalePrice;
@@ -1936,6 +2017,7 @@
             document.getElementById('prodAlert').value = p.MinStockAlert;
             document.getElementById('prodConvFactor').value = p.ConversionFactor || 1;
 
+            onProductUnitChange();
             document.getElementById('btnDeleteProd').style.display = 'inline-flex';
         }
 
@@ -1946,6 +2028,7 @@
             document.getElementById('prodRef').value = '';
             document.getElementById('prodBarcode').value = '';
             document.getElementById('prodName').value = '';
+            document.getElementById('prodSaleUnit').value = '0';
             document.getElementById('prodDim').value = '';
             document.getElementById('prodCost').value = '0';
             document.getElementById('prodPrice').value = '0';
@@ -1953,6 +2036,7 @@
             document.getElementById('prodStock').value = '10';
             document.getElementById('prodAlert').value = '5';
             document.getElementById('prodConvFactor').value = '1';
+            onProductUnitChange();
             document.getElementById('btnDeleteProd').style.display = 'none';
         }
 
@@ -1975,6 +2059,7 @@
                 barcode: document.getElementById('prodBarcode').value.trim(),
                 name: name,
                 dimensions: document.getElementById('prodDim').value.trim(),
+                saleUnit: parseInt(document.getElementById('prodSaleUnit').value) || 0,
                 purchasePrice: parseFloat(document.getElementById('prodCost').value) || 0,
                 salePrice: parseFloat(document.getElementById('prodPrice').value) || 0,
                 wholesalePrice: parseFloat(document.getElementById('prodWholesale').value) || 0,
@@ -1993,6 +2078,7 @@
                 alert(currentLang === 'ar' ? 'تم حفظ السلعة بنجاح في المخزن!' : 'Produit enregistré avec succès !');
                 resetProductForm();
                 loadStock();
+                loadFastItems();
             }
         }
 

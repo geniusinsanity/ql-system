@@ -151,7 +151,7 @@ class QLRequestHandler(http.server.SimpleHTTPRequestHandler):
             conn = get_db()
             cur = conn.cursor()
             cur.execute("""
-                SELECT p.Id, p.Reference, p.Name, p.Dimensions, p.SalePrice, p.WholesalePrice, p.StockQuantity, p.ConversionFactor,
+                SELECT p.Id, p.Reference, p.Name, p.Dimensions, p.SalePrice, p.WholesalePrice, p.StockQuantity, p.SaleUnit, p.ConversionFactor,
                        COALESCE(SUM(si.Quantity), 0) as SoldQty
                 FROM Products p
                 LEFT JOIN SaleItems si ON p.Id = si.ProductId
@@ -608,20 +608,21 @@ class QLRequestHandler(http.server.SimpleHTTPRequestHandler):
                 conversion = float(data.get("conversionFactor", 1))
                 if conversion <= 0:
                     conversion = 1.0
+                sale_unit = int(data.get("saleUnit", 0))
                 now = datetime.now().isoformat()
 
                 if p_id:
                     cur.execute("""
                         UPDATE Products SET Reference=?, Barcode=?, Name=?, NameAr=?, Dimensions=?,
-                                           PurchasePrice=?, SalePrice=?, WholesalePrice=?, StockQuantity=?, MinStockAlert=?, ConversionFactor=?, UpdatedAt=?
+                                           PurchasePrice=?, SalePrice=?, WholesalePrice=?, StockQuantity=?, MinStockAlert=?, SaleUnit=?, ConversionFactor=?, UpdatedAt=?
                         WHERE Id=?
-                    """, (ref, barcode, name, name_ar, dim, cost, price, wholesale, stock, alert, conversion, now, p_id))
+                    """, (ref, barcode, name, name_ar, dim, cost, price, wholesale, stock, alert, sale_unit, conversion, now, p_id))
                 else:
                     cur.execute("""
                         INSERT INTO Products (Reference, Barcode, Name, NameAr, CategoryId, Dimensions,
-                                             PurchasePrice, SalePrice, WholesalePrice, StockQuantity, MinStockAlert, ConversionFactor, CreatedAt, UpdatedAt)
-                        VALUES (?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                    """, (ref, barcode, name, name_ar, dim, cost, price, wholesale, stock, alert, conversion, now, now))
+                                             PurchasePrice, SalePrice, WholesalePrice, StockQuantity, MinStockAlert, SaleUnit, PurchaseUnit, ConversionFactor, CreatedAt, UpdatedAt)
+                        VALUES (?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?, ?)
+                    """, (ref, barcode, name, name_ar, dim, cost, price, wholesale, stock, alert, sale_unit, conversion, now, now))
 
                 conn.commit()
                 self.send_json({"success": True})
